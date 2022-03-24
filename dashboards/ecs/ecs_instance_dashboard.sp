@@ -165,12 +165,12 @@ dashboard "alicloud_ecs_instance_dashboard" {
 
     title = "Performance & Utilization"
 
-    # chart {
-    #   title = "Top 10 CPU - Last 7 days"
-    #   sql   = query.aws_ec2_top10_cpu_past_week.sql
-    #   type  = "line"
-    #   width = 6
-    # }
+    chart {
+      title = "Top 10 CPU - Last 7 days"
+      sql   = query.alicloud_ecs_instance_top10_cpu_past_week.sql
+      type  = "line"
+      width = 6
+    }
 
     chart {
       title = "Average Max Daily CPU - Last 30 days"
@@ -458,35 +458,35 @@ query "alicloud_ecs_instance_by_os_type" {
 
 # Performance Queries
 
-# query "aws_ec2_top10_cpu_past_week" {
-#   sql = <<-EOQ
-#     with top_n as (
-#       select
-#         instance_id,
-#         avg(average)
-#       from
-#         alicloud_ecs_instance_metric_cpu_utilization_daily
-#       where
-#         timestamp  >= CURRENT_DATE - INTERVAL '7 day'
-#       group by
-#         instance_id
-#       order by
-#         avg desc
-#       limit 10
-#   )
-#   select
-#       timestamp,
-#       instance_id,
-#       average
-#     from
-#       alicloud_ecs_instance_metric_cpu_utilization_hourly
-#     where
-#       timestamp  >= CURRENT_DATE - INTERVAL '7 day'
-#       and instance_id in (select instance_id from top_n)
-#     order by
-#       timestamp
-#   EOQ
-# }
+query "alicloud_ecs_instance_top10_cpu_past_week" {
+  sql = <<-EOQ
+    with top_n as (
+      select
+        instance_id,
+        avg(average)
+      from
+        alicloud_ecs_instance_metric_cpu_utilization_daily
+      where
+        timestamp  >= CURRENT_DATE - INTERVAL '7 day'
+      group by
+        instance_id
+      order by
+        avg desc
+      limit 10
+  )
+  select
+      timestamp,
+      instance_id,
+      average
+    from
+      alicloud_ecs_instance_metric_cpu_utilization_hourly
+    where
+      timestamp  >= CURRENT_DATE - INTERVAL '7 day'
+      and instance_id in (select instance_id from top_n)
+    order by
+      timestamp
+  EOQ
+}
 
 # underused if avg CPU < 10% every day for last month
 query "alicloud_ecs_instance_by_cpu_utilization_category" {
