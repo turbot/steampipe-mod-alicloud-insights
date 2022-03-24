@@ -1,6 +1,6 @@
-# Alicloud Insights
+# Alibaba Cloud Insights
 
-An Alicloud dashboarding tool that can be used to view dashboards and reports across all of your Alicloud accounts.
+An Alibaba Cloud dashboarding tool that can be used to view dashboards and reports across all of your Alibaba Cloud accounts.
 
 <!-- TO DO -->
 
@@ -31,7 +31,7 @@ steampipe -v
 steampipe version 0.13.0
 ```
 
-2) Install the Alicloud plugin:
+2) Install the Alibaba Cloud plugin:
 
 ```shell
 steampipe plugin install alicloud
@@ -67,4 +67,4 @@ Please see the [contribution guidelines](https://github.com/turbot/steampipe/blo
 Want to help but not sure where to start? Pick up one of the `help wanted` issues:
 
 - [Steampipe](https://github.com/turbot/steampipe/labels/help%20wanted)
-- [Alicloud Insights Mod](https://github.com/turbot/steampipe-mod-alicloud-insights/labels/help%20wanted)
+- [Alibaba Cloud Insights Mod](https://github.com/turbot/steampipe-mod-alicloud-insights/labels/help%20wanted)
