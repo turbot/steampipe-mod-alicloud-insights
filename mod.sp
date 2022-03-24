@@ -2,7 +2,7 @@ mod "alicloud_insights" {
   # hub metadata
   title         = "Alibaba Cloud Insights"
   description   = "Create dashboards and reports for your AWS resources using Steampipe."
-  color         = "#FF9900"
+  color         = "#FF6600"
   documentation = file("./docs/index.md")
   icon          = "/images/mods/turbot/alicloud-insights.svg"
   categories    = ["alicloud", "dashboard", "public cloud"]
@@ -15,8 +15,5 @@ mod "alicloud_insights" {
 
   require {
     steampipe = "0.13.1"
-    plugin "alicloud" {
-      version = "0.3.1"
-    }
   }
 }

@@ -13,7 +13,7 @@ Dashboards can help answer questions like:
 - Are there any publicly accessible resources?
 - Is encryption enabled and what keys are used for encryption?
 - Is versioning enabled?
-- What are the relationships between closely connected resources like IAM users, groups, and policies?
+<!-- - What are the relationships between closely connected resources like RAM users, groups, and policies? -->
 
 <!-- TO DO -->
 
