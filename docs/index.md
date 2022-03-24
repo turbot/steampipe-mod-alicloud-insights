@@ -2,9 +2,9 @@
 repository: "https://github.com/turbot/steampipe-mod-alicloud-insights"
 ---
 
-# Alicloud Insights Mod
+# Alibaba Cloud Insights Mod
 
-Create dashboards and reports for your Alicloud resources using Steampipe.
+Create dashboards and reports for your Alibaba Cloud resources using Steampipe.
 
 <!-- TO DO -->
 
@@ -17,13 +17,13 @@ Dashboards can help answer questions like:
 - Are there any publicly accessible resources?
 - Is encryption enabled and what keys are used for encryption?
 - Is versioning enabled?
-- What are the relationships between closely connected resources like IAM users, groups, and policies?
+<!-- - What are the relationships between closely connected resources like RAM users, groups, and policies? -->
 
-Dashboards are available for 15+ services, including CloudTrail, EC2, IAM, RDS, S3, VPC, and more!
+<!-- TO DO -->
 
 ## References
 
-[Alicloud](https://alibabacloud.com/) provides on-demand cloud computing platforms and APIs to authenticated customers on a metered pay-as-you-go basis.
+[Alibaba Cloud](https://alibabacloud.com/) provides on-demand cloud computing platforms and APIs to authenticated customers on a metered pay-as-you-go basis.
 
 [Steampipe](https://steampipe.io) is an open source CLI to instantly query cloud APIs using SQL.
 
@@ -37,7 +37,7 @@ Dashboards are available for 15+ services, including CloudTrail, EC2, IAM, RDS, 
 
 ### Installation
 
-1) Install the Alicloud plugin:
+1) Install the Alibaba Cloud plugin:
 
 ```shell
 steampipe plugin install alicloud
