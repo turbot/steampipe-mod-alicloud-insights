@@ -16,7 +16,7 @@ dashboard "alicloud_ecs_instance_dashboard" {
     }
 
     card {
-      sql   = query.alicloud_ecs_instance_total_cores.sql
+      sql   = query.alicloud_ecs_instance_total_cores_count.sql
       width = 2
     }
 
@@ -65,7 +65,7 @@ dashboard "alicloud_ecs_instance_dashboard" {
 
     chart {
       title = "IO Optimized Status"
-      sql   = query.alicloud_ecs_instance_io_optimized.sql
+      sql   = query.alicloud_ecs_instance_by_io_optimized.sql
       type  = "donut"
       width = 3
 
@@ -81,7 +81,7 @@ dashboard "alicloud_ecs_instance_dashboard" {
 
     chart {
       title = "Network Type"
-      sql   = query.alicloud_ecs_instance_network_type.sql
+      sql   = query.alicloud_ecs_instance_by_network_type.sql
       type  = "donut"
       width = 3
 
@@ -97,7 +97,7 @@ dashboard "alicloud_ecs_instance_dashboard" {
 
     chart {
       title = "Deletion Protection Status"
-      sql   = query.alicloud_ecs_instance_deletion_protection.sql
+      sql   = query.alicloud_ecs_instance_by_deletion_protection.sql
       type  = "donut"
       width = 3
 
@@ -191,7 +191,7 @@ query "alicloud_ecs_instance_count" {
   EOQ
 }
 
-query "alicloud_ecs_instance_total_cores" {
+query "alicloud_ecs_instance_total_cores_count" {
   sql = <<-EOQ
     select
       cpu_options_core_count as "Total Cores"
@@ -275,7 +275,7 @@ query "alicloud_ecs_instance_by_public_ip" {
   EOQ
 }
 
-query "alicloud_ecs_instance_io_optimized" {
+query "alicloud_ecs_instance_by_io_optimized" {
   sql = <<-EOQ
     with instances as (
       select
@@ -296,7 +296,7 @@ query "alicloud_ecs_instance_io_optimized" {
   EOQ
 }
 
-query "alicloud_ecs_instance_network_type" {
+query "alicloud_ecs_instance_by_network_type" {
   sql = <<-EOQ
     with instances as (
       select
@@ -317,7 +317,7 @@ query "alicloud_ecs_instance_network_type" {
   EOQ
 }
 
-query "alicloud_ecs_instance_deletion_protection" {
+query "alicloud_ecs_instance_by_deletion_protection" {
   sql = <<-EOQ
     with instances as (
       select
@@ -484,7 +484,7 @@ query "alicloud_ecs_instance_top10_cpu_past_week" {
       timestamp  >= CURRENT_DATE - INTERVAL '7 day'
       and instance_id in (select instance_id from top_n)
     order by
-      timestamp
+      timestamp;
   EOQ
 }
 
@@ -519,6 +519,6 @@ query "alicloud_ecs_instance_by_cpu_utilization_category" {
       cpu_buckets as b
     left join max_averages as a on b.cpu_bucket = a.cpu_bucket
     group by
-      b.cpu_bucket
+      b.cpu_bucket;
   EOQ
 }
