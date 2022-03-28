@@ -33,7 +33,7 @@ dashboard "alicloud_ecs_instance_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ecs_instance_total_cores_count
+      query = query.alicloud_ecs_instance_total_cores
       args = {
         arn = self.input.instance_arn.value
       }
@@ -49,7 +49,7 @@ dashboard "alicloud_ecs_instance_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ecs_instance_io_optimized_status
+      query = query.alicloud_ecs_instance_io_optimized
       args = {
         arn = self.input.instance_arn.value
       }
@@ -57,7 +57,7 @@ dashboard "alicloud_ecs_instance_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ecs_instance_network
+      query = query.alicloud_ecs_instance_network_type
       args = {
         arn = self.input.instance_arn.value
       }
@@ -216,7 +216,7 @@ query "alicloud_ecs_instance_type" {
   param "arn" {}
 }
 
-query "alicloud_ecs_instance_total_cores_count" {
+query "alicloud_ecs_instance_total_cores" {
   sql = <<-EOQ
     select
       'Total Cores' as label,
@@ -245,7 +245,7 @@ query "alicloud_ecs_instance_public_access" {
   param "arn" {}
 }
 
-query "alicloud_ecs_instance_io_optimized_status" {
+query "alicloud_ecs_instance_io_optimized" {
   sql = <<-EOQ
     select
       'IO Optimized' as label,
@@ -260,7 +260,7 @@ query "alicloud_ecs_instance_io_optimized_status" {
   param "arn" {}
 }
 
-query "alicloud_ecs_instance_network" {
+query "alicloud_ecs_instance_network_type" {
   sql = <<-EOQ
     select
       'Network Type' as label,
