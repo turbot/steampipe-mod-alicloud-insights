@@ -9,7 +9,7 @@ dashboard "alicloud_ecs_instance_detail" {
 
   input "instance_arn" {
     title = "Select an instance:"
-    sql   = query.alicloud_ecs_instance_input.sql
+    query = query.alicloud_ecs_instance_input
     width = 4
   }
 
