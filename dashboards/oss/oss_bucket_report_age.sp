@@ -1,6 +1,8 @@
 dashboard "alicloud_oss_bucket_age_report" {
 
-  title = "Alibaba Cloud OSS Bucket Age Report"
+  title = "Alicloud OSS Bucket Age Report"
+  documentation = file("./dashboards/oss/docs/oss_bucket_report_age.md")
+
 
   tags = merge(local.oss_common_tags, {
     type     = "Report"

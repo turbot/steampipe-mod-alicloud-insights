@@ -1,6 +1,7 @@
 dashboard "alicloud_oss_bucket_dashboard" {
 
-  title = "Alibaba Cloud OSS Bucket Dashboard"
+  title = "Alicloud OSS Bucket Dashboard"
+  documentation = file("./dashboards/oss/docs/oss_bucket_dashboard.md")
 
   tags = merge(local.oss_common_tags, {
     type = "Dashboard"
@@ -18,30 +19,30 @@ dashboard "alicloud_oss_bucket_dashboard" {
     card {
       query = query.alicloud_oss_bucket_public_access_not_blocked_count
       width = 2
-      # href  = dashboard.alicloud_oss_bucket_public_access_report.url_path
+      href  = dashboard.alicloud_oss_bucket_public_access_report.url_path
     }
 
     card {
       query = query.alicloud_oss_bucket_unencrypted_count
       width = 2
-      # href  = dashboard.alicloud_oss_bucket_encryption_report.url_path
-    }
-
-    card {
-      query = query.alicloud_oss_bucket_logging_disabled_count
-      width = 2
-      # href  = dashboard.alicloud_oss_bucket_logging_report.url_path
-    }
-
-    card {
-      query = query.alicloud_oss_bucket_versioning_disabled_count
-      width = 2
-      # href  = dashboard.alicloud_oss_bucket_lifecycle_report.url_path
+      href  = dashboard.alicloud_oss_bucket_encryption_report.url_path
     }
 
     card {
       query = query.alicloud_oss_bucket_ssl_not_enforced_count
       width = 2
+    }
+
+    card {
+      query = query.alicloud_oss_bucket_logging_disabled_count
+      width = 2
+      href  = dashboard.alicloud_oss_bucket_logging_report.url_path
+    }
+
+    card {
+      query = query.alicloud_oss_bucket_versioning_disabled_count
+      width = 2
+      href  = dashboard.alicloud_oss_bucket_lifecycle_report.url_path
     }
 
   }
@@ -83,6 +84,22 @@ dashboard "alicloud_oss_bucket_dashboard" {
     }
 
     chart {
+      title = "HTTPS Enforcement Status"
+      query = query.alicloud_oss_bucket_by_ssl_enforced_status
+      type  = "donut"
+      width = 4
+
+      series "count" {
+        point "enforced" {
+          color = "ok"
+        }
+        point "not enforced" {
+          color = "alert"
+        }
+      }
+    }
+
+    chart {
       title = "Logging Status"
       query = query.alicloud_oss_bucket_by_logging_status
       type  = "donut"
@@ -114,21 +131,6 @@ dashboard "alicloud_oss_bucket_dashboard" {
       }
     }
 
-    chart {
-      title = "SSL Enforced Status"
-      query = query.alicloud_oss_bucket_by_ssl_enforced_status
-      type  = "donut"
-      width = 4
-
-      series "count" {
-        point "enabled" {
-          color = "ok"
-        }
-        point "disabled" {
-          color = "alert"
-        }
-      }
-    }
 
   }
 
@@ -248,7 +250,7 @@ query "alicloud_oss_bucket_ssl_not_enforced_count" {
     )
     select
       count(*) as value,
-      'SSL Not Enforced' as label,
+      'HTTPS Unenforced' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
       alicloud_oss_bucket b
@@ -362,7 +364,7 @@ query "alicloud_oss_bucket_by_ssl_enforced_status" {
     ssl_enforced_status as (
       select
         case
-          when s.name is not null then 'enabled' else 'disabled'
+          when s.name is not null then 'enforced' else 'not enforced'
         end as status
       from
         alicloud_oss_bucket b

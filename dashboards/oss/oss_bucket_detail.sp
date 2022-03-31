@@ -1,6 +1,6 @@
 dashboard "alicloud_oss_bucket_detail" {
 
-  title = "Alibaba Cloud OSS Bucket Detail"
+  title = "Alicloud OSS Bucket Detail"
 
   tags = merge(local.oss_common_tags, {
     type = "Detail"
