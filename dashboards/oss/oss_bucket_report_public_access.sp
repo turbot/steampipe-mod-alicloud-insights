@@ -30,9 +30,9 @@ dashboard "alicloud_oss_bucket_public_access_report" {
       display = "none"
     }
 
-    # column "Name" {
-    #   href = "${dashboard.alicloud_oss_bucket_detail.url_path}?input.bucket_arn={{.ARN | @uri}}"
-    # }
+    column "Name" {
+      href = "${dashboard.alicloud_oss_bucket_detail.url_path}?input.bucket_arn={{.ARN | @uri}}"
+    }
 
     query = query.alicloud_oss_bucket_public_access_table
   }
