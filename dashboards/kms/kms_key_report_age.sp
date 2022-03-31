@@ -8,60 +8,60 @@ dashboard "alicloud_kms_key_age_report" {
     category = "Age"
   })
 
-   container {
+  container {
 
     card {
       width = 2
-      sql   = query.alicloud_kms_key_count.sql
+      query = query.alicloud_kms_key_count
     }
 
     card {
       type  = "info"
       width = 2
-      sql   = query.alicloud_kms_key_24_hours_count.sql
+      query = query.alicloud_kms_key_24_hours_count
     }
 
     card {
       type  = "info"
       width = 2
-      sql   = query.alicloud_kms_key_30_days_count.sql
+      query = query.alicloud_kms_key_30_days_count
     }
 
     card {
       type  = "info"
       width = 2
-      sql   = query.alicloud_kms_key_30_90_days_count.sql
+      query = query.alicloud_kms_key_30_90_days_count
     }
 
     card {
       type  = "info"
       width = 2
-      sql   = query.alicloud_kms_key_90_365_days_count.sql
+      query = query.alicloud_kms_key_90_365_days_count
     }
 
     card {
       type  = "info"
       width = 2
-      sql   = query.alicloud_kms_key_1_year_count.sql
+      query = query.alicloud_kms_key_1_year_count
     }
 
   }
 
-    table {
-      column "Account ID" {
-        display = "none"
-      }
-
-      column "ARN" {
-        display = "none"
-      }
-
-      column "Key ID" {
-        href = "${dashboard.alicloud_kms_key_detail.url_path}?input.key_arn={{.ARN | @uri}}"
-      }
-
-      sql = query.alicloud_kms_key_age_table.sql
+  table {
+    column "Account ID" {
+      display = "none"
     }
+
+    column "ARN" {
+      display = "none"
+    }
+
+    column "Key ID" {
+      href = "${dashboard.alicloud_kms_key_detail.url_path}?input.key_arn={{.ARN | @uri}}"
+    }
+
+    query = query.alicloud_kms_key_age_table
+  }
 
 }
 
@@ -132,7 +132,6 @@ query "alicloud_kms_key_age_table" {
       now()::date - k.creation_date::date as "Age in Days",
       k.creation_date as "Creation Date",
       k.key_state as "Key State",
-      --k.key_manager as "Key Manager",
       a.title as "Account",
       k.account_id as "Account ID",
       k.region as "Region",
@@ -143,6 +142,6 @@ query "alicloud_kms_key_age_table" {
     where
       k.account_id = a.account_id
     order by
-      k.key_id;
+      k.creation_date desc;
   EOQ
 }

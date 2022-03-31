@@ -11,45 +11,44 @@ dashboard "alicloud_kms_key_dashboard" {
 
     # Analysis
     card {
-      sql   = query.alicloud_kms_key_count.sql
+      query = query.alicloud_kms_key_count
       width = 2
     }
 
     card {
-      sql   = query.alicloud_kms_customer_managed_key_count.sql
+      query = query.alicloud_hsm_based_keys
       width = 2
     }
 
     # Assessments
     card {
-      sql   = query.alicloud_kms_key_disabled_count.sql
+      query = query.alicloud_kms_key_disabled_count
       width = 2
     }
 
     card {
-      sql   = query.alicloud_kms_deletion_protection_disabled_count.sql
-      width = 2
-    }
-
-    card {
-      sql   = query.alicloud_kms_cmk_rotation_disabled_count.sql
+      query = query.alicloud_kms_cmk_rotation_disabled_count
       width = 2
       href  = dashboard.alicloud_kms_key_lifecycle_report.url_path
+    }
+
+    card {
+      query = query.alicloud_kms_deletion_protection_disabled_count
+      width = 2
     }
   }
 
   container {
 
     title = "Assessments"
-    width = 6
 
     chart {
       title = "Enabled/Disabled Status"
-      sql   = query.alicloud_kms_key_disabled_status.sql
+      query = query.alicloud_kms_key_disabled_status
       type  = "donut"
       width = 4
 
-      series "count" {
+      series "Keys" {
         point "enabled" {
           color = "ok"
         }
@@ -61,11 +60,11 @@ dashboard "alicloud_kms_key_dashboard" {
 
     chart {
       title = "CMK Rotation Status"
-      sql   = query.alicloud_kms_key_rotation_status.sql
+      query = query.alicloud_kms_key_rotation_status
       type  = "donut"
       width = 4
 
-      series "count" {
+      series "Keys" {
         point "enabled" {
           color = "ok"
         }
@@ -83,28 +82,35 @@ dashboard "alicloud_kms_key_dashboard" {
 
     chart {
       title = "Keys by Account"
-      sql   = query.alicloud_kms_key_by_account.sql
+      query = query.alicloud_kms_key_by_account
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Keys by Region"
-      sql   = query.alicloud_kms_key_by_region.sql
+      query = query.alicloud_kms_key_by_region
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Keys by State"
-      sql   = query.alicloud_kms_key_by_state.sql
+      query = query.alicloud_kms_key_by_state
+      type  = "column"
+      width = 3
+    }
+
+    chart {
+      title = "Keys by Protection Level"
+      query = query.alicloud_kms_key_by_protection_level
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Keys by Age"
-      sql   = query.alicloud_kms_key_by_creation_month.sql
+      query = query.alicloud_kms_key_by_creation_month
       type  = "column"
       width = 3
     }
@@ -115,26 +121,30 @@ dashboard "alicloud_kms_key_dashboard" {
 
 # Card Queries
 
+# Analysis Card Queries
+
 query "alicloud_kms_key_count" {
   sql = <<-EOQ
     select count(*) as "Keys" from alicloud_kms_key;
   EOQ
 }
 
-query "alicloud_kms_customer_managed_key_count" {
+query "alicloud_hsm_based_keys" {
   sql = <<-EOQ
-    select
-      count(*)as "Customer Managed Keys"
+    select 
+      count(*) as "HSM Based Keys" 
     from
-      alicloud_kms_key
-    --where
-     -- key_manager = 'CUSTOMER';
+      alicloud_kms_key 
+    where
+      protection_level = 'HSM';
   EOQ
 }
 
+# Assessments Card Queries
+
 query "alicloud_kms_key_disabled_count" {
   sql = <<-EOQ
-    select
+    select 
       count(*) as value,
       'Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
@@ -155,7 +165,6 @@ query "alicloud_kms_cmk_rotation_disabled_count" {
       alicloud_kms_key
     where
       automatic_rotation = 'Disabled';
-      -- and key_manager = 'CUSTOMER';
   EOQ
 }
 
@@ -169,7 +178,6 @@ query "alicloud_kms_deletion_protection_disabled_count" {
       alicloud_kms_key
     where
       deletion_protection = 'Disabled';
-      -- and key_manager = 'CUSTOMER';
   EOQ
 }
 
@@ -178,13 +186,15 @@ query "alicloud_kms_deletion_protection_disabled_count" {
 query "alicloud_kms_key_disabled_status" {
   sql = <<-EOQ
     select
-      disabled_status,
-      count(*)
+      lower(disabled_status),
+      count(*) as "Keys"
     from (
       select
         key_state as disabled_status
       from
-        alicloud_kms_key) as t
+        alicloud_kms_key
+      where
+        lower(key_state) != 'pendingdeletion') as t
     group by
       disabled_status
     order by
@@ -195,16 +205,13 @@ query "alicloud_kms_key_disabled_status" {
 query "alicloud_kms_key_rotation_status" {
   sql = <<-EOQ
     select
-      rotation_status,
-      count(*)
+      lower(rotation_status),
+      count(*) as "Keys"
     from (
       select
         automatic_rotation as rotation_status
       from
-        alicloud_kms_key
-      --where
-        --key_manager = 'CUSTOMER'
-        ) as t
+        alicloud_kms_key) as t
     group by
       rotation_status
     order by
@@ -247,11 +254,23 @@ query "alicloud_kms_key_by_state" {
   sql = <<-EOQ
     select
       key_state,
-      count(key_state)
+      count(key_state) as "Keys"
     from
       alicloud_kms_key
     group by
       key_state;
+  EOQ
+}
+
+query "alicloud_kms_key_by_protection_level" {
+  sql = <<-EOQ
+    select
+      protection_level,
+      count(key_state) as "Keys"
+    from
+      alicloud_kms_key
+    group by
+      protection_level;
   EOQ
 }
 
@@ -291,7 +310,7 @@ query "alicloud_kms_key_by_creation_month" {
     )
     select
       months.month,
-      keys_by_month.count
+      keys_by_month.count as "Keys"
     from
       months
       left join keys_by_month on months.month = keys_by_month.creation_month
