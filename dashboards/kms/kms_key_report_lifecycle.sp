@@ -11,37 +11,32 @@ dashboard "alicloud_kms_key_lifecycle_report" {
   container {
 
     card {
-      sql   = query.alicloud_kms_customer_managed_key_count.sql
+      query = query.alicloud_kms_key_rotation_disabled_count
       width = 2
     }
 
     card {
-      sql = query.alicloud_kms_key_rotation_disabled_count.sql
-      width = 2
-    }
-
-    card {
-      sql = query.alicloud_kms_cmk_pending_deletion_count.sql
+      query = query.alicloud_kms_cmk_pending_deletion_count
       width = 2
     }
 
   }
 
-    table {
-      column "Account ID" {
-        display = "none"
-      }
-
-      column "ARN" {
-        display = "none"
-      }
-
-      column "Key ID" {
-        href = "${dashboard.alicloud_kms_key_detail.url_path}?input.key_arn={{.ARN | @uri}}"
-      }
-
-      sql = query.alicloud_kms_cmk_lifecycle_table.sql
+  table {
+    column "Account ID" {
+      display = "none"
     }
+
+    column "ARN" {
+      display = "none"
+    }
+
+    column "Key ID" {
+      href = "${dashboard.alicloud_kms_key_detail.url_path}?input.key_arn={{.ARN | @uri}}"
+    }
+
+    query = query.alicloud_kms_cmk_lifecycle_table
+  }
 
 }
 
@@ -54,8 +49,7 @@ query "alicloud_kms_key_rotation_disabled_count" {
     from
       alicloud_kms_key
     where
-      automatic_rotation = 'Disabled'
-      --and key_manager = 'CUSTOMER';
+      automatic_rotation = 'Disabled';
   EOQ
 }
 
@@ -68,8 +62,7 @@ query "alicloud_kms_cmk_pending_deletion_count" {
     from
       alicloud_kms_key
     where
-      key_state = 'PendingDeletion'
-      --and key_manager = 'CUSTOMER';
+      key_state = 'PendingDeletion';
   EOQ
 }
 
@@ -79,7 +72,6 @@ query "alicloud_kms_cmk_lifecycle_table" {
       k.key_id as "Key ID",
       k.automatic_rotation as "Key Rotation",
       k.key_state as "Key State",
-      --k.key_manager as "Key Manager",
       k.delete_date as "Deletion Date",
       a.title as "Account",
       k.account_id as "Account ID",
@@ -90,7 +82,6 @@ query "alicloud_kms_cmk_lifecycle_table" {
       alicloud_account as a
     where
       k.account_id = a.account_id
-      --and k.key_manager = 'CUSTOMER'
     order by
       k.key_id;
   EOQ
