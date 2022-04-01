@@ -169,7 +169,6 @@ dashboard "alicloud_oss_bucket_dashboard" {
 
 }
 
-
 # Card Queries
 
 query "alicloud_oss_bucket_count" {

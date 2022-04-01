@@ -47,10 +47,10 @@ query "alicloud_oss_bucket_logging_table" {
       case when b.logging ->> 'TargetBucket' <> '' then 'Enabled' else null end as "Logging",
       b.logging ->> 'TargetBucket' as "Target Bucket",
       b.logging ->> 'TargetPrefix' as "Target Prefix",
+      b.arn as "ARN",
       a.title as "Account",
       b.account_id as "Account ID",
-      b.region as "Region",
-      b.arn as "ARN"
+      b.region as "Region"
     from
       alicloud_oss_bucket as b,
       alicloud_account as a

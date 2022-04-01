@@ -1,6 +1,7 @@
 dashboard "alicloud_oss_bucket_detail" {
 
-  title = "Alicloud OSS Bucket Detail"
+  title         = "Alicloud OSS Bucket Detail"
+  documentation = file("./dashboards/oss/docs/oss_bucket_detail.md")
 
   tags = merge(local.oss_common_tags, {
     type = "Detail"
@@ -132,6 +133,7 @@ dashboard "alicloud_oss_bucket_detail" {
   }
 
 }
+
 query "alicloud_oss_bucket_input" {
   sql = <<-EOQ
     select
@@ -166,8 +168,8 @@ query "alicloud_oss_bucket_versioning" {
 query "alicloud_oss_bucket_access_type" {
   sql = <<-EOQ
     select
-      'Access' as label,
-      case when acl = 'private' then 'Private' else 'Public' end as value,
+      'Public Access' as label,
+      case when acl = 'private' then 'Disabled' else 'Enabled' end as value,
       case when acl = 'private' then 'ok' else 'alert' end as type
     from
       alicloud_oss_bucket
@@ -294,6 +296,7 @@ query "alicloud_oss_bucket_logging" {
 query "alicloud_oss_bucket_policy" {
   sql = <<-EOQ
     select
+      p -> 'Principal' as "Principal",
       p -> 'Action' as "Action",
       p ->> 'Effect' as "Effect",
       p -> 'Resource' as "Resource",
@@ -337,9 +340,9 @@ query "alicloud_oss_bucket_lifecycle_policy" {
 query "alicloud_oss_bucket_server_side_encryption" {
   sql = <<-EOQ
     select
-      server_side_encryption ->> 'KMSDataEncryption' as "KMS Data Encryption",
       server_side_encryption ->> 'KMSMasterKeyID' as "KMS Master Key ID",
-      server_side_encryption ->> 'SSEAlgorithm' as "SSE Algorithm"
+      server_side_encryption ->> 'SSEAlgorithm' as "SSE Algorithm",
+      server_side_encryption ->> 'KMSDataEncryption' as "KMS Data Encryption"
     from
       alicloud_oss_bucket
     where

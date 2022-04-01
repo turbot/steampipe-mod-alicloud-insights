@@ -1,8 +1,7 @@
 dashboard "alicloud_oss_bucket_public_access_report" {
 
-  title = "Alicloud OSS Bucket Public Access Report"
+  title         = "Alicloud OSS Bucket Public Access Report"
   documentation = file("./dashboards/oss/docs/oss_bucket_report_public_access.md")
-
 
   tags = merge(local.oss_common_tags, {
     type     = "Report"
