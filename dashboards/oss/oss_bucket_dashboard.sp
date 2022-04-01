@@ -49,7 +49,7 @@ dashboard "alicloud_oss_bucket_dashboard" {
 
   container {
     title = "Assessments"
-    width = 12
+    # width = 12
 
     chart {
       title = "Public Access Blocked"
