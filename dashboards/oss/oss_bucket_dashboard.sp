@@ -52,16 +52,16 @@ dashboard "alicloud_oss_bucket_dashboard" {
     # width = 12
 
     chart {
-      title = "Public Access Blocked"
+      title = "Public/Private"
       query = query.alicloud_oss_bucket_by_public_access_blocked_status
       type  = "donut"
       width = 4
 
       series "count" {
-        point "blocked" {
+        point "private" {
           color = "ok"
         }
-        point "not blocked" {
+        point "public" {
           color = "alert"
         }
       }
@@ -181,7 +181,7 @@ query "alicloud_oss_bucket_public_access_not_blocked_count" {
   sql = <<-EOQ
     select
       count(*) as value,
-      'Public Access Not Blocked' as label,
+      'Publicly Accessible' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
       alicloud_oss_bucket
@@ -269,7 +269,7 @@ query "alicloud_oss_bucket_by_public_access_blocked_status" {
         case
           when
             acl = 'private'
-          then 'blocked' else 'not blocked'
+          then 'private' else 'public'
         end as block_status
       from
         alicloud_oss_bucket
