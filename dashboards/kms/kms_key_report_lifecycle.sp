@@ -1,6 +1,6 @@
 dashboard "alicloud_kms_key_lifecycle_report" {
 
-  title         = "Alibaba Cloud CMK Lifecycle Report"
+  title         = "Alicloud KMS CMK Lifecycle Report"
   documentation = file("./dashboards/kms/docs/kms_key_report_lifecycle.md")
 
   tags = merge(local.kms_common_tags, {

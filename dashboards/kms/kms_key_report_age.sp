@@ -1,6 +1,6 @@
 dashboard "alicloud_kms_key_age_report" {
 
-  title         = "Alibaba Cloud Key Age Report"
+  title         = "Alicloud Key Age Report"
   documentation = file("./dashboards/kms/docs/kms_key_report_age.md")
 
   tags = merge(local.kms_common_tags, {

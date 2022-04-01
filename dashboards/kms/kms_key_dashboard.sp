@@ -1,6 +1,6 @@
 dashboard "alicloud_kms_key_dashboard" {
 
-  title         = "Alibaba Cloud KMS Key Dashboard"
+  title         = "Alicloud KMS Key Dashboard"
   documentation = file("./dashboards/kms/docs/kms_key_dashboard.md")
 
   tags = merge(local.kms_common_tags, {
@@ -46,7 +46,7 @@ dashboard "alicloud_kms_key_dashboard" {
       title = "Enabled/Disabled Status"
       query = query.alicloud_kms_key_disabled_status
       type  = "donut"
-      width = 4
+      width = 3
 
       series "Keys" {
         point "enabled" {
@@ -62,7 +62,23 @@ dashboard "alicloud_kms_key_dashboard" {
       title = "CMK Rotation Status"
       query = query.alicloud_kms_key_rotation_status
       type  = "donut"
-      width = 4
+      width = 3
+
+      series "Keys" {
+        point "enabled" {
+          color = "ok"
+        }
+        point "disabled" {
+          color = "alert"
+        }
+      }
+    }
+
+    chart {
+      title = "CMK Deletion Protection Status"
+      query = query.alicloud_kms_key_rotation_status
+      type  = "donut"
+      width = 3
 
       series "Keys" {
         point "enabled" {
@@ -102,15 +118,15 @@ dashboard "alicloud_kms_key_dashboard" {
     }
 
     chart {
-      title = "Keys by Protection Level"
-      query = query.alicloud_kms_key_by_protection_level
+      title = "Keys by Age"
+      query = query.alicloud_kms_key_by_creation_month
       type  = "column"
       width = 3
     }
 
     chart {
-      title = "Keys by Age"
-      query = query.alicloud_kms_key_by_creation_month
+      title = "Keys by Protection Level"
+      query = query.alicloud_kms_key_by_protection_level
       type  = "column"
       width = 3
     }
@@ -131,10 +147,10 @@ query "alicloud_kms_key_count" {
 
 query "alicloud_hsm_based_keys" {
   sql = <<-EOQ
-    select 
-      count(*) as "HSM Based Keys" 
+    select
+      count(*) as "HSM Based Keys"
     from
-      alicloud_kms_key 
+      alicloud_kms_key
     where
       protection_level = 'HSM';
   EOQ
@@ -144,7 +160,7 @@ query "alicloud_hsm_based_keys" {
 
 query "alicloud_kms_key_disabled_count" {
   sql = <<-EOQ
-    select 
+    select
       count(*) as value,
       'Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
@@ -216,6 +232,23 @@ query "alicloud_kms_key_rotation_status" {
       rotation_status
     order by
       rotation_status desc;
+  EOQ
+}
+
+query "alicloud_kms_key_deletion_protection_status" {
+  sql = <<-EOQ
+    select
+      lower(deletion_protection),
+      count(*) as "Keys"
+    from (
+      select
+        deletion_protection as deletion_protection
+      from
+        alicloud_kms_key) as t
+    group by
+      deletion_protection
+    order by
+      deletion_protection desc;
   EOQ
 }
 

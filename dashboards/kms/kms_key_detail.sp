@@ -1,6 +1,6 @@
 dashboard "alicloud_kms_key_detail" {
 
-  title         = "Alibaba Cloud Key Detail"
+  title         = "Alicloud Key Detail"
   documentation = file("./dashboards/kms/docs/kms_key_detail.md")
 
   tags = merge(local.kms_common_tags, {
@@ -146,8 +146,7 @@ query "alicloud_kms_key_state" {
   sql = <<-EOQ
     select
       'State' as label,
-      key_state as value,
-      case when key_state = 'Enabled' then 'ok' else 'alert' end as "type"
+      key_state as value
     from
       alicloud_kms_key
     where
@@ -191,7 +190,7 @@ query "alicloud_kms_protection_level" {
   sql = <<-EOQ
     select
       'Protection Level' as label,
-      protection_level as value,
+      initcap(protection_level) as value,
       case when protection_level='SOFTWARE' then 'ok' else 'alert' end as type
     from
       alicloud_kms_key
@@ -207,6 +206,7 @@ query "alicloud_kms_key_overview" {
     select
       key_id as "ID",
       title as "Title",
+      primary_key_version as "Primary Key Version",
       region as "Region",
       account_id as "Account ID",
       arn as "ARN"
