@@ -1,7 +1,7 @@
 dashboard "alicloud_ecs_disk_dashboard" {
 
   title         = "Alicloud ECS Disk Dashboard"
-  documentation = file("./dashboards/ecs/docs/alicloud_ecs_disk_dashboard.md")
+  documentation = file("./dashboards/ecs/docs/ecs_disk_dashboard.md")
 
   tags = merge(local.ecs_common_tags, {
     type = "Dashboard"
@@ -213,7 +213,7 @@ query "alicloud_ecs_disk_storage_total" {
 
 query "alicloud_ecs_disk_unattached_count" {
   sql = <<-EOQ
-    select 
+    select
       count(*) as value,
       'Unused' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
@@ -226,7 +226,7 @@ query "alicloud_ecs_disk_unattached_count" {
 
 query "alicloud_ecs_disk_unencrypted_count" {
   sql = <<-EOQ
-    select 
+    select
       count(*) as value,
       'Unencrpted' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
@@ -239,7 +239,7 @@ query "alicloud_ecs_disk_unencrypted_count" {
 
 query "alicloud_ecs_disk_delete_auto_snapshot_count" {
   sql = <<-EOQ
-    select 
+    select
       count(*) as value,
       'Auto Snapshot Deletion Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
@@ -301,7 +301,7 @@ query "alicloud_ecs_disk_auto_snapshot_deletion" {
         delete_auto_snapshot_enabled,
         count(*) as "Disks"
     from (
-        select 
+        select
             delete_auto_snapshot,
         case when delete_auto_snapshot then
             'enabled'
