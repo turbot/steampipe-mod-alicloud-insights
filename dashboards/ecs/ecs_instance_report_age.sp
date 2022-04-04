@@ -1,6 +1,6 @@
 dashboard "alicloud_ecs_instance_age_report" {
 
-  title         = "Alibaba Cloud ECS Instance Age Report"
+  title         = "Alicloud ECS Instance Age Report"
   documentation = file("./dashboards/ecs/docs/ecs_instance_report_age.md")
 
   tags = merge(local.ecs_common_tags, {

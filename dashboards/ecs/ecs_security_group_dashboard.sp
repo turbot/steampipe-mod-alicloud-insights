@@ -1,6 +1,6 @@
 dashboard "alicloud_ecs_security_group_dashboard" {
 
-  title         = "Alibaba Cloud ECS Security Group Dashboard"
+  title         = "Alicloud ECS Security Group Dashboard"
   documentation = file("./dashboards/ecs/docs/ecs_security_group_dashboard.md")
 
   tags = merge(local.ecs_common_tags, {
@@ -20,12 +20,12 @@ dashboard "alicloud_ecs_security_group_dashboard" {
     }
 
     card {
-      query = query.alicloud_ecs_security_unrestricted_ingress_rdp_count
+      query = query.alicloud_ecs_security_unrestricted_ingress_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ecs_security_unrestricted_ingress_ssh_count
+      query = query.alicloud_ecs_security_unrestricted_egress_count
       width = 2
     }
 
@@ -57,10 +57,10 @@ dashboard "alicloud_ecs_security_group_dashboard" {
     }
 
     chart {
-      title = "With Unrestricted Ingress RDP"
+      title = "With Unrestricted Ingress (Excludes ICMP)"
       type  = "donut"
       width = 3
-      query = query.alicloud_ecs_security_group_by_unrestricted_ingress_rdp_status
+      query = query.alicloud_ecs_security_group_by_unrestricted_ingress_status
 
       series "count" {
         point "restricted" {
@@ -73,26 +73,10 @@ dashboard "alicloud_ecs_security_group_dashboard" {
     }
 
     chart {
-      title = "With Unrestricted Egress SSH"
+      title = "With Unrestricted Egress (Excludes ICMP)"
       type  = "donut"
       width = 3
-      query = query.alicloud_ecs_security_group_by_unrestricted_ingress_ssh_status
-
-      series "count" {
-        point "restricted" {
-          color = "ok"
-        }
-        point "unrestricted" {
-          color = "alert"
-        }
-      }
-    }
-
-    chart {
-      title = "With Unrestricted Egress Remote"
-      type  = "donut"
-      width = 3
-      query = query.alicloud_ecs_security_group_by_unrestricted_ingress_remote_status
+      query = query.alicloud_ecs_security_group_by_unrestricted_egress_status
 
       series "count" {
         point "restricted" {
@@ -164,67 +148,59 @@ query "alicloud_ecs_security_group_unassociated_count" {
   EOQ
 }
 
-query "alicloud_ecs_security_unrestricted_ingress_rdp_count" {
+query "alicloud_ecs_security_unrestricted_ingress_count" {
   sql = <<-EOQ
-    with bad_groups as (
+    with ingress_sg as (
       select
         distinct arn
       from
         alicloud_ecs_security_group,
         jsonb_array_elements(permissions) as p
       where
-        p ->> 'Policy' = 'Accept'
+        p ->> 'Policy' = 'Accept' and p ->> 'IpProtocol' <> 'ICMP'
         and p ->> 'Direction' = 'ingress'
         and p ->> 'SourceCidrIp' = '0.0.0.0/0'
         and (
-          p ->> 'PortRange' in ('-1/-1', '3389/3389')
-          or (3389 between split_part(p ->> 'PortRange', '/', 1) :: int and split_part(p ->> 'PortRange', '/', 2) :: int)
+          p ->> 'PortRange' in ('-1/-1', '1/65535')
         )
     )
     select
-      'Unrestricted Ingress RDP' as label,
+      'Unrestricted Ingress (Excludes ICMP)' as label,
       count(*) as value,
       case
         when count(*) = 0 then 'ok'
         else 'alert'
       end as type
     from
-      alicloud_ecs_security_group as a
-      left join bad_groups as b on a.arn = b.arn
-    where
-      b.arn is not null;
+      ingress_sg
   EOQ
 }
 
-query "alicloud_ecs_security_unrestricted_ingress_ssh_count" {
+query "alicloud_ecs_security_unrestricted_egress_count" {
   sql = <<-EOQ
-    with bad_groups as (
+    with egress_sg as (
       select
         distinct arn
       from
         alicloud_ecs_security_group,
         jsonb_array_elements(permissions) as p
       where
-        p ->> 'Policy' = 'Accept'
-        and p ->> 'Direction' = 'ingress'
+        p ->> 'Policy' = 'Accept' and p ->> 'IpProtocol' <> 'ICMP'
+        and p ->> 'Direction' = 'egress'
         and p ->> 'SourceCidrIp' = '0.0.0.0/0'
         and (
-          p ->> 'PortRange' in ('-1/-1', '22/22')
-          or (22 between split_part(p ->> 'PortRange', '/', 1) :: int and split_part(p ->> 'PortRange', '/', 2) :: int)
+          p ->> 'PortRange' in ('-1/-1', '1/65535')
         )
     )
     select
-      'Unrestricted Ingress SSH' as label,
+      'Unrestricted Egress (Excludes ICMP)' as label,
       count(*) as value,
       case
         when count(*) = 0 then 'ok'
         else 'alert'
       end as type
     from
-      alicloud_ecs_security_group as a
-      left join bad_groups as b on a.arn = b.arn
-    where
-      b.arn is not null;
+      egress_sg
   EOQ
 }
 
@@ -298,85 +274,53 @@ query "alicloud_ecs_security_group_unassociated_status" {
   EOQ
 }
 
-query "alicloud_ecs_security_group_by_unrestricted_ingress_rdp_status" {
+query "alicloud_ecs_security_group_by_unrestricted_ingress_status" {
   sql = <<-EOQ
-    with bad_groups as (
+    with ingress_sg as (
       select
         distinct arn
       from
         alicloud_ecs_security_group,
         jsonb_array_elements(permissions) as p
       where
-        p ->> 'Policy' = 'Accept'
+        p ->> 'Policy' = 'Accept' and p ->> 'IpProtocol' <> 'ICMP'
         and p ->> 'Direction' = 'ingress'
         and p ->> 'SourceCidrIp' = '0.0.0.0/0'
         and (
-          p ->> 'PortRange' in ('-1/-1', '3389/3389')
-          or (3389 between split_part(p ->> 'PortRange', '/', 1) :: int and split_part(p ->> 'PortRange', '/', 2) :: int)
+          p ->> 'PortRange' in ('-1/-1', '1/65535')
         )
     )
     select
-     case when b.arn is null then 'restricted' else 'unrestricted' end as status,
+     case when arn is null then 'restricted' else 'unrestricted' end as status,
      count(*)
     from
-      alicloud_ecs_security_group as sg left join bad_groups as b on sg.arn = b.arn
+      ingress_sg
     group by
       status;
   EOQ
 }
 
-query "alicloud_ecs_security_group_by_unrestricted_ingress_ssh_status" {
+query "alicloud_ecs_security_group_by_unrestricted_egress_status" {
   sql = <<-EOQ
-    with bad_groups as (
+    with eggress_sg as (
       select
         distinct arn
       from
         alicloud_ecs_security_group,
         jsonb_array_elements(permissions) as p
       where
-        p ->> 'Policy' = 'Accept'
-        and p ->> 'Direction' = 'ingress'
+        p ->> 'Policy' = 'Accept' and p ->> 'IpProtocol' <> 'ICMP'
+        and p ->> 'Direction' = 'egress'
         and p ->> 'SourceCidrIp' = '0.0.0.0/0'
         and (
-          p ->> 'PortRange' in ('-1/-1', '22/22')
-          or (22 between split_part(p ->> 'PortRange', '/', 1) :: int and split_part(p ->> 'PortRange', '/', 2) :: int)
+          p ->> 'PortRange' in ('-1/-1', '1/65535')
         )
     )
     select
-      case when b.arn is null then 'restricted' else 'unrestricted' end as status,
-      count(*)
+     case when arn is null then 'restricted' else 'unrestricted' end as status,
+     count(*)
     from
-      alicloud_ecs_security_group as sg left join bad_groups as b on sg.arn = b.arn
-    group by
-      status;
-  EOQ
-}
-
-query "alicloud_ecs_security_group_by_unrestricted_ingress_remote_status" {
-  sql = <<-EOQ
-    with bad_groups as (
-      select
-        distinct arn
-      from
-        alicloud_ecs_security_group,
-        jsonb_array_elements(permissions) as p
-      where
-        p ->> 'Policy' = 'Accept'
-        and p ->> 'Direction' = 'ingress'
-        and p ->> 'SourceCidrIp' = '0.0.0.0/0'
-        and (
-          p ->> 'PortRange' in ('-1/-1', '22/22', '3389/3389')
-          or (
-            3389 between split_part(p ->> 'PortRange', '/', 1) :: int and split_part(p ->> 'PortRange', '/', 2) :: int
-            or 22 between split_part(p ->> 'PortRange', '/', 1) :: int and split_part(p ->> 'PortRange', '/', 2) :: int
-          )
-        )
-    )
-    select
-      case when b.arn is null then 'restricted' else 'unrestricted' end as status,
-      count(*)
-    from
-      alicloud_ecs_security_group as sg left join bad_groups as b on sg.arn = b.arn
+      eggress_sg
     group by
       status;
   EOQ

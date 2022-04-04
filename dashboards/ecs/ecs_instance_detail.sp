@@ -1,6 +1,6 @@
 dashboard "alicloud_ecs_instance_detail" {
 
-  title         = "Alibaba Cloud ECS Instance Detail"
+  title         = "Alicloud ECS Instance Detail"
   documentation = file("./dashboards/ecs/docs/ecs_instance_detail.md")
 
   tags = merge(local.ecs_common_tags, {
@@ -41,6 +41,14 @@ dashboard "alicloud_ecs_instance_detail" {
 
     card {
       width = 2
+      query = query.alicloud_ecs_instance_os_type
+      args = {
+        arn = self.input.instance_arn.value
+      }
+    }
+
+    card {
+      width = 2
       query = query.alicloud_ecs_instance_public_access
       args = {
         arn = self.input.instance_arn.value
@@ -55,13 +63,6 @@ dashboard "alicloud_ecs_instance_detail" {
       }
     }
 
-    card {
-      width = 2
-      query = query.alicloud_ecs_instance_network_type
-      args = {
-        arn = self.input.instance_arn.value
-      }
-    }
   }
 
   container {
@@ -146,20 +147,7 @@ dashboard "alicloud_ecs_instance_detail" {
     width = 6
 
     table {
-      title = "Operating System"
-      query = query.alicloud_ecs_instance_os
-      args = {
-        arn = self.input.instance_arn.value
-      }
-    }
-
-  }
-
-  container {
-    width = 6
-
-    table {
-      title = "VPC"
+      title = "VPC Details"
       query = query.alicloud_ecs_instance_vpc
       args = {
         arn = self.input.instance_arn.value
@@ -192,6 +180,21 @@ query "alicloud_ecs_instance_status" {
     select
       'Status' as label,
       status as value
+    from
+      alicloud_ecs_instance
+    where
+      arn = $1;
+  EOQ
+
+  param "arn" {}
+
+}
+
+query "alicloud_ecs_instance_os_type" {
+  sql = <<-EOQ
+    select
+      'OS Type' as label,
+      os_type as value
     from
       alicloud_ecs_instance
     where
@@ -248,24 +251,9 @@ query "alicloud_ecs_instance_public_access" {
 query "alicloud_ecs_instance_io_optimized" {
   sql = <<-EOQ
     select
-      'IO Optimized' as label,
+      'I/O Optimized' as label,
       case when io_optimized then 'Enabled' else 'Disabled' end as value,
       case when io_optimized then 'ok' else 'alert' end as type
-    from
-      alicloud_ecs_instance
-    where
-      arn = $1;
-  EOQ
-
-  param "arn" {}
-}
-
-query "alicloud_ecs_instance_network_type" {
-  sql = <<-EOQ
-    select
-      'Network Type' as label,
-      case when instance_network_type = 'vpc' then 'VPC' else 'Legacy' end as value,
-      case when instance_network_type = 'vpc' then 'ok' else 'alert' end as type
     from
       alicloud_ecs_instance
     where
@@ -280,7 +268,11 @@ query "alicloud_ecs_instance_overview" {
     select
       tags ->> 'Name' as "Name",
       instance_id as "Instance ID",
+      os_name_en as "OS Name",
+      network_type as "Network Type",
       creation_time as "Creation Time",
+      billing_method as "Billing Method",
+      internet_charge_type as "Internet Charge Type",
       title as "Title",
       region as "Region",
       account_id as "Account ID",
@@ -365,27 +357,14 @@ query "alicloud_ecs_instance_dedicated_host" {
 query "alicloud_ecs_instance_security_groups" {
   sql = <<-EOQ
     select
-      group_id  as "Group ID"
+      group_id  as "Group ID",
+      g.name
     from
-      alicloud_ecs_instance,
+      alicloud_ecs_instance as i,
       jsonb_array_elements_text(security_group_ids) as group_id
+      left join alicloud_ecs_security_group as g on g.security_group_id = group_id
     where
-      arn = $1;
-  EOQ
-
-  param "arn" {}
-}
-
-query "alicloud_ecs_instance_os" {
-  sql = <<-EOQ
-    select
-      os_name_en  as "Name",
-      os_type as "Type",
-      os_version as "Version"
-    from
-      alicloud_ecs_instance
-    where
-      arn = $1;
+      i.arn = $1;
   EOQ
 
   param "arn" {}
@@ -394,10 +373,10 @@ query "alicloud_ecs_instance_os" {
 query "alicloud_ecs_instance_vpc" {
   sql = <<-EOQ
     select
-      vpc_attributes -> 'VpcId' as "ID",
+      vpc_attributes ->> 'VpcId' as "ID",
       vpc_attributes ->> 'NatIpAddress'  as "Nat IP Address",
       vpc_attributes -> 'PrivateIpAddress' -> 'IpAddress'  as "Private IP Address",
-      vpc_attributes -> 'VSwitchId' as "Switch ID"
+      vpc_attributes ->> 'VSwitchId' as "Switch ID"
     from
       alicloud_ecs_instance
     where
