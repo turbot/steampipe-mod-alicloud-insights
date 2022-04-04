@@ -24,6 +24,7 @@ dashboard "alicloud_ecs_instance_dashboard" {
     card {
       query = query.alicloud_ecs_instance_public_instance_count
       width = 2
+      href  = dashboard.alicloud_ecs_instance_public_access_report.url_path
     }
 
     card {
