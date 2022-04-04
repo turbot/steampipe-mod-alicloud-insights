@@ -24,6 +24,11 @@ dashboard "alicloud_ecs_snapshot_dashboard" {
       width = 2
     }
 
+    card {
+      query = query.alicloud_ecs_unused_snapshot_count
+      width = 2
+    }
+
   }
 
   container {
@@ -142,6 +147,19 @@ query "alicloud_ecs_unencrypted_snapshot_count" {
         alicloud_ecs_snapshot
     where
         not encrypted;
+  EOQ
+}
+
+query "alicloud_ecs_unused_snapshot_count" {
+  sql = <<-EOQ
+    select
+        count(*) as value,
+        'Unused' as label,
+        case count(*) when 0 then 'ok' else 'alert' end as "type"
+    from
+        alicloud_ecs_snapshot
+    where
+        usage = 'none';
   EOQ
 }
 
