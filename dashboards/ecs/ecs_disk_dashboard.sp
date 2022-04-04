@@ -48,10 +48,10 @@ dashboard "alicloud_ecs_disk_dashboard" {
       width = 4
 
       series "Disks" {
-        point "In_use" {
+        point "in-use" {
           color = "ok"
         }
-        point "Available" {
+        point "unused" {
           color = "alert"
         }
       }
@@ -64,10 +64,10 @@ dashboard "alicloud_ecs_disk_dashboard" {
       width = 4
 
       series "Disks" {
-        point "Enabled" {
+        point "enabled" {
           color = "ok"
         }
-        point "Disabled" {
+        point "disabled" {
           color = "alert"
         }
       }
@@ -80,10 +80,10 @@ dashboard "alicloud_ecs_disk_dashboard" {
       width = 4
 
       series "Disks" {
-        point "Enabled" {
+        point "enabled" {
           color = "ok"
         }
-        point "Disabled" {
+        point "disabled" {
           color = "alert"
         }
       }
@@ -215,7 +215,7 @@ query "alicloud_ecs_disk_unattached_count" {
   sql = <<-EOQ
     select 
       count(*) as value,
-      'Not In Use' as label,
+      'Unused' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
       alicloud_ecs_disk
@@ -256,14 +256,21 @@ query "alicloud_ecs_disk_delete_auto_snapshot_count" {
 query "alicloud_ecs_disk_by_status" {
   sql = <<-EOQ
     select
-      status as "Disks",
-      count(status) as "Disks"
+        usage_status,
+        count(*) as "Disks"
+    from (
+        select status,
+        case when status = 'In_use' then
+            'in-use'
+        else
+            'unused'
+        end usage_status
     from
-      alicloud_ecs_disk
-    where
-      status in ('In_use', 'Available')
+        alicloud_ecs_disk) as t
     group by
-      status;
+        usage_status
+    order by
+        usage_status desc;
   EOQ
 }
 
@@ -275,9 +282,9 @@ query "alicloud_ecs_disk_by_encryption_status" {
     from (
         select encrypted,
         case when encrypted then
-            'Enabled'
+            'enabled'
         else
-            'Disabled'
+            'disabled'
         end encryption_status
     from
         alicloud_ecs_disk) as t
@@ -297,9 +304,9 @@ query "alicloud_ecs_disk_auto_snapshot_deletion" {
         select 
             delete_auto_snapshot,
         case when delete_auto_snapshot then
-            'Enabled'
+            'enabled'
         else
-            'Disabled'
+            'disabled'
         end delete_auto_snapshot_enabled
     from
         alicloud_ecs_disk
