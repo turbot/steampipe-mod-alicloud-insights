@@ -1,6 +1,6 @@
 dashboard "alicloud_ecs_instance_dashboard" {
 
-  title         = "Alibaba Cloud ECS Instance Dashboard"
+  title         = "Alicloud ECS Instance Dashboard"
   documentation = file("./dashboards/ecs/docs/ecs_instance_dashboard.md")
 
   tags = merge(local.ecs_common_tags, {
@@ -32,11 +32,6 @@ dashboard "alicloud_ecs_instance_dashboard" {
     }
 
     card {
-      query = query.alicloud_ecs_instance_legacy_network_count
-      width = 2
-    }
-
-    card {
       query = query.alicloud_ecs_instance_deletion_protection_disabled_count
       width = 2
     }
@@ -64,7 +59,7 @@ dashboard "alicloud_ecs_instance_dashboard" {
     }
 
     chart {
-      title = "IO Optimized Status"
+      title = "I/O Optimized Status"
       query = query.alicloud_ecs_instance_by_io_optimized
       type  = "donut"
       width = 3
@@ -74,22 +69,6 @@ dashboard "alicloud_ecs_instance_dashboard" {
           color = "ok"
         }
         point "disabled" {
-          color = "alert"
-        }
-      }
-    }
-
-    chart {
-      title = "Network Type"
-      query = query.alicloud_ecs_instance_by_network_type
-      type  = "donut"
-      width = 3
-
-      series "count" {
-        point "vpc" {
-          color = "ok"
-        }
-        point "legacy" {
           color = "alert"
         }
       }
@@ -121,42 +100,49 @@ dashboard "alicloud_ecs_instance_dashboard" {
       title = "Instances by Account"
       query = query.alicloud_ecs_instance_by_account
       type  = "column"
-      width = 4
+      width = 3
     }
 
     chart {
       title = "Instances by Region"
       query = query.alicloud_ecs_instance_by_region
       type  = "column"
-      width = 4
+      width = 3
     }
 
     chart {
       title = "Instances by State"
       query = query.alicloud_ecs_instance_by_state
       type  = "column"
-      width = 4
+      width = 3
     }
 
     chart {
       title = "Instances by Age"
       query = query.alicloud_ecs_instance_by_creation_month
       type  = "column"
-      width = 4
+      width = 3
     }
 
     chart {
       title = "Instances by Type"
       query = query.alicloud_ecs_instance_by_type
       type  = "column"
-      width = 4
+      width = 3
     }
 
     chart {
       title = "Instances by OS Type"
       query = query.alicloud_ecs_instance_by_os_type
       type  = "column"
-      width = 4
+      width = 3
+    }
+
+    chart {
+      title = "Instances by Network Type"
+      query = query.alicloud_ecs_instance_by_network_type
+      type  = "column"
+      width = 3
     }
 
   }
@@ -226,19 +212,6 @@ query "alicloud_ecs_instance_io_optimized_count" {
   EOQ
 }
 
-query "alicloud_ecs_instance_legacy_network_count" {
-  sql = <<-EOQ
-    select
-      count(*) as value,
-      'Legacy Network' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as "type"
-    from
-      alicloud_ecs_instance
-    where
-      instance_network_type <> 'vpc';
-  EOQ
-}
-
 query "alicloud_ecs_instance_deletion_protection_disabled_count" {
   sql = <<-EOQ
     select
@@ -293,27 +266,6 @@ query "alicloud_ecs_instance_by_io_optimized" {
       instances
     group by
       state;
-  EOQ
-}
-
-query "alicloud_ecs_instance_by_network_type" {
-  sql = <<-EOQ
-    with instances as (
-      select
-        case
-          when instance_network_type = 'vpc' then 'vpc'
-          else 'legacy'
-        end as type
-      from
-        alicloud_ecs_instance
-    )
-    select
-      type,
-      count(*)
-    from
-      instances
-    group by
-      type;
   EOQ
 }
 
@@ -453,8 +405,19 @@ query "alicloud_ecs_instance_by_os_type" {
   EOQ
 }
 
-# Note the CTE uses the dailt table to be efficient when filtering,
-# and the hourly table to show granular line chart
+query "alicloud_ecs_instance_by_network_type" {
+  sql = <<-EOQ
+    select
+      instance_network_type as "Type",
+      count(*) as "total"
+    from
+      alicloud_ecs_instance
+    group by
+      instance_network_type
+    order by
+      instance_network_type;
+  EOQ
+}
 
 # Performance Queries
 
