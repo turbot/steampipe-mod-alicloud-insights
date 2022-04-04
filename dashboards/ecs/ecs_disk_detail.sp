@@ -109,11 +109,8 @@ dashboard "alicloud_ecs_disk_detail" {
       table {
         title = "Encryption Details"
         column "KMS Key ID" {
-          display = "none"
+          href = "${dashboard.alicloud_kms_key_detail.url_path}?input.key_arn={{.'KMS Key ID' | @uri}}"
         }
-        # {
-        #   href = "${dashboard.alicloud_kms_key_detail.url_path}?input.key_arn={{.'KMS Key ID' | @uri}}"
-        # }
         query = query.alicloud_ecs_disk_encryption_status
         args = {
           arn = self.input.disk_arn.value
