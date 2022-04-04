@@ -28,10 +28,11 @@ dashboard "alicloud_ecs_disk_dashboard" {
     card {
       query = query.alicloud_ecs_disk_unencrypted_count
       width = 2
+      href  = dashboard.alicloud_ecs_disk_encryption_report.url_path
     }
 
     card {
-      query = query.alicloud_ecs_disk_delete_auto_snapshot
+      query = query.alicloud_ecs_disk_delete_auto_snapshot_count
       width = 3
     }
   }
@@ -41,32 +42,32 @@ dashboard "alicloud_ecs_disk_dashboard" {
     title = "Assessments"
 
     chart {
-      title = "Encryption Status"
-      query = query.alicloud_ecs_disk_by_encryption_status
-      type  = "donut"
-      width = 4
-
-      series "Disks" {
-        point "enabled" {
-          color = "ok"
-        }
-        point "disabled" {
-          color = "alert"
-        }
-      }
-    }
-
-    chart {
       title = "Disk Status"
       query = query.alicloud_ecs_disk_by_status
       type  = "donut"
       width = 4
 
       series "Disks" {
-        point "in_use" {
+        point "In_use" {
           color = "ok"
         }
-        point "available" {
+        point "Available" {
+          color = "alert"
+        }
+      }
+    }
+
+    chart {
+      title = "Encryption Status"
+      query = query.alicloud_ecs_disk_by_encryption_status
+      type  = "donut"
+      width = 4
+
+      series "Disks" {
+        point "Enabled" {
+          color = "ok"
+        }
+        point "Disabled" {
           color = "alert"
         }
       }
@@ -79,10 +80,10 @@ dashboard "alicloud_ecs_disk_dashboard" {
       width = 4
 
       series "Disks" {
-        point "enabled" {
+        point "Enabled" {
           color = "ok"
         }
-        point "disabled" {
+        point "Disabled" {
           color = "alert"
         }
       }
@@ -193,7 +194,6 @@ dashboard "alicloud_ecs_disk_dashboard" {
 
 }
 
-
 # Card Queries
 
 query "alicloud_ecs_disk_count" {
@@ -215,7 +215,7 @@ query "alicloud_ecs_disk_unattached_count" {
   sql = <<-EOQ
     select 
       count(*) as value,
-      'Unattached' as label,
+      'Not In Use' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
       alicloud_ecs_disk
@@ -237,17 +237,33 @@ query "alicloud_ecs_disk_unencrypted_count" {
   EOQ
 }
 
-query "alicloud_ecs_disk_delete_auto_snapshot" {
+query "alicloud_ecs_disk_delete_auto_snapshot_count" {
   sql = <<-EOQ
     select 
       count(*) as value,
-      'Delete Auto Snapshot Disabled' as label,
+      'Auto Snapshot Deletion Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
       alicloud_ecs_disk
     where
       enable_auto_snapshot and
       not delete_auto_snapshot;
+  EOQ
+}
+
+# Assessments Queries
+
+query "alicloud_ecs_disk_by_status" {
+  sql = <<-EOQ
+    select
+      status as "Disks",
+      count(status) as "Disks"
+    from
+      alicloud_ecs_disk
+    where
+      status in ('In_use', 'Available')
+    group by
+      status;
   EOQ
 }
 
@@ -259,9 +275,9 @@ query "alicloud_ecs_disk_by_encryption_status" {
     from (
         select encrypted,
         case when encrypted then
-            'enabled'
+            'Enabled'
         else
-            'disabled'
+            'Disabled'
         end encryption_status
     from
         alicloud_ecs_disk) as t
@@ -269,18 +285,6 @@ query "alicloud_ecs_disk_by_encryption_status" {
         encryption_status
     order by
         encryption_status desc;
-  EOQ
-}
-
-query "alicloud_ecs_disk_by_status" {
-  sql = <<-EOQ
-    select
-      lower(status) as "Disks",
-      count(status) as "Disks"
-    from
-      alicloud_ecs_disk
-    group by
-      status;
   EOQ
 }
 
@@ -293,9 +297,9 @@ query "alicloud_ecs_disk_auto_snapshot_deletion" {
         select 
             delete_auto_snapshot,
         case when delete_auto_snapshot then
-            'enabled'
+            'Enabled'
         else
-            'disabled'
+            'Disabled'
         end delete_auto_snapshot_enabled
     from
         alicloud_ecs_disk
@@ -514,7 +518,7 @@ query "alicloud_ecs_disk_top_10_read_ops_avg" {
         instance_id,
         average
       from
-        alicloud_ecs_disk_metric_read_iops
+        alicloud_ecs_disk_metric_read_iops_hourly
       where
         timestamp  >= CURRENT_DATE - INTERVAL '7 day'
         and instance_id in (select instance_id from top_n);
@@ -528,7 +532,7 @@ query "alicloud_ecs_disk_top_10_write_ops_avg" {
         instance_id,
         avg(average)
       from
-        alicloud_ecs_disk_metric_read_iops_daily
+        alicloud_ecs_disk_metric_write_iops_daily
       where
         timestamp  >= CURRENT_DATE - INTERVAL '7 day'
       group by
@@ -542,7 +546,7 @@ query "alicloud_ecs_disk_top_10_write_ops_avg" {
       instance_id,
       average
     from
-      alicloud_ecs_disk_metric_read_iops
+      alicloud_ecs_disk_metric_write_iops_hourly
     where
       timestamp  >= CURRENT_DATE - INTERVAL '7 day'
       and instance_id in (select instance_id from top_n);
