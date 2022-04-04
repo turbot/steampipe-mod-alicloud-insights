@@ -29,10 +29,6 @@ dashboard "alicloud_ecs_security_group_dashboard" {
       width = 2
     }
 
-    card {
-      query = query.alicloud_ecs_security_unrestricted_ingress_remote_count
-      width = 2
-    }
 
   }
 
@@ -98,21 +94,28 @@ dashboard "alicloud_ecs_security_group_dashboard" {
       title = "Security Groups by Account"
       query = query.alicloud_ecs_security_group_by_acount
       type  = "column"
-      width = 4
+      width = 3
     }
 
     chart {
       title = "Security Groups by Region"
       query = query.alicloud_ecs_security_group_by_region
       type  = "column"
-      width = 4
+      width = 3
     }
 
     chart {
       title = "Security Groups by VPC"
       query = query.alicloud_ecs_security_group_by_vpc
       type  = "column"
-      width = 4
+      width = 3
+    }
+
+    chart {
+      title = "Security Groups by Type"
+      query = query.alicloud_ecs_security_group_by_type
+      type  = "column"
+      width = 3
     }
 
   }
@@ -201,41 +204,6 @@ query "alicloud_ecs_security_unrestricted_egress_count" {
       end as type
     from
       egress_sg
-  EOQ
-}
-
-query "alicloud_ecs_security_unrestricted_ingress_remote_count" {
-  sql = <<-EOQ
-    with bad_groups as (
-      select
-        distinct arn
-      from
-        alicloud_ecs_security_group,
-        jsonb_array_elements(permissions) as p
-      where
-        p ->> 'Policy' = 'Accept'
-        and p ->> 'Direction' = 'ingress'
-        and p ->> 'SourceCidrIp' = '0.0.0.0/0'
-        and (
-          p ->> 'PortRange' in ('-1/-1', '22/22', '3389/3389')
-          or (
-            3389 between split_part(p ->> 'PortRange', '/', 1) :: int and split_part(p ->> 'PortRange', '/', 2) :: int
-            or 22 between split_part(p ->> 'PortRange', '/', 1) :: int and split_part(p ->> 'PortRange', '/', 2) :: int
-          )
-        )
-    )
-    select
-      'Unrestricted Ingress Remote' as label,
-      count(*) as value,
-      case
-        when count(*) = 0 then 'ok'
-        else 'alert'
-      end as type
-    from
-      alicloud_ecs_security_group as a
-      left join bad_groups as b on a.arn = b.arn
-    where
-      b.arn is not null;
   EOQ
 }
 
@@ -370,5 +338,19 @@ query "alicloud_ecs_security_group_by_vpc" {
       vpc_id
     order by
       vpc_id;
+  EOQ
+}
+
+query "alicloud_ecs_security_group_by_type" {
+  sql = <<-EOQ
+    select
+      type as "VPC Type",
+      count(*) as "total"
+    from
+      alicloud_ecs_security_group
+    group by
+      type
+    order by
+      type;
   EOQ
 }
