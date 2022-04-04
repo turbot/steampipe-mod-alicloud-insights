@@ -36,7 +36,7 @@ dashboard "alicloud_ecs_snapshot_dashboard" {
     title = "Assessments"
 
     chart {
-      title = "Usage Status"
+      title = "Unused Snapshot Status"
       query   = query.alicloud_ecs_snapshot_by_usage
       type  = "donut"
       width = 4
@@ -244,12 +244,12 @@ query "alicloud_ecs_snapshot_by_account" {
 
 query "alicloud_ecs_snapshot_by_region" {
   sql = <<-EOQ
-    select 
+    select
       region as "Region",
-      count(*) as "Snapshots" 
-    from 
-      alicloud_ecs_snapshot 
-    group by 
+      count(*) as "Snapshots"
+    from
+      alicloud_ecs_snapshot
+    group by
       region
     order by
       region
