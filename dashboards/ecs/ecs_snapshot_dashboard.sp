@@ -20,12 +20,12 @@ dashboard "alicloud_ecs_snapshot_dashboard" {
     }
 
     card {
-      query = query.alicloud_ecs_unencrypted_snapshot_count
+      query = query.alicloud_ecs_unused_snapshot_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ecs_unused_snapshot_count
+      query = query.alicloud_ecs_unencrypted_snapshot_count
       width = 2
     }
 
@@ -34,6 +34,22 @@ dashboard "alicloud_ecs_snapshot_dashboard" {
   container {
 
     title = "Assessments"
+
+    chart {
+      title = "Usage Status"
+      query   = query.alicloud_ecs_snapshot_by_usage
+      type  = "donut"
+      width = 4
+
+      series "Snapshots" {
+        point "in-use" {
+          color = "ok"
+        }
+        point "unused" {
+          color = "alert"
+        }
+      }
+    }
 
     chart {
       title = "Encryption Status"
@@ -137,19 +153,6 @@ query "alicloud_ecs_snapshot_storage_total" {
   EOQ
 }
 
-query "alicloud_ecs_unencrypted_snapshot_count" {
-  sql = <<-EOQ
-    select
-        count(*) as value,
-        'Unencrypted' as label,
-        case count(*) when 0 then 'ok' else 'alert' end as "type"
-    from
-        alicloud_ecs_snapshot
-    where
-        not encrypted;
-  EOQ
-}
-
 query "alicloud_ecs_unused_snapshot_count" {
   sql = <<-EOQ
     select
@@ -163,7 +166,41 @@ query "alicloud_ecs_unused_snapshot_count" {
   EOQ
 }
 
+query "alicloud_ecs_unencrypted_snapshot_count" {
+  sql = <<-EOQ
+    select
+        count(*) as value,
+        'Unencrypted' as label,
+        case count(*) when 0 then 'ok' else 'alert' end as "type"
+    from
+        alicloud_ecs_snapshot
+    where
+        not encrypted;
+  EOQ
+}
+
 # Assessment Queries
+
+query "alicloud_ecs_snapshot_by_usage" {
+  sql = <<-EOQ
+    select
+      snapshot_usage,
+      count(*) as "Snapshots"
+    from (
+      select usage,
+        case when usage = 'none' then
+          'unused'
+        else
+          'in-use'
+        end snapshot_usage
+      from
+        alicloud_ecs_snapshot) as t
+    group by
+      snapshot_usage
+    order by
+      snapshot_usage;
+  EOQ
+}
 
 query "alicloud_ecs_snapshot_by_encryption_status" {
   sql = <<-EOQ
