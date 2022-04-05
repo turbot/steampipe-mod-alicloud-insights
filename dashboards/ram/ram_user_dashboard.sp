@@ -16,15 +16,16 @@ dashboard "alicloud_ram_user_dashboard" {
     }
 
     # Assessments
+
     card {
-      query = query.alicloud_ram_user_no_mfa_count
+      query = query.alicloud_ram_users_with_direct_policy_count
       width = 2
-      # href  = dashboard.alicloud_ram_user_mfa_report.url_path
     }
 
     card {
-      query = query.alicloud_ram_users_with_direct_attached_policy_count
+      query = query.alicloud_ram_user_no_mfa_count
       width = 2
+      href  = dashboard.alicloud_ram_user_mfa_report.url_path
     }
 
   }
@@ -49,16 +50,16 @@ dashboard "alicloud_ram_user_dashboard" {
     }
 
     chart {
-      title = "Attached Policies"
+      title = "Direct Attached Policies"
       query = query.alicloud_ram_users_with_direct_attached_policy
       type  = "donut"
       width = 3
 
       series "count" {
-        point "no policies" {
+        point "no attached policies" {
           color = "ok"
         }
-        point "with policies" {
+        point "with attached policies" {
           color = "alert"
         }
       }
@@ -111,16 +112,16 @@ query "alicloud_ram_user_no_mfa_count" {
   EOQ
 }
 
-query "alicloud_ram_users_with_direct_attached_policy_count" {
+query "alicloud_ram_users_with_direct_policy_count" {
   sql = <<-EOQ
     select
       count(*) as value,
-       'With Attached Policies' as label,
+      'With Direct Attached Policies' as label,
       case when count(*) = 0 then 'ok' else 'alert' end as type
     from
       alicloud_ram_user
     where
-      jsonb_array_length(attached_policy) > 0;
+      attached_policy != '[]'
   EOQ
 }
 
@@ -149,11 +150,11 @@ query "alicloud_ram_users_by_mfa_enabled" {
 
 query "alicloud_ram_users_with_direct_attached_policy" {
   sql = <<-EOQ
-    with attached_compliance as (
+    with direct_attached_policies as (
       select
         case
-          when jsonb_array_length(attached_policy) > 0 then 'with policies'
-          else 'no policies'
+          when jsonb_array_length(attached_policy) > 0 then 'with attached policies'
+          else 'no attached policies'
         end as has_attached
       from
         alicloud_ram_user
@@ -162,7 +163,7 @@ query "alicloud_ram_users_with_direct_attached_policy" {
       has_attached,
       count(*)
     from
-      attached_compliance
+      direct_attached_policies
     group by
       has_attached;
   EOQ
