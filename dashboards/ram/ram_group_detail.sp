@@ -10,20 +10,8 @@ dashboard "alicloud_ram_group_detail" {
 
   input "group_title" {
     title = "Select a group:"
-    sql   = query.alicloud_ram_group_input.sql
+    query = query.alicloud_ram_group_input
     width = 2
-  }
-
-  container {
-
-    card {
-      width = 2
-      query = query.alicloud_ram_group_custom_policy_count_for_group
-      args = {
-        title = self.input.group_title.value
-      }
-    }
-
   }
 
   container {
@@ -90,22 +78,6 @@ query "alicloud_ram_group_input" {
     order by
       title;
   EOQ
-}
-
-query "alicloud_ram_group_custom_policy_count_for_group" {
-  sql = <<-EOQ
-    select
-      count(*) as value,
-      'Custom Policies' as label,
-      case when count(*) = 0 then 'ok' else 'alert' end as type
-    from
-      alicloud_ram_group,
-      jsonb_array_elements(attached_policy) as policies
-    where
-      policies ->> 'PolicyType' = 'Custom' and title = $1
-  EOQ
-
-  param "title" {}
 }
 
 query "alicloud_ram_group_overview" {

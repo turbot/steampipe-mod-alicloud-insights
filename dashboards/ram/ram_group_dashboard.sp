@@ -1,6 +1,6 @@
 dashboard "alicloud_ram_group_dashboard" {
 
-  title = "Alicloud RAM Group Dashboard"
+  title         = "Alicloud RAM Group Dashboard"
   documentation = file("./dashboards/ram/docs/ram_group_dashboard.md")
 
 
@@ -12,18 +12,18 @@ dashboard "alicloud_ram_group_dashboard" {
 
     # Analysis
     card {
-      query   = query.alicloud_ram_group_count
+      query = query.alicloud_ram_group_count
+      width = 2
+    }
+
+    card {
+      query = query.alicloud_ram_groups_with_custom_attached_policy_count
       width = 2
     }
 
     # Assessments
     card {
-      query   = query.alicloud_ram_groups_without_users_count
-      width = 2
-    }
-
-    card {
-      query   = query.alicloud_ram_groups_with_custom_attached_policy_count
+      query = query.alicloud_ram_groups_without_users_count
       width = 2
     }
 
@@ -35,7 +35,7 @@ dashboard "alicloud_ram_group_dashboard" {
 
     chart {
       title = "Groups Without Users"
-      query   = query.alicloud_ram_groups_without_users
+      query = query.alicloud_ram_groups_without_users
       type  = "donut"
       width = 3
 
@@ -49,21 +49,6 @@ dashboard "alicloud_ram_group_dashboard" {
       }
     }
 
-    chart {
-      title = "Custom Policies"
-      query   = query.alicloud_ram_groups_with_custom_policy
-      type  = "donut"
-      width = 3
-
-      series "count" {
-        point "no custom policies" {
-          color = "ok"
-        }
-        point "with custom policies" {
-          color = "alert"
-        }
-      }
-    }
 
   }
 
@@ -73,14 +58,14 @@ dashboard "alicloud_ram_group_dashboard" {
 
     chart {
       title = "Groups by Account"
-      query   = query.alicloud_ram_groups_by_account
+      query = query.alicloud_ram_groups_by_account
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Groups by Age"
-      query   = query.alicloud_ram_groups_by_creation_month
+      query = query.alicloud_ram_groups_by_creation_month
       type  = "column"
       width = 4
     }
@@ -114,8 +99,7 @@ query "alicloud_ram_groups_with_custom_attached_policy_count" {
   sql = <<-EOQ
     select
       count(*) as value,
-      'With Custom Policies' as label,
-      case when count(*) = 0 then 'ok' else 'alert' end as type
+      'With Custom Policies' as label
     from
       alicloud_ram_group,
       jsonb_array_elements(attached_policy) as policies
@@ -145,51 +129,6 @@ query "alicloud_ram_groups_without_users" {
         groups_without_users
       group by
         has_users;
-  EOQ
-}
-
-query "alicloud_ram_groups_with_attached_policy" {
-  sql = <<-EOQ
-    with group_attached_policy as (
-      select
-        title,
-        case
-          when jsonb_array_length(attached_policy) > 0 then 'with attached policies'
-          else 'no attached policies'
-        end as has_attached_policy
-      from
-        alicloud_ram_group
-      )
-      select
-        has_attached_policy,
-        count(*)
-      from
-        group_attached_policy
-      group by
-        has_attached_policy;
-  EOQ
-}
-
-query "alicloud_ram_groups_with_custom_policy" {
-  sql = <<-EOQ
-    with group_custom_policy as (
-    select
-      title,
-      case
-        when policies ->> 'PolicyType' = 'Custom' then 'with custom policies'
-        else 'no custom policies'
-      end as has_custom_policy
-    from
-      alicloud_ram_group,
-      jsonb_array_elements(attached_policy) as policies
-    )
-    select
-      has_custom_policy,
-      count(*)
-    from
-      group_custom_policy
-    group by
-      has_custom_policy;
   EOQ
 }
 
