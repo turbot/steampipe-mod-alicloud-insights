@@ -10,7 +10,7 @@ dashboard "alicloud_ram_group_detail" {
 
   input "group_title" {
     title = "Select a group:"
-    sql   = query.alicloud_ram_group_input.sql
+    query   = query.alicloud_ram_group_input
     width = 2
   }
 

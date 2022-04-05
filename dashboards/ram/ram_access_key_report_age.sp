@@ -1,6 +1,6 @@
 dashboard "alicloud_ram_access_key_age_report" {
 
-  title = "Alicloud RAM Access Key Age Report"
+  title         = "Alicloud RAM Access Key Age Report"
   documentation = file("./dashboards/ram/docs/ram_access_key_report_age.md")
 
   tags = merge(local.ram_common_tags, {
@@ -12,37 +12,37 @@ dashboard "alicloud_ram_access_key_age_report" {
 
     card {
       width = 2
-      sql   = query.alicloud_ram_access_count.sql
+      query = query.alicloud_ram_access_count
     }
 
     card {
       type  = "info"
       width = 2
-      sql   = query.alicloud_ram_access_key_24_hours_count.sql
+      query = query.alicloud_ram_access_key_24_hours_count
     }
 
     card {
       type  = "info"
       width = 2
-      sql   = query.alicloud_ram_access_key_30_days_count.sql
+      query = query.alicloud_ram_access_key_30_days_count
     }
 
     card {
       type  = "info"
       width = 2
-      sql   = query.alicloud_ram_access_key_30_90_days_count.sql
+      query = query.alicloud_ram_access_key_30_90_days_count
     }
 
     card {
       width = 2
       type  = "info"
-      sql   = query.alicloud_ram_access_key_90_365_days_count.sql
+      query = query.alicloud_ram_access_key_90_365_days_count
     }
 
     card {
       width = 2
       type  = "info"
-      sql   = query.alicloud_ram_access_key_1_year_count.sql
+      query = query.alicloud_ram_access_key_1_year_count
     }
 
   }
@@ -52,7 +52,7 @@ dashboard "alicloud_ram_access_key_age_report" {
       display = "none"
     }
 
-    sql = query.alicloud_ram_access_key_age_table.sql
+    query = query.alicloud_ram_access_key_age_table
   }
 
 }
