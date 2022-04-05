@@ -1,6 +1,6 @@
 dashboard "alicloud_ram_user_mfa_report" {
 
-  title = "Alicloud RAM User MFA Report"
+  title         = "Alicloud RAM User MFA Report"
   documentation = file("./dashboards/ram/docs/ram_user_report_mfa.md")
 
   tags = merge(local.ram_common_tags, {
@@ -11,12 +11,12 @@ dashboard "alicloud_ram_user_mfa_report" {
   container {
 
     card {
-      query   = query.alicloud_ram_user_count
+      query = query.alicloud_ram_user_count
       width = 2
     }
 
     card {
-      query   = query.alicloud_ram_user_no_mfa_count
+      query = query.alicloud_ram_user_no_mfa_count
       width = 2
     }
   }
@@ -26,9 +26,9 @@ dashboard "alicloud_ram_user_mfa_report" {
       display = "none"
     }
 
-    column "User Name" {
-      # href = "${dashboard.alicloud_ram_user_detail.url_path}?input.user_name={{.NAME | @uri}}"
-    }
+    # column "User Name" {
+    #   href = "${dashboard.alicloud_ram_user_detail.url_path}?input.user_name={{.NAME | @uri}}"
+    # }
 
     query = query.alicloud_ram_user_mfa_table
   }
