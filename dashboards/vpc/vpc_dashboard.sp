@@ -10,17 +10,17 @@ dashboard "alicloud_vpc_dashboard" {
   container {
 
     card {
-      sql   = query.alicloud_vpc_count.sql
+      query = query.alicloud_vpc_count
       width = 2
     }
 
     card {
-      sql   = query.alicloud_vpc_default_count.sql
+      query = query.alicloud_vpc_default_count
       width = 2
     }
 
     card {
-      sql   = query.alicloud_vpc_no_vswitch_count.sql
+      query = query.alicloud_vpc_no_vswitch_count
       width = 2
     }
 
@@ -34,7 +34,7 @@ dashboard "alicloud_vpc_dashboard" {
       title = "Default VPCs"
       type  = "donut"
       width = 3
-      sql   = query.alicloud_vpc_default_status.sql
+      query = query.alicloud_vpc_default_status
 
       series "count" {
         point "non-default" {
@@ -50,7 +50,7 @@ dashboard "alicloud_vpc_dashboard" {
       title = "Empty VPCs (No vSwitches)"
       type  = "donut"
       width = 3
-      sql   = query.alicloud_vpc_empty_status.sql
+      query = query.alicloud_vpc_empty_status
 
       series "count" {
         point "non-empty" {
@@ -70,28 +70,28 @@ dashboard "alicloud_vpc_dashboard" {
 
     chart {
       title = "VPCs by Account"
-      sql   = query.alicloud_vpc_by_account.sql
+      query = query.alicloud_vpc_by_account
       type  = "column"
       width = 3
     }
 
     chart {
       title = "VPCs by Region"
-      sql   = query.alicloud_vpc_by_region.sql
+      query = query.alicloud_vpc_by_region
       type  = "column"
       width = 3
     }
 
     chart {
       title = "VPCs by Size"
-      sql   = query.alicloud_vpc_by_size.sql
+      query = query.alicloud_vpc_by_size
       type  = "column"
       width = 3
     }
 
     chart {
       title = "VPCs by RFC1918 Range"
-      sql   = query.alicloud_vpc_by_rfc1918_range.sql
+      query = query.alicloud_vpc_by_rfc1918_range
       type  = "column"
       width = 3
     }
