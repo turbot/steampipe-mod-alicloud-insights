@@ -50,13 +50,13 @@ dashboard "alicloud_ram_group_dashboard" {
     }
 
     chart {
-      title = "Attached Policies"
+      title = "Custom Policies"
       query   = query.alicloud_ram_groups_with_custom_policy
       type  = "donut"
       width = 3
 
       series "count" {
-        point "without custom policies" {
+        point "no custom policies" {
           color = "ok"
         }
         point "with custom policies" {
@@ -177,7 +177,7 @@ query "alicloud_ram_groups_with_custom_policy" {
       title,
       case
         when policies ->> 'PolicyType' = 'Custom' then 'with custom policies'
-        else 'without custom policies'
+        else 'no custom policies'
       end as has_custom_policy
     from
       alicloud_ram_group,
