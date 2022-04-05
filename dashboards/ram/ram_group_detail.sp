@@ -53,9 +53,9 @@ dashboard "alicloud_ram_group_detail" {
     table {
       title = "Users"
       width = 6
-      column "User Name" {
-        # href = "${dashboard.ram_iam_user_detail.url_path}?input.user_arn={{.'User ARN' | @uri}}"
-      }
+      # column "User Name" {
+      #   href = "${dashboard.ram_iam_user_detail.url_path}?input.user_arn={{.'User ARN' | @uri}}"
+      # }
 
       query = query.alicloud_ram_users_for_group
       args = {
@@ -108,21 +108,6 @@ query "alicloud_ram_group_custom_policy_count_for_group" {
   param "title" {}
 }
 
-# query "alicloud_ram_group_direct_attached_policy_count_for_group" {
-#   sql = <<-EOQ
-#     select
-#       case when attached_policy_arns is null then 0 else jsonb_array_length(attached_policy_arns) end as value,
-#       'Attached Policies' as label,
-#       case when (attached_policy_arns is null) or (jsonb_array_length(attached_policy_arns) = 0)  then 'ok' else 'alert' end as type
-#     from
-#       alicloud_ram_group
-#     where
-#       title = $1
-#   EOQ
-
-#   param "title" {}
-# }
-
 query "alicloud_ram_group_overview" {
   sql = <<-EOQ
     select
@@ -158,10 +143,10 @@ query "alicloud_ram_users_for_group" {
 query "alicloud_ram_all_policies_for_group" {
   sql = <<-EOQ
     select
-      policies ->> 'PolicyName' as "Policy Name",
-      policies ->> 'PolicyType' as "Policy Type",
-      policies ->> 'DefaultVersion' as "Policy Default Version",
-      policies ->> 'AttachDate' as "Policy Attachment Date"
+      policies ->> 'PolicyName' as "Name",
+      policies ->> 'PolicyType' as "Type",
+      policies ->> 'DefaultVersion' as "Default Version",
+      policies ->> 'AttachDate' as "Attachment Date"
     from
       alicloud_ram_group,
       jsonb_array_elements(attached_policy) as policies
