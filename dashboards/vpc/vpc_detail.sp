@@ -423,17 +423,19 @@ query "alicloud_vpc_vswitches_detail" {
     with vSwitches as (
       select
         vswitch_id,
-        tags,
+        name,
         cidr_block,
         zone_id,
         available_ip_address_count,
         power(2, 32 - masklen(cidr_block :: cidr)) -1 as raw_size
       from
         alicloud_vpc_vswitch
+      where
+        vpc_id = $1
     )
     select
       vswitch_id as "vSwitch ID",
-      tags ->> 'Name' as "Name",
+      name as "Name",
       cidr_block as "CIDR Block",
       zone_id as "Zone ID",
       available_ip_address_count as "Available IPs",
