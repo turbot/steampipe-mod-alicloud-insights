@@ -18,14 +18,14 @@ dashboard "alicloud_ram_user_dashboard" {
     # Assessments
 
     card {
-      query = query.alicloud_ram_users_with_direct_policy_count
-      width = 2
-    }
-
-    card {
       query = query.alicloud_ram_user_no_mfa_count
       width = 2
       href  = dashboard.alicloud_ram_user_mfa_report.url_path
+    }
+
+    card {
+      query = query.alicloud_ram_users_with_direct_policy_count
+      width = 2
     }
 
   }
