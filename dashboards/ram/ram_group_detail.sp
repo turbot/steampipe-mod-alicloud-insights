@@ -41,9 +41,9 @@ dashboard "alicloud_ram_group_detail" {
     table {
       title = "Users"
       width = 6
-      # column "User Name" {
-      #   href = "${dashboard.ram_iam_user_detail.url_path}?input.user_arn={{.'User ARN' | @uri}}"
-      # }
+      column "User Name" {
+        href = "${dashboard.alicloud_ram_user_detail.url_path}?input.user_name={{.'User Name' | @uri}}"
+      }
 
       query = query.alicloud_ram_users_for_group
       args = {

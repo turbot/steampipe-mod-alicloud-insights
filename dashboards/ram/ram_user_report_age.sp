@@ -57,7 +57,7 @@ dashboard "alicloud_ram_user_age_report" {
     }
 
     column "Name" {
-      # href = "${dashboard.alicloud_ram_user_detail.url_path}?input.user_arn={{.ARN | @uri}}"
+      href = "${dashboard.alicloud_ram_user_detail.url_path}?input.user_name={{.Name | @uri}}"
     }
 
     query = query.alicloud_ram_user_age_table
@@ -136,7 +136,6 @@ query "alicloud_ram_user_age_table" {
       b.create_date as "Create Time",
       a.title as "Account",
       b.account_id as "Account ID",
-      b.region as "Region",
       b.akas ->> 0 as "ARN"
     from
       alicloud_ram_user as b,
