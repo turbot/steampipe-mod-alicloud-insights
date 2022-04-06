@@ -168,6 +168,7 @@ query "alicloud_ram_user_overview" {
     select
       name as "Name",
       create_date as "Create Date",
+      update_date as "Last Modified Date",
       user_id as "User ID",
       akas ->> 0 as "ARN",
       account_id as "Account ID"
@@ -198,12 +199,9 @@ query "alicloud_ram_user_access_keys" {
 query "alicloud_ram_user_mfa_devices" {
   sql = <<-EOQ
     select
-      mfa ->> 'SerialNumber' as "Serial Number",
-      mfa ->> 'ActivateDate' as "Activate Date",
-      mfa -> 'User' ->> 'UserId' as "User Id"
+      mfa_device_serial_number as "MFA Device Serial Number"
     from
-      alicloud_ram_user,
-      jsonb_array_elements(mfa_device_serial_number) as mfa
+      alicloud_ram_user
     where
       akas ->> 0  = $1
   EOQ
@@ -254,9 +252,9 @@ query "alicloud_ram_user_manage_policies_sankey" {
     from
       alicloud_ram_user as u,
       alicloud_ram_policy as p,
-      
+
       jsonb_array_elements(u.groups) as user_groups
-      
+
       inner join alicloud_ram_group g on g.name = user_groups ->> 'GroupName',
       jsonb_array_elements(g.attached_policy) as user_policy
     where
