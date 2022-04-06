@@ -7,7 +7,7 @@ dashboard "alicloud_ram_user_detail" {
     type = "Detail"
   })
 
-  input "user_aka" {
+  input "user_name" {
     title = "Select a user:"
     query = query.alicloud_ram_user_input
     width = 4
@@ -19,7 +19,7 @@ dashboard "alicloud_ram_user_detail" {
       width = 2
       query = query.alicloud_ram_user_mfa_for_user
       args = {
-        akas = self.input.user_aka.value
+        name = self.input.user_name.value
       }
     }
 
@@ -27,7 +27,7 @@ dashboard "alicloud_ram_user_detail" {
       width = 2
       query = query.alicloud_ram_user_direct_attached_policy_count_for_user
       args = {
-        akas = self.input.user_aka.value
+        name = self.input.user_name.value
       }
     }
 
@@ -44,7 +44,7 @@ dashboard "alicloud_ram_user_detail" {
         type  = "line"
         query = query.alicloud_ram_user_overview
         args = {
-          akas = self.input.user_aka.value
+          name = self.input.user_name.value
         }
       }
 
@@ -58,7 +58,7 @@ dashboard "alicloud_ram_user_detail" {
         title = "Access Keys"
         query = query.alicloud_ram_user_access_keys
         args = {
-          akas = self.input.user_aka.value
+          name = self.input.user_name.value
         }
       }
 
@@ -66,7 +66,7 @@ dashboard "alicloud_ram_user_detail" {
         title = "MFA Devices"
         query = query.alicloud_ram_user_mfa_devices
         args = {
-          akas = self.input.user_aka.value
+          name = self.input.user_name.value
         }
       }
 
@@ -83,7 +83,7 @@ dashboard "alicloud_ram_user_detail" {
       title = "Attached Policies"
       query = query.alicloud_ram_user_manage_policies_sankey
       args = {
-        akas = self.input.user_aka.value
+        name = self.input.user_name.value
       }
 
       category "alicloud_ram_group" {
@@ -96,7 +96,7 @@ dashboard "alicloud_ram_user_detail" {
       width = 6
       query = query.alicloud_ram_groups_for_user
       args = {
-        akas = self.input.user_aka.value
+        name = self.input.user_name.value
       }
 
       column "Name" {
@@ -111,7 +111,7 @@ dashboard "alicloud_ram_user_detail" {
       width = 6
       query = query.alicloud_ram_all_policies_for_user
       args = {
-        akas = self.input.user_aka.value
+        name = self.input.user_name.value
       }
     }
 
@@ -122,7 +122,7 @@ query "alicloud_ram_user_input" {
   sql = <<-EOQ
     select
       title as label,
-      akas ->> 0 as value,
+      name as value,
       json_build_object(
         'account_id', account_id
       ) as tags
@@ -142,10 +142,10 @@ query "alicloud_ram_user_mfa_for_user" {
     from
       alicloud_ram_user
     where
-      akas ->> 0 = $1
+      name = $1
   EOQ
 
-  param "akas" {}
+  param "name" {}
 }
 
 query "alicloud_ram_user_direct_attached_policy_count_for_user" {
@@ -157,10 +157,10 @@ query "alicloud_ram_user_direct_attached_policy_count_for_user" {
     from
       alicloud_ram_user
     where
-     akas ->> 0 = $1
+     name = $1
   EOQ
 
-  param "akas" {}
+  param "name" {}
 }
 
 query "alicloud_ram_user_overview" {
@@ -175,10 +175,10 @@ query "alicloud_ram_user_overview" {
     from
       alicloud_ram_user
     where
-      akas ->> 0 = $1
+      name = $1
   EOQ
 
-  param "akas" {}
+  param "name" {}
 }
 
 query "alicloud_ram_user_access_keys" {
@@ -190,10 +190,10 @@ query "alicloud_ram_user_access_keys" {
     from
       alicloud_ram_access_key as a left join alicloud_ram_user as u on u.name = a.user_name
     where
-      u.akas ->> 0  = $1
+      u.name  = $1
   EOQ
 
-  param "akas" {}
+  param "name" {}
 }
 
 query "alicloud_ram_user_mfa_devices" {
@@ -203,10 +203,10 @@ query "alicloud_ram_user_mfa_devices" {
     from
       alicloud_ram_user
     where
-      akas ->> 0  = $1
+      name  = $1
   EOQ
 
-  param "akas" {}
+  param "name" {}
 }
 
 query "alicloud_ram_user_manage_policies_sankey" {
@@ -278,7 +278,7 @@ query "alicloud_ram_user_manage_policies_sankey" {
 
   EOQ
 
-  param "akas" {}
+  param "name" {}
 }
 
 query "alicloud_ram_groups_for_user" {
@@ -290,10 +290,10 @@ query "alicloud_ram_groups_for_user" {
       alicloud_ram_user as u,
       jsonb_array_elements(groups) as g
     where
-      u.akas ->> 0 = $1
+      u.name = $1
   EOQ
 
-  param "akas" {}
+  param "name" {}
 }
 
 query "alicloud_ram_all_policies_for_user" {
@@ -312,7 +312,7 @@ query "alicloud_ram_all_policies_for_user" {
       jsonb_array_elements(g.attached_policy) as group_policy
     where
       group_policy ->> 'PolicyName' = p.title
-      and u.akas ->> 0 = $1
+      and u.name = $1
 
     -- Policies (attached to user)
     union select
@@ -325,8 +325,8 @@ query "alicloud_ram_all_policies_for_user" {
       alicloud_ram_policy as p
     where
       pol_arn ->> 'PolicyName' = p.title
-      and u.akas ->> 0 = $1
+      and u.name = $1
   EOQ
 
-  param "akas" {}
+  param "name" {}
 }
