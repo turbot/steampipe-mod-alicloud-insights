@@ -136,7 +136,6 @@ query "alicloud_ram_user_age_table" {
       b.create_date as "Create Time",
       a.title as "Account",
       b.account_id as "Account ID",
-      b.region as "Region",
       b.akas ->> 0 as "ARN"
     from
       alicloud_ram_user as b,
