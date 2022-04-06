@@ -9,7 +9,7 @@ dashboard "alicloud_ram_role_detail" {
 
   input "role_arn" {
     title = "Select a role:"
-    sql   = query.alicloud_ram_role_input.sql
+    query = query.alicloud_ram_role_input
     width = 2
   }
 
@@ -57,37 +57,26 @@ dashboard "alicloud_ram_role_detail" {
         }
       }
 
-      # table {
-      #   title = "Tags"
-      #   width = 6
-      #   query = query.alicloud_ram_role_tags
-      #   args = {
-      #     arn = self.input.role_arn.value
-      #   }
-      # }
     }
 
     container {
 
       title = "Alicloud RAM Role Policy Analysis"
 
-      # hierarchy {
-      #   type  = "tree"
-      #   width = 6
-      #   title = "Attached Policies"
-      #   query = query.alicloud_ram_user_manage_policies_hierarchy
-      #   args = {
-      #     arn = self.input.role_arn.value
-      #   }
+      hierarchy {
+        type  = "tree"
+        width = 6
+        title = "Attached Policies"
+        query = query.alicloud_ram_user_manage_policies_hierarchy
+        args = {
+          arn = self.input.role_arn.value
+        }
 
-      #   category "inline_policy" {
-      #     color = "alert"
-      #   }
-      #   category "managed_policy" {
-      #     color = "ok"
-      #   }
+        category "managed_policy" {
+          color = "ok"
+        }
 
-      # }
+      }
 
 
       table {
@@ -221,40 +210,31 @@ query "alicloud_ram_policies_for_role" {
   param "arn" {}
 }
 
-# query "alicloud_ram_user_manage_policies_hierarchy" {
-#   sql = <<-EOQ
-#     select
-#       $1 as id,
-#       $1 as title,
-#       'role' as category,
-#       null as from_id
+query "alicloud_ram_user_manage_policies_hierarchy" {
+  sql = <<-EOQ
+    select
+      r.name as id,
+      r.name as title,
+      'role' as category,
+      null as from_id
+    from
+      alicloud_ram_role as r
+    where
+      r.arn = $1
 
-#     -- Policies (attached to groups)
-#     union select
-#       policy_arn as id,
-#       p.name as title,
-#       'managed_policy' as category,
-#       r.arn as from_id
-#     from
-#       alicloud_ram_role as r,
-#       jsonb_array_elements_text(r.attached_policy_arns) as policy_arn,
-#       alicloud_ram_policy as p
-#     where
-#       p.arn = policy_arn
-#       and r.arn = $1
+    -- Policies (attached to groups)
+    union select
+      policy ->> 'PolicyName' as id,
+      policy ->> 'PolicyName' as title,
+      'managed_policy' as category,
+      r.name as from_id
+    from
+      alicloud_ram_role as r,
+      jsonb_array_elements(r.attached_policy) as policy
+    where 
+      r.arn = $1
 
-#     -- Inline Policies (defined on role)
-#     union select
-#       concat('inline_', i ->> 'PolicyName') as id,
-#       i ->> 'PolicyName' as title,
-#       'inline_policy' as category,
-#       r.arn as from_id
-#     from
-#       alicloud_ram_role as r,
-#       jsonb_array_elements(inline_policies_std) as i
-#     where
-#       arn = $1
-#   EOQ
+  EOQ
 
-#   param "arn" {}
-# }
+  param "arn" {}
+}
