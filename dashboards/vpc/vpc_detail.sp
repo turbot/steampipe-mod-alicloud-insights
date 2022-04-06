@@ -82,7 +82,7 @@ dashboard "alicloud_vpc_detail" {
 
       table {
         title = "CIDR Blocks"
-        // query = query.alicloud_vpc_cidr_blocks
+        query = query.alicloud_vpc_cidr_blocks
         args = {
           vpc_id = self.input.vpc_id.value
         }
@@ -90,7 +90,7 @@ dashboard "alicloud_vpc_detail" {
 
       table {
         title = "DHCP Options"
-        // query = query.alicloud_vpc_dhcp_options
+        query = query.alicloud_vpc_dhcp_options
         args = {
           vpc_id = self.input.vpc_id.value
         }
@@ -257,7 +257,7 @@ query "alicloud_vpc_ipv4_count" {
     select
       sum(num_ips) as "IPv4 Addresses"
     from
-      cidrs
+      cidrs;
   EOQ
 
   param "vpc_id" {}
@@ -267,24 +267,17 @@ query "alicloud_vpc_ipv6_count" {
   sql = <<-EOQ
     with cidrs as (
       select
-        power(2, 128 - masklen(ipv6_cidr_block)) as num_ips
-      from
-        alicloud_vpc
-      where
-        vpc_id = $1
-      union all
-      select
-        power(2, 128 - masklen(b:: cidr)) as num_ips
+        power(2, 128 - masklen((b ->> 'Ipv6CidrBlock'):: cidr)) as num_ips
       from
         alicloud_vpc,
-        jsonb_array_elements_text(secondary_cidr_blocks) as b
+        jsonb_array_elements(ipv6_cidr_blocks) as b
       where
         vpc_id = $1
     )
     select
       sum(num_ips) as "IPv6 Addresses"
     from
-      cidrs
+      cidrs;
   EOQ
 
   param "vpc_id" {}
@@ -353,11 +346,11 @@ query "alicloud_vpc_tags" {
   param "vpc_id" {}
 }
 
-query "alicloud_vpc_cidr_ipv4_blocks" {
+query "alicloud_vpc_cidr_blocks" {
   sql = <<-EOQ
     select
       cidr_block as "CIDR Block",
-      power(2, 32 - masklen(cidr_block)) as "IPv4 Total IPs"
+      power(2, 32 - masklen(cidr_block)) as "Total IPs"
     from
       alicloud_vpc
     where
@@ -365,10 +358,19 @@ query "alicloud_vpc_cidr_ipv4_blocks" {
     union all
     select
       b::cidr as "CIDR Block",
-      power(2, 32 - masklen(b:: cidr)) as "IPv4 Total IPs"
+      power(2, 32 - masklen(b:: cidr)) as "Total IPs"
     from
       alicloud_vpc,
       jsonb_array_elements_text(secondary_cidr_blocks) as b
+    where
+      vpc_id = $1
+    union all
+    select
+      (b ->> 'Ipv6CidrBlock'):: cidr as "CIDR Block",
+      power(2, 128 - masklen((b ->> 'Ipv6CidrBlock'):: cidr)) as "Total IPs"
+    from
+      alicloud_vpc,
+      jsonb_array_elements(ipv6_cidr_blocks) as b
     where
       vpc_id = $1;
   EOQ
@@ -379,21 +381,20 @@ query "alicloud_vpc_cidr_ipv4_blocks" {
 query "alicloud_vpc_dhcp_options" {
   sql = <<-EOQ
     select
-      d.dhcp_options_id as "DHCP Options ID",
-      d.tags ->> 'Name' as "Name",
-      d.domain_name as "Domain Name",
-      d.domain_name_servers as "Domain Name Servers",
-      d.netbios_name_servers as "NetBIOS Name Servers",
-      d.netbios_node_type "NetBIOS Node Type",
-      d.ntp_servers as "NTP Servers"
+      distinct dhcp_options_set_id as "DHCP Options Set ID",
+      name as "Name",
+      status as "Status",
+      domain_name as "Domain Name",
+      domain_name_servers as "Domain Name Servers",
+      boot_file_name as "Boot File Name",
+      tftp_server_name as "TFTP Server Name"
     from
-      alicloud_vpc as v,
-      alicloud_vpc_dhcp_options as d
+      alicloud_vpc_dhcp_options_set,
+      jsonb_array_elements(associate_vpcs) as v
     where
-      v.vpc_id = $1
-      and v.dhcp_options_id = d.dhcp_options_id
+      v ->> 'VpcId' = $1
     order by
-      d.dhcp_options_id;
+      dhcp_options_set_id;
   EOQ
 
   param "vpc_id" {}
@@ -442,76 +443,6 @@ query "alicloud_vpc_vswitches_detail" {
       vSwitches
     order by
       vswitch_id;
-  EOQ
-
-  param "vpc_id" {}
-}
-
-query "alicloud_vpc_routes_for_vpc_sankey" {
-  sql = <<-EOQ
-    with routes as (
-    select
-        route_table_id,
-        vpc_id,
-        r ->> 'State' as state,
-        case
-          when r ->> 'GatewayId' is not null then r ->> 'GatewayId'
-          when r ->> 'InstanceId' is not null then r ->> 'InstanceId'
-          when r ->> 'NatGatewayId' is not null then r ->> 'NatGatewayId'
-          when r ->> 'LocalGatewayId' is not null then r ->> 'LocalGatewayId'
-          when r ->> 'CarrierGatewayId' is not null then r ->> 'CarrierGatewayId'
-          when r ->> 'TransitGatewayId' is not null then r ->> 'TransitGatewayId'
-          when r ->> 'VpcPeeringConnectionId' is not null then r ->> 'VpcPeeringConnectionId'
-          when r ->> 'DestinationPrefixListId' is not null then r ->> 'DestinationPrefixListId'
-          when r ->> 'DestinationIpv6CidrBlock' is not null then r ->> 'DestinationIpv6CidrBlock'
-          when r ->> 'EgressOnlyInternetGatewayId' is not null then r ->> 'EgressOnlyInternetGatewayId'
-          when r ->> 'NetworkInterfaceId' is not null then r ->> 'NetworkInterfaceId'
-          when r ->> 'CoreNetworkArn' is not null then r ->> 'CoreNetworkArn'
-          when r ->> 'InstanceOwnerId' is not null then r ->> 'InstanceOwnerId'
-        end as gateway,
-        case
-          when r ->> 'DestinationCidrBlock' is not null then r ->> 'DestinationCidrBlock'
-          when r ->> 'DestinationIpv6CidrBlock' is not null then r ->> 'DestinationIpv6CidrBlock'
-          else '???'
-        end as destination_cidr,
-        case
-          when a ->> 'Main' = 'true' then vpc_id
-          when a ->> 'vswitchId' is not null then  a->> 'vswitchId'
-          else '??'
-        end as associated_to
-      from
-        alicloud_vpc_route_table,
-        jsonb_array_elements(routes) as r,
-        jsonb_array_elements(associations) as a
-      where
-        vpc_id = $1
-    )
-      select
-        null as from_id,
-        associated_to as id,
-        associated_to as title,
-        'alicloud_vpc_route_table' as category,
-        0 as depth
-      from
-        routes
-      union
-        select
-          associated_to as from_id,
-          destination_cidr as id,
-          destination_cidr as title,
-          'vpc_or_vswitch' as category,
-          1 as depth
-        from
-          routes
-      union
-        select
-          destination_cidr as from_id,
-          gateway as id,
-          gateway as title,
-          'gateway' as category,
-          2 as depth
-        from
-          routes
   EOQ
 
   param "vpc_id" {}
@@ -600,9 +531,6 @@ query "alicloud_vpc_gateways_detail" {
 
   param "vpc_id" {}
 }
-
-
-
 
 query "alicloud_vpc_ingress_nacl_sankey" {
   sql = <<-EOQ
