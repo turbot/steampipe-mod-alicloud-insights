@@ -79,7 +79,6 @@ dashboard "alicloud_ram_user_detail" {
     title = "Alicloud RAM User Policy Analysis"
 
     flow {
-      base  = flow.policy_attachement_flow
       type  = "sankey"
       title = "Attached Policies"
       query = query.alicloud_ram_user_manage_policies_sankey
@@ -117,21 +116,6 @@ dashboard "alicloud_ram_user_detail" {
     }
 
   }
-}
-
-flow "policy_attachement_flow" {
-  width = 6
-  type  = "sankey"
-
-
-  category "direct" {
-    color = "alert"
-  }
-
-  category "indirect" {
-    color = "ok"
-  }
-
 }
 
 query "alicloud_ram_user_input" {
