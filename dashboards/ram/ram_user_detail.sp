@@ -79,6 +79,7 @@ dashboard "alicloud_ram_user_detail" {
     title = "Alicloud RAM User Policy Analysis"
 
     flow {
+      base  = flow.policy_attachement_flow
       type  = "sankey"
       title = "Attached Policies"
       query = query.alicloud_ram_user_manage_policies_sankey
@@ -116,6 +117,21 @@ dashboard "alicloud_ram_user_detail" {
     }
 
   }
+}
+
+flow "policy_attachement_flow" {
+  width = 6
+  type  = "sankey"
+
+
+  category "direct" {
+    color = "alert"
+  }
+
+  category "indirect" {
+    color = "ok"
+  }
+
 }
 
 query "alicloud_ram_user_input" {
@@ -212,7 +228,7 @@ query "alicloud_ram_user_manage_policies_sankey" {
   sql = <<-EOQ
 
     with args as (
-        select $1 as ram_user_aka
+        select $1 as ram_user_name
     )
 
     -- User
@@ -225,7 +241,7 @@ query "alicloud_ram_user_manage_policies_sankey" {
     from
       alicloud_ram_user
     where
-      name in (select ram_user_aka from args)
+      name in (select ram_user_name from args)
 
     -- Groups
     union select
@@ -239,7 +255,7 @@ query "alicloud_ram_user_manage_policies_sankey" {
       jsonb_array_elements(u.groups) as user_groups
       inner join alicloud_ram_group g on g.name = user_groups ->> 'GroupName'
     where
-      u.name in (select ram_user_aka from args)
+      u.name in (select ram_user_name from args)
 
     -- Policies (attached to groups)
     union select
@@ -256,7 +272,7 @@ query "alicloud_ram_user_manage_policies_sankey" {
       jsonb_array_elements(g.attached_policy) as user_policy
     where
        user_policy ->> 'PolicyName' = p.title
-       and u.name in (select ram_user_aka from args)
+       and u.name in (select ram_user_name from args)
 
     -- Policies (attached to user)
     union select
@@ -271,7 +287,7 @@ query "alicloud_ram_user_manage_policies_sankey" {
       alicloud_ram_policy as p
     where
       pol_arn ->> 'PolicyName' = p.title
-      and u.name in (select ram_user_aka from args)
+      and u.name in (select ram_user_name from args)
 
   EOQ
 
