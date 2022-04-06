@@ -170,7 +170,6 @@ query "alicloud_ram_user_overview" {
       create_date as "Create Date",
       update_date as "Last Modified Date",
       user_id as "User ID",
-      akas ->> 0 as "ARN",
       account_id as "Account ID"
     from
       alicloud_ram_user
@@ -219,19 +218,19 @@ query "alicloud_ram_user_manage_policies_sankey" {
     -- User
     select
       null as from_id,
-      akas ->> 0 as id,
+      name as id,
       title,
       0 as depth,
       'alicloud_ram_user' as category
     from
       alicloud_ram_user
     where
-      akas ->> 0 in (select ram_user_aka from args)
+      name in (select ram_user_aka from args)
 
     -- Groups
     union select
-      u.akas ->> 0 as from_id,
-      g.akas ->> 0 as id,
+      u.name as from_id,
+      g.name as id,
       user_groups ->> 'GroupName' as title,
       1 as depth,
       'alicloud_ram_group' as category
@@ -240,31 +239,29 @@ query "alicloud_ram_user_manage_policies_sankey" {
       jsonb_array_elements(u.groups) as user_groups
       inner join alicloud_ram_group g on g.name = user_groups ->> 'GroupName'
     where
-      u.akas ->> 0 in (select ram_user_aka from args)
+      u.name in (select ram_user_aka from args)
 
     -- Policies (attached to groups)
     union select
-      g.akas ->> 0 as from_id,
-      p.akas ->> 0 as id,
+      g.name as from_id,
+      p.title as id,
       p.title as title,
       2 as depth,
       'alicloud_ram_policy' as category
     from
       alicloud_ram_user as u,
       alicloud_ram_policy as p,
-
       jsonb_array_elements(u.groups) as user_groups
-
       inner join alicloud_ram_group g on g.name = user_groups ->> 'GroupName',
       jsonb_array_elements(g.attached_policy) as user_policy
     where
        user_policy ->> 'PolicyName' = p.title
-       and u.akas ->> 0 in (select ram_user_aka from args)
+       and u.name in (select ram_user_aka from args)
 
     -- Policies (attached to user)
     union select
-      u.akas ->> 0 as from_id,
-      p.akas ->> 0 as id,
+      u.name as from_id,
+      p.title as id,
       p.title as title,
       2 as depth,
       'alicloud_ram_policy' as category
@@ -274,7 +271,7 @@ query "alicloud_ram_user_manage_policies_sankey" {
       alicloud_ram_policy as p
     where
       pol_arn ->> 'PolicyName' = p.title
-      and u.akas ->> 0 in (select ram_user_aka from args)
+      and u.name in (select ram_user_aka from args)
 
   EOQ
 
@@ -302,7 +299,6 @@ query "alicloud_ram_all_policies_for_user" {
     -- Policies (attached to groups)
     select
       p.title as "Policy",
-      p.akas ->> 0 as "ARN",
       'Group: ' || g.title as "Via"
     from
       alicloud_ram_user as u,
@@ -317,7 +313,6 @@ query "alicloud_ram_all_policies_for_user" {
     -- Policies (attached to user)
     union select
       p.title as "Policy",
-      p.akas ->> 0 as "ARN",
       'Attached to User' as "Via"
     from
       alicloud_ram_user as u,

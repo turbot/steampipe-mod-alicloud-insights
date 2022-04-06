@@ -27,7 +27,7 @@ dashboard "alicloud_ram_user_mfa_report" {
     }
 
     column "User Name" {
-      href = "${dashboard.alicloud_ram_user_detail.url_path}?input.user_aka={{.ARN | @uri}}"
+      href = "${dashboard.alicloud_ram_user_detail.url_path}?input.user_name={{.'User Name' | @uri}}"
     }
 
     query = query.alicloud_ram_user_mfa_table
