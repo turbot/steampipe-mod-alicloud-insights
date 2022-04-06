@@ -102,10 +102,10 @@ dashboard "alicloud_vpc_detail" {
 
   container {
 
-    title = "Vswitches"
+    title = "vSwitches"
 
     chart {
-      title = "vSwitches by AZ"
+      title = "vSwitches by Zone"
       type  = "column"
       width = 4
       query = query.alicloud_vpc_vswitch_by_az
