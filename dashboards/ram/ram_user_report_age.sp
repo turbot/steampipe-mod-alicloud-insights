@@ -57,7 +57,7 @@ dashboard "alicloud_ram_user_age_report" {
     }
 
     column "Name" {
-      href = "${dashboard.alicloud_ram_user_detail.url_path}?input.user_aka={{.ARN | @uri}}"
+      href = "${dashboard.alicloud_ram_user_detail.url_path}?input.user_name={{.Name | @uri}}"
     }
 
     query = query.alicloud_ram_user_age_table
