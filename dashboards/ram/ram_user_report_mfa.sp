@@ -26,9 +26,9 @@ dashboard "alicloud_ram_user_mfa_report" {
       display = "none"
     }
 
-    # column "User Name" {
-    #   href = "${dashboard.alicloud_ram_user_detail.url_path}?input.user_name={{.NAME | @uri}}"
-    # }
+    column "User Name" {
+      href = "${dashboard.alicloud_ram_user_detail.url_path}?input.user_aka={{.ARN | @uri}}"
+    }
 
     query = query.alicloud_ram_user_mfa_table
   }
@@ -42,7 +42,7 @@ query "alicloud_ram_user_mfa_table" {
       case when u.mfa_enabled then 'Active' else null end as "MFA Status",
       a.title as "Account",
       a.account_id as "Account ID",
-      u.akas ->> 0 as "AKA"
+      u.akas ->> 0 as "ARN"
     from
       alicloud_ram_user as u,
       alicloud_account as a

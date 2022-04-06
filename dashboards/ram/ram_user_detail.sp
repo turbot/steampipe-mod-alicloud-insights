@@ -99,12 +99,11 @@ dashboard "alicloud_ram_user_detail" {
         akas = self.input.user_aka.value
       }
 
-      # column "Name" {
-      #   // cyclic dependency prevents use of url_path, hardcode for now
-      #   //href = "${dashboard.alicloud_ram_group_detail.url_path}?input.group_arn={{.'ARN' | @uri}}"
-      #   # href = "/aws_insights.dashboard.alicloud_ram_group_detail?input.group_arn={{.'ARN' | @uri}}"
+      column "Name" {
+        // cyclic dependency prevents use of url_path, hardcode for now
+        href = "/alicloud_insights.dashboard.alicloud_ram_group_detail?input.group_title={{.'Name' | @uri}}"
 
-      # }
+      }
     }
 
     table {
@@ -112,7 +111,7 @@ dashboard "alicloud_ram_user_detail" {
       width = 6
       query = query.alicloud_ram_all_policies_for_user
       args = {
-        arn = self.input.user_aka.value
+        akas = self.input.user_aka.value
       }
     }
 
@@ -170,7 +169,7 @@ query "alicloud_ram_user_overview" {
       name as "Name",
       create_date as "Create Date",
       user_id as "User ID",
-      akas ->> 0 as "AKAS",
+      akas ->> 0 as "ARN",
       account_id as "Account ID"
     from
       alicloud_ram_user
@@ -285,7 +284,7 @@ query "alicloud_ram_user_manage_policies_sankey" {
 }
 
 query "alicloud_ram_groups_for_user" {
-  sql   = <<-EOQ
+  sql = <<-EOQ
     select
       g ->> 'GroupName' as "Name",
       g ->> 'JoinDate' as "Join Date"
@@ -331,5 +330,5 @@ query "alicloud_ram_all_policies_for_user" {
       and u.akas ->> 0 = $1
   EOQ
 
-  param "arn" {}
+  param "akas" {}
 }
