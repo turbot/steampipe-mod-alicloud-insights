@@ -31,11 +31,15 @@ dashboard "alicloud_ram_credential_report" {
       display = "none"
     }
 
-    column "User Name" {
-      # href = "${dashboard.alicloud_ram_user_detail.url_path}?input.user_arn={{.'User ARN' | @uri}}"
+    column "User ARN" {
+      display = "none"
     }
 
-    sql = query.alicloud_ram_credential_entities_root_access_keys_table.sql
+    column "User Name" {
+      href = "${dashboard.alicloud_ram_user_detail.url_path}?input.user_arn={{.'User ARN' | @uri}}"
+    }
+
+    query = query.alicloud_ram_credential_entities_root_access_keys_table
   }
 
 }
@@ -70,6 +74,7 @@ query "alicloud_ram_credential_entities_root_access_keys_table" {
   sql = <<-EOQ
     select
       user_name as "User Name",
+      'acs:ram::' || r.account_id || ':user/' || user_name as "User ARN",
 
       password_exist as "Password Enabled",
       mfa_active as "MFA Active",

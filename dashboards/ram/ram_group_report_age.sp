@@ -57,7 +57,7 @@ dashboard "alicloud_ram_group_age_report" {
     }
 
     column "Name" {
-      href = "${dashboard.alicloud_ram_group_detail.url_path}?input.group_title={{.Name | @uri}}"
+      href = "${dashboard.alicloud_ram_group_detail.url_path}?input.group_arn={{.ARN | @uri}}"
     }
 
     query = query.alicloud_ram_group_age_table
@@ -132,12 +132,11 @@ query "alicloud_ram_group_age_table" {
   sql = <<-EOQ
     select
       b.name as "Name",
+      b.arn as "ARN",
       now()::date - b.create_date::date as "Age in Days",
       b.create_date as "Create Time",
       a.title as "Account",
-      b.account_id as "Account ID",
-      b.region as "Region",
-      b.akas ->> 0 as "ARN"
+      b.account_id as "Account ID"
     from
       alicloud_ram_group as b,
       alicloud_account as a
