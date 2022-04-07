@@ -1,6 +1,6 @@
 dashboard "alicloud_ram_user_detail" {
 
-  title         = "Alicloud RAM User Detail"
+  title         = "AliCloud RAM User Detail"
   documentation = file("./dashboards/ram/docs/ram_user_detail.md")
 
   tags = merge(local.ram_common_tags, {
@@ -76,7 +76,7 @@ dashboard "alicloud_ram_user_detail" {
 
   container {
 
-    title = "Alicloud RAM User Policy Analysis"
+    title = "AliCloud RAM User Policy Analysis"
 
     flow {
       type  = "sankey"

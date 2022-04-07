@@ -1,6 +1,6 @@
 dashboard "alicloud_ecs_security_group_dashboard" {
 
-  title         = "Alicloud ECS Security Group Dashboard"
+  title         = "AliCloud ECS Security Group Dashboard"
   documentation = file("./dashboards/ecs/docs/ecs_security_group_dashboard.md")
 
   tags = merge(local.ecs_common_tags, {

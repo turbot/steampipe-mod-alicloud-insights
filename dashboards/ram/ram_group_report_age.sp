@@ -1,6 +1,6 @@
 dashboard "alicloud_ram_group_age_report" {
 
-  title         = "Alicloud RAM Group Age Report"
+  title         = "AliCloud RAM Group Age Report"
   documentation = file("./dashboards/ram/docs/ram_group_report_age.md")
 
   tags = merge(local.ram_common_tags, {

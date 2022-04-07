@@ -1,6 +1,6 @@
 dashboard "alicloud_ram_credential_report" {
 
-  title = "Alicloud RAM Credential Report"
+  title         = "AliCloud RAM Credential Report"
   documentation = file("./dashboards/ram/docs/ram_credential_report.md")
 
   tags = merge(local.ram_common_tags, {

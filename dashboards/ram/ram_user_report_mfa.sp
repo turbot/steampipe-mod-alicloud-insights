@@ -1,6 +1,6 @@
 dashboard "alicloud_ram_user_mfa_report" {
 
-  title         = "Alicloud RAM User MFA Report"
+  title         = "AliCloud RAM User MFA Report"
   documentation = file("./dashboards/ram/docs/ram_user_report_mfa.md")
 
   tags = merge(local.ram_common_tags, {

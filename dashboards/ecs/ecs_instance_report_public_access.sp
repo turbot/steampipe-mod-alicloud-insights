@@ -1,6 +1,6 @@
 dashboard "alicloud_ecs_instance_public_access_report" {
 
-  title         = "Alicloud ECS Instance Public Access Report"
+  title         = "AliCloud ECS Instance Public Access Report"
   documentation = file("./dashboards/ecs/docs/ecs_instance_report_public_access.md")
 
   tags = merge(local.ecs_common_tags, {

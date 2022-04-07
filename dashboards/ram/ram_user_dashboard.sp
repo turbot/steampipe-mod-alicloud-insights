@@ -1,6 +1,6 @@
 dashboard "alicloud_ram_user_dashboard" {
 
-  title         = "Alicloud RAM User Dashboard"
+  title         = "AliCloud RAM User Dashboard"
   documentation = file("./dashboards/ram/docs/ram_user_dashboard.md")
 
   tags = merge(local.ram_common_tags, {

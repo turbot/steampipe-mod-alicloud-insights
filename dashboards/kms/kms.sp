@@ -1,5 +1,5 @@
 locals {
   kms_common_tags = {
-    service = "Alicloud/KMS"
+    service = "AliCloud/KMS"
   }
 }

@@ -1,6 +1,6 @@
 dashboard "alicloud_ecs_disk_detail" {
 
-  title         = "Alicloud ECS Disk Detail"
+  title         = "AliCloud ECS Disk Detail"
   documentation = file("./dashboards/ecs/docs/ecs_disk_detail.md")
 
   tags = merge(local.ecs_common_tags, {

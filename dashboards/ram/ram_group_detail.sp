@@ -1,6 +1,6 @@
 dashboard "alicloud_ram_group_detail" {
 
-  title         = "Alicloud RAM Group Detail"
+  title         = "AliCloud RAM Group Detail"
   documentation = file("./dashboards/ram/docs/ram_group_detail.md")
 
 
@@ -56,7 +56,7 @@ dashboard "alicloud_ram_group_detail" {
 
   container {
 
-    title = "Alicloud RAM Group Analysis"
+    title = "AliCloud RAM Group Analysis"
 
     table {
       title = "Users"
