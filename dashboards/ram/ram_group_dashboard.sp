@@ -1,6 +1,6 @@
 dashboard "alicloud_ram_group_dashboard" {
 
-  title         = "Alicloud RAM Group Dashboard"
+  title         = "AliCloud RAM Group Dashboard"
   documentation = file("./dashboards/ram/docs/ram_group_dashboard.md")
 
 

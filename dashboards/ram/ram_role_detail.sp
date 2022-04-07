@@ -1,6 +1,6 @@
 dashboard "alicloud_ram_role_detail" {
 
-  title         = "Alicloud RAM Role Detail"
+  title         = "AliCloud RAM Role Detail"
   documentation = file("./dashboards/ram/docs/ram_role_detail.md")
 
   tags = merge(local.ram_common_tags, {
@@ -61,7 +61,7 @@ dashboard "alicloud_ram_role_detail" {
 
     container {
 
-      title = "Alicloud RAM Role Policy Analysis"
+      title = "AliCloud RAM Role Policy Analysis"
 
       hierarchy {
         type  = "tree"

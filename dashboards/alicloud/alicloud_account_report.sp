@@ -1,6 +1,6 @@
 dashboard "alicloud_account_report" {
 
-  title         = "Alicloud Account Report"
+  title         = "AliCloud Account Report"
   documentation = file("./dashboards/alicloud/docs/alicloud_account_report.md")
 
   tags = merge(local.alicloud_common_tags, {

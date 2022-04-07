@@ -1,6 +1,6 @@
 dashboard "alicloud_vpc_dashboard" {
 
-  title         = "Alicloud VPC Dashboard"
+  title         = "AliCloud VPC Dashboard"
   documentation = file("./dashboards/vpc/docs/vpc_dashboard.md")
 
   tags = merge(local.vpc_common_tags, {

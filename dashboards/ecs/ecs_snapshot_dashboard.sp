@@ -1,6 +1,6 @@
 dashboard "alicloud_ecs_snapshot_dashboard" {
 
-  title         = "Alicloud ECS Snapshot Dashboard"
+  title         = "AliCloud ECS Snapshot Dashboard"
   documentation = file("./dashboards/ecs/docs/ecs_snapshot_dashboard.md")
 
   tags = merge(local.ecs_common_tags, {
@@ -37,7 +37,7 @@ dashboard "alicloud_ecs_snapshot_dashboard" {
 
     chart {
       title = "Unused Snapshot Status"
-      query   = query.alicloud_ecs_snapshot_by_usage
+      query = query.alicloud_ecs_snapshot_by_usage
       type  = "donut"
       width = 4
 
@@ -53,7 +53,7 @@ dashboard "alicloud_ecs_snapshot_dashboard" {
 
     chart {
       title = "Encryption Status"
-      query   = query.alicloud_ecs_snapshot_by_encryption_status
+      query = query.alicloud_ecs_snapshot_by_encryption_status
       type  = "donut"
       width = 4
 

@@ -1,6 +1,6 @@
 dashboard "alicloud_ram_access_key_age_report" {
 
-  title         = "Alicloud RAM Access Key Age Report"
+  title         = "AliCloud RAM Access Key Age Report"
   documentation = file("./dashboards/ram/docs/ram_access_key_report_age.md")
 
   tags = merge(local.ram_common_tags, {
