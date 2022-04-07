@@ -10,36 +10,26 @@ dashboard "alicloud_ram_role_dashboard" {
   container {
 
     # Analysis
+
     card {
-      query   = query.alicloud_ram_role_count
+      query = query.alicloud_ram_role_count
       width = 2
     }
 
     card {
-      query   = query.alicloud_ram_roles_without_policy_count
-      width = 2
-    }
-
-    # Assessments
-    # card {
-    #   query   = query.alicloud_ram_roles_with_inline_policy_count
-    #   width = 2
-    # }
-
-    card {
-      query   = query.alicloud_ram_role_with_admin_access_count
+      query = query.alicloud_ram_roles_without_policy_count
       width = 2
     }
 
     card {
-      query   = query.alicloud_ram_role_allows_cross_account_access_count
+      query = query.alicloud_ram_role_with_admin_access_count
       width = 2
     }
 
-    # card {
-    #   query   = query.alicloud_ram_role_allows_assume_role_to_all_principal_count
-    #   width = 2
-    # }
+    card {
+      query = query.alicloud_ram_role_allows_cross_account_access_count
+      width = 2
+    }
 
   }
 
@@ -48,7 +38,7 @@ dashboard "alicloud_ram_role_dashboard" {
 
     chart {
       title = "Allows Administrator Actions"
-      query   = query.alicloud_ram_roles_allow_admin_action
+      query = query.alicloud_ram_roles_allow_admin_action
       type  = "donut"
       width = 3
 
@@ -64,7 +54,7 @@ dashboard "alicloud_ram_role_dashboard" {
 
     chart {
       title = "Allows Cross-Account Access"
-      query   = query.alicloud_ram_roles_allow_cross_account_access
+      query = query.alicloud_ram_roles_allow_cross_account_access
       type  = "donut"
       width = 3
 
@@ -86,14 +76,14 @@ dashboard "alicloud_ram_role_dashboard" {
 
     chart {
       title = "Roles by Account"
-      query   = query.alicloud_ram_roles_by_account
+      query = query.alicloud_ram_roles_by_account
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Roles by Age"
-      query   = query.alicloud_ram_roles_by_creation_month
+      query = query.alicloud_ram_roles_by_creation_month
       type  = "column"
       width = 4
     }
@@ -114,12 +104,12 @@ query "alicloud_ram_roles_without_policy_count" {
   sql = <<-EOQ
     select
       count(*) as value,
-       'Without Policies' as label
-      -- case when count(*) > 0 then 'alert' else 'ok' end as type
+       'Without Policies' as label,
+      case when count(*) > 0 then 'alert' else 'ok' end as type
     from
       alicloud_ram_role
     where
-      attached_policy = '[]'
+      attached_policy = '[]';
   EOQ
 }
 
@@ -133,7 +123,7 @@ query "alicloud_ram_role_with_admin_access_count" {
       alicloud_ram_role,
       jsonb_array_elements(attached_policy) as policies
     where
-      policies ->> 'PolicyName' = 'AdministratorAccess'
+      policies ->> 'PolicyName' = 'AdministratorAccess';
   EOQ
 }
 

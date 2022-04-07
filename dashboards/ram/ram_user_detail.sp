@@ -151,13 +151,13 @@ query "alicloud_ram_user_mfa_for_user" {
 query "alicloud_ram_user_direct_attached_policy_count_for_user" {
   sql = <<-EOQ
     select
-      coalesce(jsonb_array_length(attached_policy), 0) as value,
+      count(*) as value,
       'Direct Attached Policies' as label,
-      case when coalesce(jsonb_array_length(attached_policy), 0) = 0 then 'ok' else 'alert' end as type
+      case when count(*) = 0 then 'ok' else 'alert' end as type
     from
       alicloud_ram_user
     where
-     arn = $1;
+     arn = $1 and attached_policy = '[]';
   EOQ
 
   param "arn" {}
