@@ -16,14 +16,15 @@ dashboard "alicloud_ram_group_dashboard" {
       width = 2
     }
 
+    # Assessments
+
     card {
-      query = query.alicloud_ram_groups_with_custom_attached_policy_count
+      query = query.alicloud_ram_groups_without_users_count
       width = 2
     }
 
-    # Assessments
     card {
-      query = query.alicloud_ram_groups_without_users_count
+      query = query.alicloud_ram_groups_with_no_attached_policy_count
       width = 2
     }
 
@@ -49,6 +50,21 @@ dashboard "alicloud_ram_group_dashboard" {
       }
     }
 
+    chart {
+      title = "Groups Without Policies"
+      query = query.alicloud_ram_groups_without_policies
+      type  = "donut"
+      width = 3
+
+      series "count" {
+        point "with policies" {
+          color = "ok"
+        }
+        point "no policies" {
+          color = "alert"
+        }
+      }
+    }
 
   }
 
@@ -91,20 +107,19 @@ query "alicloud_ram_groups_without_users_count" {
     from
       alicloud_ram_group
     where
-      users is null;
+      users = '[]';
   EOQ
 }
 
-query "alicloud_ram_groups_with_custom_attached_policy_count" {
+query "alicloud_ram_groups_with_no_attached_policy_count" {
   sql = <<-EOQ
     select
       count(*) as value,
-      'With Custom Policies' as label
+      'With No Policies' as label,
+      case when jsonb_array_length(attached_policy) = 0 then 'alert' else 'ok' end as type
     from
-      alicloud_ram_group,
-      jsonb_array_elements(attached_policy) as policies
-    where
-      policies ->> 'PolicyType' = 'Custom';
+      alicloud_ram_group
+    group by attached_policy
   EOQ
 }
 
@@ -116,7 +131,7 @@ query "alicloud_ram_groups_without_users" {
       select
         title,
         case
-          when users is null then 'no users'
+          when users = '[]' then 'no users'
           else 'with users'
         end as has_users
       from
@@ -131,6 +146,31 @@ query "alicloud_ram_groups_without_users" {
         has_users;
   EOQ
 }
+
+query "alicloud_ram_groups_without_policies" {
+  sql = <<-EOQ
+    with groups_without_policies as (
+      select
+        title,
+        case
+          when jsonb_array_length(attached_policy) = 0 then 'no policies'
+          else 'with policies'
+        end as has_policies
+      from
+        alicloud_ram_group
+      )
+      select
+        has_policies,
+        count(*)
+      from
+        groups_without_policies
+      group by
+        has_policies;
+  EOQ
+}
+
+
+
 
 # Analysis Queries
 
