@@ -116,7 +116,7 @@ query "alicloud_ram_role_policy_count_for_role" {
     from
       alicloud_ram_role
     where
-      arn = $1
+      arn = $1;
   EOQ
 
   param "arn" {}
@@ -141,7 +141,7 @@ query "alicloud_ram_role_with_admin_access" {
       alicloud_ram_role as r
       left join admin_roles as a on r.name = a.name
     where
-      r.arn = $1
+      r.arn = $1;
   EOQ
 
   param "arn" {}
@@ -167,7 +167,7 @@ query "alicloud_ram_role_with_cross_account_access" {
       alicloud_ram_role as r
       left join roles_with_cross_account_access as a on r.name = a.name
     where
-      r.arn = $1
+      r.arn = $1;
   EOQ
 
   param "arn" {}
@@ -187,7 +187,7 @@ query "alicloud_ram_role_overview" {
     from
       alicloud_ram_role
     where
-      arn = $1
+      arn = $1;
   EOQ
 
   param "arn" {}
@@ -204,7 +204,7 @@ query "alicloud_ram_policies_for_role" {
       alicloud_ram_role,
       jsonb_array_elements(attached_policy) as policies
     where
-      arn = $1
+      arn = $1;
   EOQ
 
   param "arn" {}
@@ -231,9 +231,8 @@ query "alicloud_ram_user_manage_policies_hierarchy" {
     from
       alicloud_ram_role as r,
       jsonb_array_elements(r.attached_policy) as policy
-    where 
-      r.arn = $1
-
+    where
+      r.arn = $1;
   EOQ
 
   param "arn" {}
