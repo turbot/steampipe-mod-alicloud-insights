@@ -198,11 +198,14 @@ query "alicloud_ram_user_access_keys" {
 query "alicloud_ram_user_mfa_devices" {
   sql = <<-EOQ
     select
-      mfa_device_serial_number as "MFA Device Serial Number"
+      mfa -> 'User' ->> 'UserId' as "User Id",
+      mfa ->> 'SerialNumber' as "MFA Serial Number",
+      mfa ->> 'ActivateDate' as "Activate Date"
     from
-      alicloud_ram_user
+      alicloud_ram_user,
+      jsonb_array_elements(virtual_mfa_devices) as mfa
     where
-      name  = $1;
+      arn  = $1;
   EOQ
 
   param "arn" {}
