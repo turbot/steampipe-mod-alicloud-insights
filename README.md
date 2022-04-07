@@ -2,7 +2,7 @@
 
 An Alibaba Cloud dashboarding tool that can be used to view dashboards and reports across all of your Alibaba Cloud accounts.
 
-<!-- TO DO -->
+![image](https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/main/docs/images/alicloud_oss_bucket_dashboard.png)
 
 ## Overview
 
@@ -13,9 +13,9 @@ Dashboards can help answer questions like:
 - Are there any publicly accessible resources?
 - Is encryption enabled and what keys are used for encryption?
 - Is versioning enabled?
-<!-- - What are the relationships between closely connected resources like RAM users, groups, and policies? -->
+- What are the relationships between closely connected resources like RAM users, groups, and policies?
 
-<!-- TO DO -->
+Dashboards are available for 6+ services, including ECS, RAM, OSS, VPC, and more!
 
 ## Getting started
 
