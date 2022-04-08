@@ -1,7 +1,7 @@
-dashboard "alicloud_ram_user_age_report" {
+dashboard "alicloud_ram_role_age_report" {
 
-  title         = "AliCloud RAM User Age Report"
-  documentation = file("./dashboards/ram/docs/ram_user_report_age.md")
+  title         = "AliCloud RAM Role Age Report"
+  documentation = file("./dashboards/ram/docs/ram_role_report_age.md")
 
   tags = merge(local.ram_common_tags, {
     type     = "Report"
@@ -11,36 +11,36 @@ dashboard "alicloud_ram_user_age_report" {
   container {
 
     card {
-      query = query.alicloud_ram_user_count
+      query = query.alicloud_ram_role_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ram_user_24_hours_count
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      query = query.alicloud_ram_user_30_days_count
+      query = query.alicloud_ram_role_24_hours_count
       width = 2
       type  = "info"
     }
 
     card {
-      query = query.alicloud_ram_user_30_90_days_count
+      query = query.alicloud_ram_role_30_days_count
       width = 2
       type  = "info"
     }
 
     card {
-      query = query.alicloud_ram_user_90_365_days_count
+      query = query.alicloud_ram_role_30_90_days_count
       width = 2
       type  = "info"
     }
 
     card {
-      query = query.alicloud_ram_user_1_year_count
+      query = query.alicloud_ram_role_90_365_days_count
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.alicloud_ram_role_1_year_count
       width = 2
       type  = "info"
     }
@@ -57,78 +57,78 @@ dashboard "alicloud_ram_user_age_report" {
     }
 
     column "Name" {
-      href = "${dashboard.alicloud_ram_user_detail.url_path}?input.user_arn={{.ARN | @uri}}"
+      href = "${dashboard.alicloud_ram_role_detail.url_path}?input.role_arn={{.ARN | @uri}}"
     }
 
-    query = query.alicloud_ram_user_age_table
+    query = query.alicloud_ram_role_age_table
   }
 
 }
 
-query "alicloud_ram_user_24_hours_count" {
+query "alicloud_ram_role_24_hours_count" {
   sql = <<-EOQ
     select
       count(*) as value,
       '< 24 hours' as label
     from
-      alicloud_ram_user
+      alicloud_ram_role
     where
       create_date > now() - '1 days' :: interval;
   EOQ
 }
 
-query "alicloud_ram_user_30_days_count" {
+query "alicloud_ram_role_30_days_count" {
   sql = <<-EOQ
     select
       count(*) as value,
       '1-30 Days' as label
     from
-      alicloud_ram_user
+      alicloud_ram_role
     where
       create_date between symmetric now() - '1 days' :: interval
       and now() - '30 days' :: interval;
   EOQ
 }
 
-query "alicloud_ram_user_30_90_days_count" {
+query "alicloud_ram_role_30_90_days_count" {
   sql = <<-EOQ
     select
       count(*) as value,
       '30-90 Days' as label
     from
-      alicloud_ram_user
+      alicloud_ram_role
     where
       create_date between symmetric now() - '30 days' :: interval
       and now() - '90 days' :: interval;
   EOQ
 }
 
-query "alicloud_ram_user_90_365_days_count" {
+query "alicloud_ram_role_90_365_days_count" {
   sql = <<-EOQ
     select
       count(*) as value,
       '90-365 Days' as label
     from
-      alicloud_ram_user
+      alicloud_ram_role
     where
       create_date between symmetric (now() - '90 days'::interval)
       and (now() - '365 days'::interval);
   EOQ
 }
 
-query "alicloud_ram_user_1_year_count" {
+query "alicloud_ram_role_1_year_count" {
   sql = <<-EOQ
     select
       count(*) as value,
       '> 1 Year' as label
     from
-      alicloud_ram_user
+      alicloud_ram_role
     where
       create_date <= now() - '1 year' :: interval;
   EOQ
 }
 
-query "alicloud_ram_user_age_table" {
+query "alicloud_ram_role_age_table" {
   sql = <<-EOQ
     select
       b.name as "Name",
@@ -138,7 +138,7 @@ query "alicloud_ram_user_age_table" {
       a.title as "Account",
       b.account_id as "Account ID"
     from
-      alicloud_ram_user as b,
+      alicloud_ram_role as b,
       alicloud_account as a
     where
       b.account_id = a.account_id

@@ -1,6 +1,6 @@
 dashboard "alicloud_kms_key_dashboard" {
 
-  title         = "Alicloud KMS Key Dashboard"
+  title         = "AliCloud KMS Key Dashboard"
   documentation = file("./dashboards/kms/docs/kms_key_dashboard.md")
 
   tags = merge(local.kms_common_tags, {

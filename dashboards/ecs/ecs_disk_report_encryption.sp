@@ -1,6 +1,6 @@
 dashboard "alicloud_ecs_disk_encryption_report" {
 
-  title         = "Alicloud ECS Disk Encryption Report"
+  title         = "AliCloud ECS Disk Encryption Report"
   documentation = file("./dashboards/ecs/docs/ecs_disk_report_encryption.md")
 
   tags = merge(local.ecs_common_tags, {
@@ -11,12 +11,12 @@ dashboard "alicloud_ecs_disk_encryption_report" {
   container {
 
     card {
-      query   = query.alicloud_ecs_disk_count
+      query = query.alicloud_ecs_disk_count
       width = 2
     }
 
     card {
-      query   = query.alicloud_ecs_disk_unencrypted_count
+      query = query.alicloud_ecs_disk_unencrypted_count
       width = 2
     }
 

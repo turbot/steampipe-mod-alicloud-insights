@@ -1,6 +1,6 @@
 dashboard "alicloud_ecs_snapshot_age_report" {
 
-  title         = "Alicloud ECS Snapshot Age Report"
+  title         = "AliCloud ECS Snapshot Age Report"
   documentation = file("./dashboards/ecs/docs/ecs_snapshot_report_age.md")
 
   tags = merge(local.ecs_common_tags, {

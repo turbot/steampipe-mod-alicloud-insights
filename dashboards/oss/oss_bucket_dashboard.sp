@@ -1,6 +1,6 @@
 dashboard "alicloud_oss_bucket_dashboard" {
 
-  title = "Alicloud OSS Bucket Dashboard"
+  title         = "AliCloud OSS Bucket Dashboard"
   documentation = file("./dashboards/oss/docs/oss_bucket_dashboard.md")
 
   tags = merge(local.oss_common_tags, {

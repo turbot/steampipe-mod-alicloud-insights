@@ -1,6 +1,6 @@
 dashboard "alicloud_ram_access_key_age_report" {
 
-  title         = "Alicloud RAM Access Key Age Report"
+  title         = "AliCloud RAM Access Key Age Report"
   documentation = file("./dashboards/ram/docs/ram_access_key_report_age.md")
 
   tags = merge(local.ram_common_tags, {
@@ -50,6 +50,14 @@ dashboard "alicloud_ram_access_key_age_report" {
   table {
     column "Account ID" {
       display = "none"
+    }
+
+    column "User ARN" {
+      display = "none"
+    }
+
+    column "User Name" {
+      href = "${dashboard.alicloud_ram_user_detail.url_path}?input.user_arn={{.'User ARN' | @uri}}"
     }
 
     query = query.alicloud_ram_access_key_age_table
@@ -130,7 +138,8 @@ query "alicloud_ram_access_key_1_year_count" {
 query "alicloud_ram_access_key_age_table" {
   sql = <<-EOQ
     select
-      k.user_name as "User",
+      k.user_name as "User Name",
+      'acs:ram::' || k.account_id || ':user/' || k.user_name as "User ARN",
       k.access_key_id as "Access Key ID",
       k.status as "Status",
       now()::date - k.create_date::date as "Age in Days",

@@ -6,7 +6,13 @@ repository: "https://github.com/turbot/steampipe-mod-alicloud-insights"
 
 Create dashboards and reports for your Alibaba Cloud resources using Steampipe.
 
-<!-- TO DO -->
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/main/docs/images/alicloud_ecs_instance_dashboard.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/main/docs/images/alicloud_ecs_snapshot_dashboard.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/main/docs/images/alicloud_oss_bucket_detail.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/main/docs/images/alicloud_ecs_instance_public_access_report.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/main/docs/images/alicloud_ram_user_detail.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/main/docs/images/alicloud_kms_key_age_report" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/main/docs/images/alicloud_vpc_dashboard.png" width="50%" type="thumbnail"/>
 
 ## Overview
 
@@ -17,9 +23,9 @@ Dashboards can help answer questions like:
 - Are there any publicly accessible resources?
 - Is encryption enabled and what keys are used for encryption?
 - Is versioning enabled?
-<!-- - What are the relationships between closely connected resources like RAM users, groups, and policies? -->
+- What are the relationships between closely connected resources like RAM users, groups, and policies?
 
-<!-- TO DO -->
+Dashboards are available for 6+ services, including ECS, RAM, OSS, VPC, and more!
 
 ## References
 

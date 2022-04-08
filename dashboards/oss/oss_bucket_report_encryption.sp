@@ -1,6 +1,6 @@
 dashboard "alicloud_oss_bucket_encryption_report" {
 
-  title = "Alicloud OSS Bucket Encryption Report"
+  title         = "AliCloud OSS Bucket Encryption Report"
   documentation = file("./dashboards/oss/docs/oss_bucket_report_encryption.md")
 
   tags = merge(local.oss_common_tags, {

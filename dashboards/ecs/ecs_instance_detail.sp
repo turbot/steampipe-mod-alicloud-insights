@@ -1,6 +1,6 @@
 dashboard "alicloud_ecs_instance_detail" {
 
-  title         = "Alicloud ECS Instance Detail"
+  title         = "AliCloud ECS Instance Detail"
   documentation = file("./dashboards/ecs/docs/ecs_instance_detail.md")
 
   tags = merge(local.ecs_common_tags, {

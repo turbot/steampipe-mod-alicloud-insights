@@ -1,6 +1,6 @@
 dashboard "alicloud_ecs_disk_age_report" {
 
-  title         = "Alicloud ECS Disk Age Report"
+  title         = "AliCloud ECS Disk Age Report"
   documentation = file("./dashboards/ecs/docs/ecs_disk_report_age.md")
 
   tags = merge(local.ecs_common_tags, {
