@@ -21,6 +21,12 @@ dashboard "alicloud_rds_instance_dashboard" {
     }
 
     # Assessments
+
+    card {
+      query = query.alicloud_rds_instance_public_access_count
+      width = 2
+    }
+
     card {
       query = query.alicloud_rds_instance_ssl_count
       width = 2
@@ -33,11 +39,6 @@ dashboard "alicloud_rds_instance_dashboard" {
 
     card {
       query = query.alicloud_rds_instance_audit_count
-      width = 2
-    }
-
-    card {
-      query = query.alicloud_rds_instance_public_access_count
       width = 2
     }
 
@@ -96,16 +97,16 @@ dashboard "alicloud_rds_instance_dashboard" {
     }
 
     chart {
-      title = "Public Access"
+      title = "Public/Private Status"
       query = query.alicloud_rds_instance_by_public_access
       type  = "donut"
       width = 2
 
       series "Instances" {
-        point "disabled" {
+        point "private" {
           color = "ok"
         }
-        point "enabled" {
+        point "public" {
           color = "alert"
         }
       }
@@ -214,6 +215,19 @@ query "alicloud_rds_instance_total_storage" {
   EOQ
 }
 
+query "alicloud_rds_instance_public_access_count" {
+  sql = <<-EOQ
+    select
+      count(*) as value,
+      'Publicly Accessible' as label,
+      case count(*) when 0 then 'ok' else 'alert' end as "type"
+    from
+      alicloud_rds_instance
+    where
+      security_ips :: jsonb ? '0.0.0.0/0';
+  EOQ
+}
+
 query "alicloud_rds_instance_ssl_count" {
   sql = <<-EOQ
     select
@@ -250,19 +264,6 @@ query "alicloud_rds_instance_audit_count" {
       alicloud_rds_instance
     where
       sql_collector_policy ->> 'SQLCollectorStatus' <> 'Enable';
-  EOQ
-}
-
-query "alicloud_rds_instance_public_access_count" {
-  sql = <<-EOQ
-    select
-      count(*) as value,
-      'Public Access' as label,
-      case count(*) when 0 then 'ok' else 'alert' end as "type"
-    from
-      alicloud_rds_instance
-    where
-      security_ips :: jsonb ? '0.0.0.0/0';
   EOQ
 }
 
@@ -322,8 +323,8 @@ query "alicloud_rds_instance_by_public_access" {
     with db_instances as (
       select
         case
-          when security_ips :: jsonb ? '0.0.0.0/0' then 'enabled'
-          else 'disabled'
+          when security_ips :: jsonb ? '0.0.0.0/0' then 'public'
+          else 'private'
         end as public_access
       from
         alicloud_rds_instance
