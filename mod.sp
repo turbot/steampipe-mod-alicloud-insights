@@ -15,5 +15,8 @@ mod "alicloud_insights" {
 
   require {
     steampipe = "0.13.1"
+    plugin "gcp" {
+      version = "0.6.0"
+    }
   }
 }
