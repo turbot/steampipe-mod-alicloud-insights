@@ -44,7 +44,7 @@ query "alicloud_oss_bucket_public_access_table" {
   sql = <<-EOQ
     select
       b.name as "Name",
-      b.acl as "Access",
+      b.acl as "ACL Access",
       a.title as "Account",
       b.account_id as "Account ID",
       b.region as "Region",
