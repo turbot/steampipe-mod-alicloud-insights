@@ -7,5 +7,4 @@ New dashboards, reports, and details for the following services:
 - KMS
 - OSS
 - RAM
-- EC2
 - VPC
