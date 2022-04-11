@@ -340,9 +340,9 @@ query "alicloud_ecs_instance_network_interfaces" {
 query "alicloud_ecs_instance_dedicated_host" {
   sql = <<-EOQ
     select
-      dedicated_host_cluster_id  as "Cluster ID",
-      dedicated_host_id  as "ID",
       dedicated_host_name as "Name",
+      dedicated_host_id  as "ID",
+      dedicated_host_cluster_id  as "Cluster ID",
       dedicated_instance_affinity as "Instance Affinity",
       dedicated_instance_tenancy  as "Instance Tenancy"
     from

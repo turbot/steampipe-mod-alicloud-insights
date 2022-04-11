@@ -99,11 +99,8 @@ dashboard "alicloud_ecs_disk_detail" {
         }
 
         column "Instance ID" {
-          display = "none"
+          href = "${dashboard.alicloud_ecs_instance_detail.url_path}?input.instance_arn={{.'Instance ARN' | @uri}}"
         }
-        # {
-        #   href = "${dashboard.alicloud_ecs_instance_detail.url_path}?input.instance_arn={{.'Instance ARN' | @uri}}"
-        # }
       }
 
       table {
@@ -117,58 +114,6 @@ dashboard "alicloud_ecs_disk_detail" {
         }
       }
     }
-  }
-
-  container {
-
-    width = 12
-
-    chart {
-      title = "Read Throughput (IOPS) - Last 7 Days"
-      type  = "line"
-      width = 6
-      sql   = <<-EOQ
-        select
-          timestamp,
-          (average / 3600) as read_throughput_ops
-        from
-          alicloud_ecs_disk_metric_read_iops_hourly
-        where
-          timestamp >= current_date - interval '7 day'
-          and instance_id = reverse(split_part(reverse($1), '/', 1))
-        order by timestamp
-      EOQ
-
-      param "arn" {}
-
-      args = {
-        arn = self.input.disk_arn.value
-      }
-    }
-
-    chart {
-      title = "Write Throughput (IOPS) - Last 7 Days"
-      type  = "line"
-      width = 6
-      sql   = <<-EOQ
-        select
-          timestamp,
-          (average / 3600) as write_throughput_ops
-        from
-          alicloud_ecs_disk_metric_write_iops_hourly
-        where
-          timestamp >= current_date - interval '7 day'
-          and instance_id = reverse(split_part(reverse($1), '/', 1))
-        order by timestamp;
-      EOQ
-
-      param "arn" {}
-
-      args = {
-        arn = self.input.disk_arn.value
-      }
-    }
-
   }
 
 }

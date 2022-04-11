@@ -25,7 +25,7 @@ Dashboards can help answer questions like:
 - Is versioning enabled?
 - What are the relationships between closely connected resources like RAM users, groups, and policies?
 
-Dashboards are available for 6+ services, including ECS, RAM, OSS, VPC, and more!
+Dashboards are available for ECS, KMS, RAM, OSS, and VPC services.
 
 ## References
 
