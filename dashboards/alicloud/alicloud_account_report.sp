@@ -18,6 +18,10 @@ dashboard "alicloud_account_report" {
   }
 
   table {
+    column "ARN" {
+      display = "none"
+    }
+    
     query = query.alicloud_account_table
   }
 

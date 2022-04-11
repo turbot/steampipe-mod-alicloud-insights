@@ -33,7 +33,7 @@ dashboard "alicloud_ecs_disk_dashboard" {
 
     card {
       query = query.alicloud_ecs_disk_delete_auto_snapshot_count
-      width = 3
+      width = 2
     }
   }
 
@@ -74,7 +74,7 @@ dashboard "alicloud_ecs_disk_dashboard" {
     }
 
     chart {
-      title = "Auto Snapshot Deletion"
+      title = "Automatic Snapshot Deletion"
       query = query.alicloud_ecs_disk_auto_snapshot_deletion
       type  = "donut"
       width = 4
