@@ -1,4 +1,4 @@
-# Alibaba Cloud Insights
+# Alibaba Cloud Insights Mod for Steampipe
 
 An Alibaba Cloud dashboarding tool that can be used to view dashboards and reports across all of your Alibaba Cloud accounts.
 
