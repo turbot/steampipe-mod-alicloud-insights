@@ -19,43 +19,106 @@ dashboard "kms_key_detail" {
     card {
       width = 2
       query = query.kms_key_origin
-      args = {
-        arn = self.input.key_arn.value
-      }
+      args  = [self.input.key_arn.value]
     }
 
     card {
       width = 3
       query = query.kms_key_state
-      args = {
-        arn = self.input.key_arn.value
-      }
+      args  = [self.input.key_arn.value]
     }
 
     card {
       width = 2
       query = query.kms_key_rotation_enabled
-      args = {
-        arn = self.input.key_arn.value
-      }
+      args  = [self.input.key_arn.value]
     }
 
     card {
       width = 2
       query = query.kms_deletion_protection
-      args = {
-        arn = self.input.key_arn.value
-      }
+      args  = [self.input.key_arn.value]
     }
 
     card {
       width = 3
       query = query.kms_protection_level
-      args = {
-        arn = self.input.key_arn.value
-      }
+      args  = [self.input.key_arn.value]
     }
 
+  }
+
+  with "oss_buckets" {
+    query = query.kms_keys_oss_buckets
+    args = [self.input.key_arn.value]
+  }
+
+  with "ecs_disks" {
+    query = query.kms_keys_ecs_disks
+    args = [self.input.key_arn.value]
+  }
+
+  with "ecs_snapshots" {
+    query = query.kms_keys_ecs_snapshots
+    args = [self.input.key_arn.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.kms_key
+        args = {
+          kms_key_arns = [self.input.key_arn.value]
+        }
+      }
+
+      // node {
+      //   base = node.ecs_disk
+      //   args = {
+      //     ecs_disk_arns = with.ecs_disks.rows[*].disk_arn
+      //   }
+      // }
+
+      // node {
+      //   base = node.ecs_snapshot
+      //   args = {
+      //     ecs_snapshot_arns = with.ecs_snapshots.rows[*].snapshot_arn
+      //   }
+      // }
+
+      // node {
+      //   base = node.oss_bucket
+      //   args = {
+      //     oss_bucket_arns = with.oss_buckets.rows[*].bucket_arn
+      //   }
+      // }
+
+      // edge {
+      //   base = edge.ecs_disk_to_kms_key
+      //   args = {
+      //     ecs_disk_arns = with.ecs_disks.rows[*].disk_arn
+      //   }
+      // }
+
+      // edge {
+      //   base = edge.ecs_snapshot_to_kms_key
+      //   args = {
+      //     ecs_snapshot_arns = with.ecs_snapshots.rows[*].snapshot_arn
+      //   }
+      // }
+
+      // edge {
+      //   base = edge.oss_bucket_to_kms_key
+      //   args = {
+      //     oss_bucket_arns = with.oss_buckets.rows[*].bucket_arn
+      //   }
+      // }
+    }
   }
 
   container {
@@ -69,9 +132,7 @@ dashboard "kms_key_detail" {
         type  = "line"
         width = 6
         query = query.kms_key_overview
-        args = {
-          arn = self.input.key_arn.value
-        }
+        args  = [self.input.key_arn.value]
 
       }
 
@@ -79,9 +140,7 @@ dashboard "kms_key_detail" {
         title = "Tags"
         width = 6
         query = query.kms_key_tags
-        args = {
-          arn = self.input.key_arn.value
-        }
+        args  = [self.input.key_arn.value]
       }
 
     }
@@ -93,9 +152,7 @@ dashboard "kms_key_detail" {
       table {
         title = "Key Age"
         query = query.kms_key_age
-        args = {
-          arn = self.input.key_arn.value
-        }
+        args  = [self.input.key_arn.value]
       }
 
     }
@@ -105,9 +162,7 @@ dashboard "kms_key_detail" {
   table {
     title = "Key Aliases"
     query = query.kms_key_aliases
-    args = {
-      arn = self.input.key_arn.value
-    }
+    args  = [self.input.key_arn.value]
   }
 
 }
@@ -128,6 +183,8 @@ query "kms_key_input" {
   EOQ
 }
 
+# card queries
+
 query "kms_key_origin" {
   sql = <<-EOQ
     select
@@ -139,7 +196,6 @@ query "kms_key_origin" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "kms_key_state" {
@@ -153,7 +209,6 @@ query "kms_key_state" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "kms_key_rotation_enabled" {
@@ -168,7 +223,6 @@ query "kms_key_rotation_enabled" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "kms_deletion_protection" {
@@ -183,7 +237,6 @@ query "kms_deletion_protection" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "kms_protection_level" {
@@ -198,8 +251,48 @@ query "kms_protection_level" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
+
+# with queries
+
+query "kms_keys_oss_buckets" {
+    sql = <<-EOQ
+    select
+      b.arn as bucket_arn
+    from
+      alicloud_oss_bucket as b
+      left join alicloud_kms_key k on b.server_side_encryption ->> 'KMSMasterKeyID' = k.key_id
+    where
+      k.arn = $1
+      and b.arn is not null;
+  EOQ
+}
+
+query "kms_keys_ecs_disks" {
+  sql = <<-EOQ
+    select
+      arn as disk_arn
+    from
+      alicloud_ecs_disk
+    where
+      kms_key_id = $1
+      and arn is not null;
+  EOQ
+}
+
+query "kms_keys_ecs_snapshots" {
+  sql = <<-EOQ
+    select
+      arn as snapshot_arn
+    from
+      alicloud_ecs_snapshot
+    where
+      kms_key_id = $1
+      and arn is not null;
+  EOQ
+}
+
+# table queries
 
 query "kms_key_overview" {
   sql = <<-EOQ
@@ -216,7 +309,6 @@ query "kms_key_overview" {
       arn = $1
     EOQ
 
-  param "arn" {}
 }
 
 query "kms_key_tags" {
@@ -233,7 +325,6 @@ query "kms_key_tags" {
       tag ->> 'TagKey';
     EOQ
 
-  param "arn" {}
 }
 
 query "kms_key_age" {
@@ -248,7 +339,6 @@ query "kms_key_age" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "kms_key_aliases" {
@@ -264,5 +354,4 @@ query "kms_key_aliases" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }

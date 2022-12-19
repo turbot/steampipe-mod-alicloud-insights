@@ -17,13 +17,13 @@ dashboard "oss_bucket_detail" {
 
     card {
       width = 2
-      query = query.alicloud_oss_bucket_versioning
+      query = query.oss_bucket_versioning
       args = [self.input.bucket_arn.value]
     }
 
     card {
       width = 2
-      query = query.alicloud_oss_bucket_access_type
+      query = query.oss_bucket_access_type
       args = [self.input.bucket_arn.value]
     }
 
@@ -35,16 +35,45 @@ dashboard "oss_bucket_detail" {
 
     card {
       width = 2
-      query = query.alicloud_oss_bucket_encryption
+      query = query.oss_bucket_encryption
       args = [self.input.bucket_arn.value]
     }
 
     card {
       width = 2
-      query = query.alicloud_oss_bucket_https_enforce
+      query = query.oss_bucket_https_enforce
       args = [self.input.bucket_arn.value]
     }
 
+  }
+
+
+  with "kms_keys" {
+    query = query.oss_bucket_kms_keys
+    args = [self.input.bucket_arn.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.kms_key
+        args = {
+          kms_key_arns = with.kms_keys.rows[*].key_arn
+        }
+      }
+
+      node {
+        base = node.oss_bucket
+        args = {
+          oss_bucket_arns = [self.input.bucket_arn.value]
+        }
+      }
+    }
   }
 
   container {
@@ -56,14 +85,14 @@ dashboard "oss_bucket_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.alicloud_oss_bucket_overview
+        query = query.oss_bucket_overview
         args = [self.input.bucket_arn.value]
       }
 
       table {
         title = "Tags"
         width = 6
-        query = query.alicloud_oss_bucket_tags_detail
+        query = query.oss_bucket_tags_detail
         args = [self.input.bucket_arn.value]
       }
     }
@@ -73,7 +102,7 @@ dashboard "oss_bucket_detail" {
 
       table {
         title = "Logging"
-        query = query.alicloud_oss_bucket_logging
+        query = query.oss_bucket_logging
         args = [self.input.bucket_arn.value]
       }
 
@@ -83,7 +112,7 @@ dashboard "oss_bucket_detail" {
       width = 12
       table {
         title = "Policy"
-        query = query.alicloud_oss_bucket_policy
+        query = query.oss_bucket_policy
         args = [self.input.bucket_arn.value]
       }
     }
@@ -92,7 +121,7 @@ dashboard "oss_bucket_detail" {
       width = 12
       table {
         title = "Lifecycle Rules"
-        query = query.alicloud_oss_bucket_lifecycle_policy
+        query = query.oss_bucket_lifecycle_policy
         args = [self.input.bucket_arn.value]
       }
     }
@@ -101,7 +130,7 @@ dashboard "oss_bucket_detail" {
       width = 12
       table {
         title = "Server Side Encryption"
-        query = query.alicloud_oss_bucket_server_side_encryption
+        query = query.oss_bucket_server_side_encryption
         args = [self.input.bucket_arn.value]
       }
     }
@@ -120,11 +149,13 @@ query "oss_bucket_input" {
         'region', region
       ) as tags
     from
-      alicloud_oss_bucket
+      oss_bucket
     order by
       title;
   EOQ
 }
+
+# card queries
 
 query "oss_bucket_versioning" {
   sql = <<-EOQ
@@ -133,7 +164,7 @@ query "oss_bucket_versioning" {
       case when versioning <> '' then 'Enabled' else 'Disabled' end as value,
       case when versioning <> '' then 'ok' else 'alert' end as type
     from
-      alicloud_oss_bucket
+      oss_bucket
     where
       arn = $1;
   EOQ
@@ -147,7 +178,7 @@ query "oss_bucket_access_type" {
       case when acl = 'private' then 'Disabled' else 'Enabled' end as value,
       case when acl = 'private' then 'ok' else 'alert' end as type
     from
-      alicloud_oss_bucket
+      oss_bucket
     where
       arn = $1;
   EOQ
@@ -161,7 +192,7 @@ query "oss_bucket_logging_enabled" {
       case when (logging ->> 'TargetBucket') <> '' then 'Enabled' else 'Disabled' end as value,
       case when (logging ->> 'TargetBucket') <> '' then 'ok' else 'alert' end as type
     from
-      alicloud_oss_bucket
+      oss_bucket
     where
       arn = $1;
   EOQ
@@ -175,7 +206,7 @@ query "oss_bucket_encryption" {
       case when server_side_encryption ->> 'SSEAlgorithm' <> '' then 'Enabled' else 'Disabled' end as value,
       case when server_side_encryption ->> 'SSEAlgorithm' <> '' then 'ok' else 'alert' end as type
     from
-      alicloud_oss_bucket
+      oss_bucket
     where
       arn = $1;
   EOQ
@@ -188,7 +219,7 @@ query "oss_bucket_https_enforce" {
       select
         distinct name
       from
-        alicloud_oss_bucket,
+        oss_bucket,
         jsonb_array_elements(policy -> 'Statement') as s,
         jsonb_array_elements_text(s -> 'Principal') as p,
         jsonb_array_elements_text(s -> 'Resource') as r,
@@ -205,7 +236,7 @@ query "oss_bucket_https_enforce" {
       case when s.name is not null then 'Enabled' else 'Disabled' end as value,
       case when s.name is not null then 'ok' else 'alert' end as type
     from
-      alicloud_oss_bucket as b
+      oss_bucket as b
       left join ssl_ok as s on s.name = b.name
     where
       arn = $1;
@@ -213,6 +244,21 @@ query "oss_bucket_https_enforce" {
 
 }
 
+# with queries
+
+query "oss_bucket_kms_keys" {
+    sql = <<-EOQ
+    select
+      k.arn as key_arn
+    from
+      alicloud_oss_bucket as b
+      left join alicloud_kms_key k on b.server_side_encryption ->> 'KMSMasterKeyID' = k.key_id
+    where
+      b.arn = $1;
+  EOQ
+}
+
+# table queries
 query "oss_bucket_overview" {
   sql = <<-EOQ
     select
@@ -223,7 +269,7 @@ query "oss_bucket_overview" {
       account_id as "Account ID",
       arn as "ARN"
     from
-      alicloud_oss_bucket
+      oss_bucket
     where
       arn = $1;
   EOQ
@@ -236,7 +282,7 @@ query "oss_bucket_tags_detail" {
       tag ->> 'Key' as "Key",
       tag ->> 'Value' as "Value"
     from
-      alicloud_oss_bucket,
+      oss_bucket,
       jsonb_array_elements(tags_src) as tag
     where
       arn = $1
@@ -254,7 +300,7 @@ query "oss_bucket_logging" {
       logging -> 'XMLName' ->> 'Local' as "Local",
       logging -> 'XMLName' ->> 'Space' as "Space"
     from
-      alicloud_oss_bucket
+      oss_bucket
     where
       arn = $1;
   EOQ
@@ -270,7 +316,7 @@ query "oss_bucket_policy" {
       p -> 'Resource' as "Resource",
       policy ->> 'Version' as "Version"
     from
-      alicloud_oss_bucket,
+      oss_bucket,
       jsonb_array_elements(policy -> 'Statement') as p
     where
       arn = $1;
@@ -293,7 +339,7 @@ query "oss_bucket_lifecycle_policy" {
       r ->> 'Transitions' as "Transitions",
       r ->>  'XMLName' as "XML Name"
     from
-      alicloud_oss_bucket,
+      oss_bucket,
       jsonb_array_elements(lifecycle_rules) as r
     where
       arn = $1
@@ -310,7 +356,7 @@ query "oss_bucket_server_side_encryption" {
       server_side_encryption ->> 'SSEAlgorithm' as "SSE Algorithm",
       server_side_encryption ->> 'KMSDataEncryption' as "KMS Data Encryption"
     from
-      alicloud_oss_bucket
+      oss_bucket
     where
       arn = $1;
   EOQ
