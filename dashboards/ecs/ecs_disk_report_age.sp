@@ -1,4 +1,4 @@
-dashboard "alicloud_ecs_disk_age_report" {
+dashboard "ecs_disk_age_report" {
 
   title         = "AliCloud ECS Disk Age Report"
   documentation = file("./dashboards/ecs/docs/ecs_disk_report_age.md")
@@ -12,37 +12,37 @@ dashboard "alicloud_ecs_disk_age_report" {
 
     card {
       width = 2
-      query = query.alicloud_ecs_disk_count
+      query = query.ecs_disk_count
     }
 
     card {
       type  = "info"
       width = 2
-      query = query.alicloud_ecs_disk_24_hours_count
+      query = query.ecs_disk_24_hours_count
     }
 
     card {
       type  = "info"
       width = 2
-      query = query.alicloud_ecs_disk_30_days_count
+      query = query.ecs_disk_30_days_count
     }
 
     card {
       type  = "info"
       width = 2
-      query = query.alicloud_ecs_disk_30_90_days_count
+      query = query.ecs_disk_30_90_days_count
     }
 
     card {
       width = 2
       type  = "info"
-      query = query.alicloud_ecs_disk_90_365_days_count
+      query = query.ecs_disk_90_365_days_count
     }
 
     card {
       width = 2
       type  = "info"
-      query = query.alicloud_ecs_disk_1_year_count
+      query = query.ecs_disk_1_year_count
     }
 
   }
@@ -57,15 +57,15 @@ dashboard "alicloud_ecs_disk_age_report" {
     }
 
     column "Disk ID" {
-      href = "${dashboard.alicloud_ecs_disk_detail.url_path}?input.disk_arn={{.ARN | @uri}}"
+      href = "${dashboard.ecs_disk_detail.url_path}?input.disk_arn={{.ARN | @uri}}"
     }
 
-    query = query.alicloud_ecs_disk_age_table
+    query = query.ecs_disk_age_table
   }
 
 }
 
-query "alicloud_ecs_disk_24_hours_count" {
+query "ecs_disk_24_hours_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -77,7 +77,7 @@ query "alicloud_ecs_disk_24_hours_count" {
   EOQ
 }
 
-query "alicloud_ecs_disk_30_days_count" {
+query "ecs_disk_30_days_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -90,7 +90,7 @@ query "alicloud_ecs_disk_30_days_count" {
   EOQ
 }
 
-query "alicloud_ecs_disk_30_90_days_count" {
+query "ecs_disk_30_90_days_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -103,7 +103,7 @@ query "alicloud_ecs_disk_30_90_days_count" {
   EOQ
 }
 
-query "alicloud_ecs_disk_90_365_days_count" {
+query "ecs_disk_90_365_days_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -116,7 +116,7 @@ query "alicloud_ecs_disk_90_365_days_count" {
   EOQ
 }
 
-query "alicloud_ecs_disk_1_year_count" {
+query "ecs_disk_1_year_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -128,7 +128,7 @@ query "alicloud_ecs_disk_1_year_count" {
   EOQ
 }
 
-query "alicloud_ecs_disk_age_table" {
+query "ecs_disk_age_table" {
   sql = <<-EOQ
     select
       d.disk_id as "Disk ID",

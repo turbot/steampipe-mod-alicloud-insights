@@ -1,4 +1,4 @@
-dashboard "alicloud_ecs_security_group_dashboard" {
+dashboard "ecs_security_group_dashboard" {
 
   title         = "AliCloud ECS Security Group Dashboard"
   documentation = file("./dashboards/ecs/docs/ecs_security_group_dashboard.md")
@@ -10,22 +10,22 @@ dashboard "alicloud_ecs_security_group_dashboard" {
   container {
 
     card {
-      query = query.alicloud_ecs_security_group_count
+      query = query.ecs_security_group_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ecs_security_group_unassociated_count
+      query = query.ecs_security_group_unassociated_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ecs_security_unrestricted_ingress_count
+      query = query.ecs_security_unrestricted_ingress_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ecs_security_unrestricted_egress_count
+      query = query.ecs_security_unrestricted_egress_count
       width = 2
     }
 
@@ -40,7 +40,7 @@ dashboard "alicloud_ecs_security_group_dashboard" {
       title = "Association Status"
       type  = "donut"
       width = 3
-      query = query.alicloud_ecs_security_group_unassociated_status
+      query = query.ecs_security_group_unassociated_status
 
       series "count" {
         point "associated" {
@@ -56,7 +56,7 @@ dashboard "alicloud_ecs_security_group_dashboard" {
       title = "With Unrestricted Ingress (Excludes ICMP)"
       type  = "donut"
       width = 3
-      query = query.alicloud_ecs_security_group_by_unrestricted_ingress_status
+      query = query.ecs_security_group_by_unrestricted_ingress_status
 
       series "count" {
         point "restricted" {
@@ -72,7 +72,7 @@ dashboard "alicloud_ecs_security_group_dashboard" {
       title = "With Unrestricted Egress (Excludes ICMP)"
       type  = "donut"
       width = 3
-      query = query.alicloud_ecs_security_group_by_unrestricted_egress_status
+      query = query.ecs_security_group_by_unrestricted_egress_status
 
       series "count" {
         point "restricted" {
@@ -92,28 +92,28 @@ dashboard "alicloud_ecs_security_group_dashboard" {
 
     chart {
       title = "Security Groups by Account"
-      query = query.alicloud_ecs_security_group_by_acount
+      query = query.ecs_security_group_by_acount
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Security Groups by Region"
-      query = query.alicloud_ecs_security_group_by_region
+      query = query.ecs_security_group_by_region
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Security Groups by VPC"
-      query = query.alicloud_ecs_security_group_by_vpc
+      query = query.ecs_security_group_by_vpc
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Security Groups by Type"
-      query = query.alicloud_ecs_security_group_by_type
+      query = query.ecs_security_group_by_type
       type  = "column"
       width = 3
     }
@@ -124,13 +124,13 @@ dashboard "alicloud_ecs_security_group_dashboard" {
 
 # Card Queries
 
-query "alicloud_ecs_security_group_count" {
+query "ecs_security_group_count" {
   sql = <<-EOQ
     select count(*) as "Security Groups" from alicloud_ecs_security_group;
   EOQ
 }
 
-query "alicloud_ecs_security_group_unassociated_count" {
+query "ecs_security_group_unassociated_count" {
   sql = <<-EOQ
     with associated_sg as (
       select
@@ -151,7 +151,7 @@ query "alicloud_ecs_security_group_unassociated_count" {
   EOQ
 }
 
-query "alicloud_ecs_security_unrestricted_ingress_count" {
+query "ecs_security_unrestricted_ingress_count" {
   sql = <<-EOQ
     with ingress_sg as (
       select
@@ -179,7 +179,7 @@ query "alicloud_ecs_security_unrestricted_ingress_count" {
   EOQ
 }
 
-query "alicloud_ecs_security_unrestricted_egress_count" {
+query "ecs_security_unrestricted_egress_count" {
   sql = <<-EOQ
     with egress_sg as (
       select
@@ -209,7 +209,7 @@ query "alicloud_ecs_security_unrestricted_egress_count" {
 
 # Assessment Queries
 
-query "alicloud_ecs_security_group_unassociated_status" {
+query "ecs_security_group_unassociated_status" {
   sql = <<-EOQ
     with associated_sg as (
       select
@@ -242,7 +242,7 @@ query "alicloud_ecs_security_group_unassociated_status" {
   EOQ
 }
 
-query "alicloud_ecs_security_group_by_unrestricted_ingress_status" {
+query "ecs_security_group_by_unrestricted_ingress_status" {
   sql = <<-EOQ
     with ingress_sg as (
       select
@@ -268,7 +268,7 @@ query "alicloud_ecs_security_group_by_unrestricted_ingress_status" {
   EOQ
 }
 
-query "alicloud_ecs_security_group_by_unrestricted_egress_status" {
+query "ecs_security_group_by_unrestricted_egress_status" {
   sql = <<-EOQ
     with eggress_sg as (
       select
@@ -296,7 +296,7 @@ query "alicloud_ecs_security_group_by_unrestricted_egress_status" {
 
 # Analysis Queries
 
-query "alicloud_ecs_security_group_by_acount" {
+query "ecs_security_group_by_acount" {
   sql = <<-EOQ
     select
       a.title as "account",
@@ -313,7 +313,7 @@ query "alicloud_ecs_security_group_by_acount" {
   EOQ
 }
 
-query "alicloud_ecs_security_group_by_region" {
+query "ecs_security_group_by_region" {
   sql = <<-EOQ
     select
       region as "Region",
@@ -327,7 +327,7 @@ query "alicloud_ecs_security_group_by_region" {
   EOQ
 }
 
-query "alicloud_ecs_security_group_by_vpc" {
+query "ecs_security_group_by_vpc" {
   sql = <<-EOQ
     select
       vpc_id as "VPC",
@@ -341,7 +341,7 @@ query "alicloud_ecs_security_group_by_vpc" {
   EOQ
 }
 
-query "alicloud_ecs_security_group_by_type" {
+query "ecs_security_group_by_type" {
   sql = <<-EOQ
     select
       type as "VPC Type",

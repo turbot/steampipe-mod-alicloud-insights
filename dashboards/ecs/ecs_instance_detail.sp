@@ -1,4 +1,4 @@
-dashboard "alicloud_ecs_instance_detail" {
+dashboard "ecs_instance_detail" {
 
   title         = "AliCloud ECS Instance Detail"
   documentation = file("./dashboards/ecs/docs/ecs_instance_detail.md")
@@ -9,7 +9,7 @@ dashboard "alicloud_ecs_instance_detail" {
 
   input "instance_arn" {
     title = "Select an instance:"
-    query = query.alicloud_ecs_instance_input
+    query = query.ecs_instance_input
     width = 4
   }
 
@@ -17,7 +17,7 @@ dashboard "alicloud_ecs_instance_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ecs_instance_status
+      query = query.ecs_instance_status
       args = {
         arn = self.input.instance_arn.value
       }
@@ -25,7 +25,7 @@ dashboard "alicloud_ecs_instance_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ecs_instance_type
+      query = query.ecs_instance_type
       args = {
         arn = self.input.instance_arn.value
       }
@@ -33,7 +33,7 @@ dashboard "alicloud_ecs_instance_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ecs_instance_total_cores
+      query = query.ecs_instance_total_cores
       args = {
         arn = self.input.instance_arn.value
       }
@@ -41,7 +41,7 @@ dashboard "alicloud_ecs_instance_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ecs_instance_os_type
+      query = query.ecs_instance_os_type
       args = {
         arn = self.input.instance_arn.value
       }
@@ -49,7 +49,7 @@ dashboard "alicloud_ecs_instance_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ecs_instance_public_access
+      query = query.ecs_instance_public_access
       args = {
         arn = self.input.instance_arn.value
       }
@@ -57,7 +57,7 @@ dashboard "alicloud_ecs_instance_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ecs_instance_io_optimized
+      query = query.ecs_instance_io_optimized
       args = {
         arn = self.input.instance_arn.value
       }
@@ -74,7 +74,7 @@ dashboard "alicloud_ecs_instance_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.alicloud_ecs_instance_overview
+        query = query.ecs_instance_overview
         args = {
           arn = self.input.instance_arn.value
         }
@@ -84,7 +84,7 @@ dashboard "alicloud_ecs_instance_detail" {
       table {
         title = "Tags"
         width = 6
-        query = query.alicloud_ecs_instance_tags
+        query = query.ecs_instance_tags
         args = {
           arn = self.input.instance_arn.value
         }
@@ -95,7 +95,7 @@ dashboard "alicloud_ecs_instance_detail" {
 
       table {
         title = " CPU cores"
-        query = query.alicloud_ecs_instance_cpu_cores
+        query = query.ecs_instance_cpu_cores
         args = {
           arn = self.input.instance_arn.value
         }
@@ -109,7 +109,7 @@ dashboard "alicloud_ecs_instance_detail" {
 
     table {
       title = "Network Interfaces"
-      query = query.alicloud_ecs_instance_network_interfaces
+      query = query.ecs_instance_network_interfaces
       args = {
         arn = self.input.instance_arn.value
       }
@@ -122,7 +122,7 @@ dashboard "alicloud_ecs_instance_detail" {
 
     table {
       title = "Dedicated Host"
-      query = query.alicloud_ecs_instance_dedicated_host
+      query = query.ecs_instance_dedicated_host
       args = {
         arn = self.input.instance_arn.value
       }
@@ -135,7 +135,7 @@ dashboard "alicloud_ecs_instance_detail" {
 
     table {
       title = "Security Groups"
-      query = query.alicloud_ecs_instance_security_groups
+      query = query.ecs_instance_security_groups
       args = {
         arn = self.input.instance_arn.value
       }
@@ -148,7 +148,7 @@ dashboard "alicloud_ecs_instance_detail" {
 
     table {
       title = "VPC Details"
-      query = query.alicloud_ecs_instance_vpc
+      query = query.ecs_instance_vpc
       args = {
         arn = self.input.instance_arn.value
       }
@@ -158,7 +158,7 @@ dashboard "alicloud_ecs_instance_detail" {
 
 }
 
-query "alicloud_ecs_instance_input" {
+query "ecs_instance_input" {
   sql = <<-EOQ
     select
       title as label,
@@ -175,7 +175,7 @@ query "alicloud_ecs_instance_input" {
   EOQ
 }
 
-query "alicloud_ecs_instance_status" {
+query "ecs_instance_status" {
   sql = <<-EOQ
     select
       'Status' as label,
@@ -190,7 +190,7 @@ query "alicloud_ecs_instance_status" {
 
 }
 
-query "alicloud_ecs_instance_os_type" {
+query "ecs_instance_os_type" {
   sql = <<-EOQ
     select
       'OS Type' as label,
@@ -205,7 +205,7 @@ query "alicloud_ecs_instance_os_type" {
 
 }
 
-query "alicloud_ecs_instance_type" {
+query "ecs_instance_type" {
   sql = <<-EOQ
     select
       'Type' as label,
@@ -219,7 +219,7 @@ query "alicloud_ecs_instance_type" {
   param "arn" {}
 }
 
-query "alicloud_ecs_instance_total_cores" {
+query "ecs_instance_total_cores" {
   sql = <<-EOQ
     select
       'Total Cores' as label,
@@ -233,7 +233,7 @@ query "alicloud_ecs_instance_total_cores" {
   param "arn" {}
 }
 
-query "alicloud_ecs_instance_public_access" {
+query "ecs_instance_public_access" {
   sql = <<-EOQ
     select
       'Public Access' as label,
@@ -248,7 +248,7 @@ query "alicloud_ecs_instance_public_access" {
   param "arn" {}
 }
 
-query "alicloud_ecs_instance_io_optimized" {
+query "ecs_instance_io_optimized" {
   sql = <<-EOQ
     select
       'I/O Optimized' as label,
@@ -263,7 +263,7 @@ query "alicloud_ecs_instance_io_optimized" {
   param "arn" {}
 }
 
-query "alicloud_ecs_instance_overview" {
+query "ecs_instance_overview" {
   sql = <<-EOQ
     select
       tags ->> 'Name' as "Name",
@@ -286,7 +286,7 @@ query "alicloud_ecs_instance_overview" {
   param "arn" {}
 }
 
-query "alicloud_ecs_instance_tags" {
+query "ecs_instance_tags" {
   sql = <<-EOQ
     select
       tag ->> 'TagKey' as "Key",
@@ -303,7 +303,7 @@ query "alicloud_ecs_instance_tags" {
   param "arn" {}
 }
 
-query "alicloud_ecs_instance_cpu_cores" {
+query "ecs_instance_cpu_cores" {
   sql = <<-EOQ
     select
       cpu_options_core_count  as "CPU Options Core Count",
@@ -317,7 +317,7 @@ query "alicloud_ecs_instance_cpu_cores" {
   param "arn" {}
 }
 
-query "alicloud_ecs_instance_network_interfaces" {
+query "ecs_instance_network_interfaces" {
   sql = <<-EOQ
     select
       p ->> 'NetworkInterfaceId' as "Network Interface ID",
@@ -337,7 +337,7 @@ query "alicloud_ecs_instance_network_interfaces" {
   param "arn" {}
 }
 
-query "alicloud_ecs_instance_dedicated_host" {
+query "ecs_instance_dedicated_host" {
   sql = <<-EOQ
     select
       dedicated_host_name as "Name",
@@ -354,7 +354,7 @@ query "alicloud_ecs_instance_dedicated_host" {
   param "arn" {}
 }
 
-query "alicloud_ecs_instance_security_groups" {
+query "ecs_instance_security_groups" {
   sql = <<-EOQ
     select
       group_id  as "Group ID",
@@ -370,7 +370,7 @@ query "alicloud_ecs_instance_security_groups" {
   param "arn" {}
 }
 
-query "alicloud_ecs_instance_vpc" {
+query "ecs_instance_vpc" {
   sql = <<-EOQ
     select
       vpc_attributes ->> 'VpcId' as "ID",

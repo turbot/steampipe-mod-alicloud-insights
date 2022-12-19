@@ -1,4 +1,4 @@
-dashboard "alicloud_vpc_detail" {
+dashboard "vpc_detail" {
 
   title         = "AliCloud VPC Detail"
   documentation = file("./dashboards/vpc/docs/vpc_detail.md")
@@ -9,7 +9,7 @@ dashboard "alicloud_vpc_detail" {
 
   input "vpc_id" {
     title = "Select a VPC:"
-    query = query.alicloud_vpc_input
+    query = query.vpc_input
     width = 4
   }
 
@@ -17,7 +17,7 @@ dashboard "alicloud_vpc_detail" {
 
     card {
       width = 2
-      query = query.alicloud_vpc_ipv4_count
+      query = query.vpc_ipv4_count
       args = {
         vpc_id = self.input.vpc_id.value
       }
@@ -25,7 +25,7 @@ dashboard "alicloud_vpc_detail" {
 
     card {
       width = 2
-      query = query.alicloud_vpc_ipv6_count
+      query = query.vpc_ipv6_count
       args = {
         vpc_id = self.input.vpc_id.value
       }
@@ -33,7 +33,7 @@ dashboard "alicloud_vpc_detail" {
 
     card {
       width = 2
-      query = query.alicloud_vpc_vswitch_count
+      query = query.vpc_vswitch_count
       args = {
         vpc_id = self.input.vpc_id.value
       }
@@ -41,7 +41,7 @@ dashboard "alicloud_vpc_detail" {
 
     card {
       width = 2
-      query = query.alicloud_vpc_is_default
+      query = query.vpc_is_default
       args = {
         vpc_id = self.input.vpc_id.value
       }
@@ -59,7 +59,7 @@ dashboard "alicloud_vpc_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.alicloud_vpc_overview
+        query = query.vpc_overview
         args = {
           vpc_id = self.input.vpc_id.value
         }
@@ -68,7 +68,7 @@ dashboard "alicloud_vpc_detail" {
       table {
         title = "Tags"
         width = 6
-        query = query.alicloud_vpc_tags
+        query = query.vpc_tags
         args = {
           vpc_id = self.input.vpc_id.value
         }
@@ -82,7 +82,7 @@ dashboard "alicloud_vpc_detail" {
 
       table {
         title = "CIDR Blocks"
-        query = query.alicloud_vpc_cidr_blocks
+        query = query.vpc_cidr_blocks
         args = {
           vpc_id = self.input.vpc_id.value
         }
@@ -90,7 +90,7 @@ dashboard "alicloud_vpc_detail" {
 
       table {
         title = "DHCP Options"
-        query = query.alicloud_vpc_dhcp_options
+        query = query.vpc_dhcp_options
         args = {
           vpc_id = self.input.vpc_id.value
         }
@@ -108,7 +108,7 @@ dashboard "alicloud_vpc_detail" {
       title = "vSwitches by Zone"
       type  = "column"
       width = 4
-      query = query.alicloud_vpc_vswitch_by_az
+      query = query.vpc_vswitch_by_az
       args = {
         vpc_id = self.input.vpc_id.value
       }
@@ -116,7 +116,7 @@ dashboard "alicloud_vpc_detail" {
     }
 
     table {
-      query = query.alicloud_vpc_vswitches_detail
+      query = query.vpc_vswitches_detail
       width = 8
       args = {
         vpc_id = self.input.vpc_id.value
@@ -129,7 +129,7 @@ dashboard "alicloud_vpc_detail" {
 
     table {
       title = "Route Tables"
-      query = query.alicloud_vpc_route_tables_detail
+      query = query.vpc_route_tables_detail
       width = 6
       args = {
         vpc_id = self.input.vpc_id.value
@@ -138,7 +138,7 @@ dashboard "alicloud_vpc_detail" {
 
     table {
       title = "Routes"
-      query = query.alicloud_vpc_routes_detail
+      query = query.vpc_routes_detail
       width = 6
       args = {
         vpc_id = self.input.vpc_id.value
@@ -156,7 +156,7 @@ dashboard "alicloud_vpc_detail" {
       base  = flow.nacl_flow
       title = "Ingress NACLs"
       width = 6
-      query = query.alicloud_vpc_ingress_nacl_sankey
+      query = query.vpc_ingress_nacl_sankey
       args = {
         vpc_id = self.input.vpc_id.value
       }
@@ -167,7 +167,7 @@ dashboard "alicloud_vpc_detail" {
       base  = flow.nacl_flow
       title = "Egress NACLs"
       width = 6
-      query = query.alicloud_vpc_egress_nacl_sankey
+      query = query.vpc_egress_nacl_sankey
       args = {
         vpc_id = self.input.vpc_id.value
       }
@@ -181,7 +181,7 @@ dashboard "alicloud_vpc_detail" {
     table {
       title = "Security Groups"
 
-      query = query.alicloud_vpc_security_groups_detail
+      query = query.vpc_security_groups_detail
       width = 6
       args = {
         vpc_id = self.input.vpc_id.value
@@ -190,7 +190,7 @@ dashboard "alicloud_vpc_detail" {
 
     table {
       title = "Gateways"
-      query = query.alicloud_vpc_gateways_detail
+      query = query.vpc_gateways_detail
       width = 6
       args = {
         vpc_id = self.input.vpc_id.value
@@ -219,7 +219,7 @@ flow "nacl_flow" {
 
 }
 
-query "alicloud_vpc_input" {
+query "vpc_input" {
   sql = <<-EOQ
     select
       title as label,
@@ -236,7 +236,7 @@ query "alicloud_vpc_input" {
   EOQ
 }
 
-query "alicloud_vpc_ipv4_count" {
+query "vpc_ipv4_count" {
   sql = <<-EOQ
     with cidrs as (
       select
@@ -263,7 +263,7 @@ query "alicloud_vpc_ipv4_count" {
   param "vpc_id" {}
 }
 
-query "alicloud_vpc_ipv6_count" {
+query "vpc_ipv6_count" {
   sql = <<-EOQ
     with cidrs as (
       select
@@ -283,7 +283,7 @@ query "alicloud_vpc_ipv6_count" {
   param "vpc_id" {}
 }
 
-query "alicloud_vpc_vswitch_count" {
+query "vpc_vswitch_count" {
   sql = <<-EOQ
     select
       'vSwitches' as label,
@@ -298,7 +298,7 @@ query "alicloud_vpc_vswitch_count" {
   param "vpc_id" {}
 }
 
-query "alicloud_vpc_is_default" {
+query "vpc_is_default" {
   sql = <<-EOQ
     select
       'Default VPC' as label,
@@ -313,7 +313,7 @@ query "alicloud_vpc_is_default" {
   param "vpc_id" {}
 }
 
-query "alicloud_vpc_overview" {
+query "vpc_overview" {
   sql = <<-EOQ
     select
       vpc_id as "VPC ID",
@@ -329,7 +329,7 @@ query "alicloud_vpc_overview" {
   param "vpc_id" {}
 }
 
-query "alicloud_vpc_tags" {
+query "vpc_tags" {
   sql = <<-EOQ
     select
       tag ->> 'Key' as "Key",
@@ -346,7 +346,7 @@ query "alicloud_vpc_tags" {
   param "vpc_id" {}
 }
 
-query "alicloud_vpc_cidr_blocks" {
+query "vpc_cidr_blocks" {
   sql = <<-EOQ
     select
       cidr_block as "CIDR Block",
@@ -378,7 +378,7 @@ query "alicloud_vpc_cidr_blocks" {
   param "vpc_id" {}
 }
 
-query "alicloud_vpc_dhcp_options" {
+query "vpc_dhcp_options" {
   sql = <<-EOQ
     select
       distinct dhcp_options_set_id as "DHCP Options Set ID",
@@ -400,7 +400,7 @@ query "alicloud_vpc_dhcp_options" {
   param "vpc_id" {}
 }
 
-query "alicloud_vpc_vswitch_by_az" {
+query "vpc_vswitch_by_az" {
   sql = <<-EOQ
     select
       zone_id,
@@ -418,7 +418,7 @@ query "alicloud_vpc_vswitch_by_az" {
   param "vpc_id" {}
 }
 
-query "alicloud_vpc_vswitches_detail" {
+query "vpc_vswitches_detail" {
   sql = <<-EOQ
     with vSwitches as (
       select
@@ -450,7 +450,7 @@ query "alicloud_vpc_vswitches_detail" {
   param "vpc_id" {}
 }
 
-query "alicloud_vpc_route_tables_detail" {
+query "vpc_route_tables_detail" {
   sql = <<-EOQ
     select
       route_table_id as "Route Table ID",
@@ -466,7 +466,7 @@ query "alicloud_vpc_route_tables_detail" {
   param "vpc_id" {}
 }
 
-query "alicloud_vpc_routes_detail" {
+query "vpc_routes_detail" {
   sql = <<-EOQ
     select
       route_table_id as "Route Table ID",
@@ -492,7 +492,7 @@ query "alicloud_vpc_routes_detail" {
   param "vpc_id" {}
 }
 
-query "alicloud_vpc_security_groups_detail" {
+query "vpc_security_groups_detail" {
   sql = <<-EOQ
     select
       name as "Group Name",
@@ -508,7 +508,7 @@ query "alicloud_vpc_security_groups_detail" {
   param "vpc_id" {}
 }
 
-query "alicloud_vpc_gateways_detail" {
+query "vpc_gateways_detail" {
   sql = <<-EOQ
     select
       vpn_gateway_id as "ID",
@@ -534,7 +534,7 @@ query "alicloud_vpc_gateways_detail" {
   param "vpc_id" {}
 }
 
-query "alicloud_vpc_ingress_nacl_sankey" {
+query "vpc_ingress_nacl_sankey" {
   sql = <<-EOQ
     with aces as (
       select
@@ -639,7 +639,7 @@ query "alicloud_vpc_ingress_nacl_sankey" {
   param "vpc_id" {}
 }
 
-query "alicloud_vpc_egress_nacl_sankey" {
+query "vpc_egress_nacl_sankey" {
   sql = <<-EOQ
     with aces as (
       select

@@ -1,4 +1,4 @@
-dashboard "alicloud_ecs_disk_detail" {
+dashboard "ecs_disk_detail" {
 
   title         = "AliCloud ECS Disk Detail"
   documentation = file("./dashboards/ecs/docs/ecs_disk_detail.md")
@@ -9,7 +9,7 @@ dashboard "alicloud_ecs_disk_detail" {
 
   input "disk_arn" {
     title = "Select a disk:"
-    query = query.alicloud_ecs_disk_input
+    query = query.ecs_disk_input
     width = 4
   }
 
@@ -17,7 +17,7 @@ dashboard "alicloud_ecs_disk_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ecs_disk_storage
+      query = query.ecs_disk_storage
       args = {
         arn = self.input.disk_arn.value
       }
@@ -25,7 +25,7 @@ dashboard "alicloud_ecs_disk_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ecs_disk_iops
+      query = query.ecs_disk_iops
       args = {
         arn = self.input.disk_arn.value
       }
@@ -33,7 +33,7 @@ dashboard "alicloud_ecs_disk_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ecs_disk_category
+      query = query.ecs_disk_category
       args = {
         arn = self.input.disk_arn.value
       }
@@ -41,7 +41,7 @@ dashboard "alicloud_ecs_disk_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ecs_disk_attached_instances_count
+      query = query.ecs_disk_attached_instances_count
       args = {
         arn = self.input.disk_arn.value
       }
@@ -49,7 +49,7 @@ dashboard "alicloud_ecs_disk_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ecs_disk_encryption
+      query = query.ecs_disk_encryption
       args = {
         arn = self.input.disk_arn.value
       }
@@ -67,7 +67,7 @@ dashboard "alicloud_ecs_disk_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.alicloud_ecs_disk_overview
+        query = query.ecs_disk_overview
         args = {
           arn = self.input.disk_arn.value
         }
@@ -76,7 +76,7 @@ dashboard "alicloud_ecs_disk_detail" {
       table {
         title = "Tags"
         width = 6
-        query = query.alicloud_ecs_disk_tags
+        query = query.ecs_disk_tags
         args = {
           arn = self.input.disk_arn.value
         }
@@ -89,7 +89,7 @@ dashboard "alicloud_ecs_disk_detail" {
 
       table {
         title = "Attached To"
-        query = query.alicloud_ecs_disk_attached_instances
+        query = query.ecs_disk_attached_instances
         args = {
           arn = self.input.disk_arn.value
         }
@@ -99,16 +99,16 @@ dashboard "alicloud_ecs_disk_detail" {
         }
 
         column "Instance ID" {
-          href = "${dashboard.alicloud_ecs_instance_detail.url_path}?input.instance_arn={{.'Instance ARN' | @uri}}"
+          href = "${dashboard.ecs_instance_detail.url_path}?input.instance_arn={{.'Instance ARN' | @uri}}"
         }
       }
 
       table {
         title = "Encryption Details"
         column "KMS Key ID" {
-          href = "${dashboard.alicloud_kms_key_detail.url_path}?input.key_arn={{.'KMS Key ID' | @uri}}"
+          href = "${dashboard.kms_key_detail.url_path}?input.key_arn={{.'KMS Key ID' | @uri}}"
         }
-        query = query.alicloud_ecs_disk_encryption_status
+        query = query.ecs_disk_encryption_status
         args = {
           arn = self.input.disk_arn.value
         }
@@ -118,7 +118,7 @@ dashboard "alicloud_ecs_disk_detail" {
 
 }
 
-query "alicloud_ecs_disk_input" {
+query "ecs_disk_input" {
   sql = <<-EOQ
     select
       title as label,
@@ -135,7 +135,7 @@ query "alicloud_ecs_disk_input" {
   EOQ
 }
 
-query "alicloud_ecs_disk_storage" {
+query "ecs_disk_storage" {
   sql = <<-EOQ
     select
       'Storage (GB)' as label,
@@ -149,7 +149,7 @@ query "alicloud_ecs_disk_storage" {
   param "arn" {}
 }
 
-query "alicloud_ecs_disk_iops" {
+query "ecs_disk_iops" {
   sql = <<-EOQ
     select
       'IOPS' as label,
@@ -163,7 +163,7 @@ query "alicloud_ecs_disk_iops" {
   param "arn" {}
 }
 
-query "alicloud_ecs_disk_category" {
+query "ecs_disk_category" {
   sql = <<-EOQ
     select
       'Category' as label,
@@ -177,7 +177,7 @@ query "alicloud_ecs_disk_category" {
   param "arn" {}
 }
 
-query "alicloud_ecs_disk_attached_instances_count" {
+query "ecs_disk_attached_instances_count" {
   sql = <<-EOQ
     select
       'Attached Instances' as label,
@@ -198,7 +198,7 @@ query "alicloud_ecs_disk_attached_instances_count" {
   param "arn" {}
 }
 
-query "alicloud_ecs_disk_encryption" {
+query "ecs_disk_encryption" {
   sql = <<-EOQ
     select
       'Encryption' as label,
@@ -213,7 +213,7 @@ query "alicloud_ecs_disk_encryption" {
   param "arn" {}
 }
 
-query "alicloud_ecs_disk_attached_instances" {
+query "ecs_disk_attached_instances" {
   sql = <<-EOQ
     select
       i.instance_id as "Instance ID",
@@ -235,7 +235,7 @@ query "alicloud_ecs_disk_attached_instances" {
   param "arn" {}
 }
 
-query "alicloud_ecs_disk_encryption_status" {
+query "ecs_disk_encryption_status" {
   sql = <<-EOQ
     select
       case when encrypted then 'Enabled' else 'Disabled' end as "Encryption",
@@ -249,7 +249,7 @@ query "alicloud_ecs_disk_encryption_status" {
   param "arn" {}
 }
 
-query "alicloud_ecs_disk_overview" {
+query "ecs_disk_overview" {
   sql = <<-EOQ
     select
       disk_id as "Disk ID",
@@ -269,7 +269,7 @@ query "alicloud_ecs_disk_overview" {
   param "arn" {}
 }
 
-query "alicloud_ecs_disk_tags" {
+query "ecs_disk_tags" {
   sql = <<-EOQ
     select
       tag ->> 'Key' as "Key",

@@ -1,4 +1,4 @@
-dashboard "alicloud_ecs_security_group_detail" {
+dashboard "ecs_security_group_detail" {
 
   title         = "AliCloud ECS Security Group Detail"
   documentation = file("./dashboards/ecs/docs/ecs_security_group_detail.md")
@@ -9,7 +9,7 @@ dashboard "alicloud_ecs_security_group_detail" {
 
   input "security_group_id" {
     title = "Select a security group:"
-    query = query.alicloud_ecs_security_group_input
+    query = query.ecs_security_group_input
     width = 4
   }
 
@@ -17,7 +17,7 @@ dashboard "alicloud_ecs_security_group_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ecs_security_group_unassociated
+      query = query.ecs_security_group_unassociated
       args = {
         id = self.input.security_group_id.value
       }
@@ -25,7 +25,7 @@ dashboard "alicloud_ecs_security_group_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ecs_security_unrestricted_ingress
+      query = query.ecs_security_unrestricted_ingress
       args = {
         id = self.input.security_group_id.value
       }
@@ -33,7 +33,7 @@ dashboard "alicloud_ecs_security_group_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ecs_security_unrestricted_egress
+      query = query.ecs_security_unrestricted_egress
       args = {
         id = self.input.security_group_id.value
       }
@@ -50,7 +50,7 @@ dashboard "alicloud_ecs_security_group_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.alicloud_ecs_security_group_overview
+        query = query.ecs_security_group_overview
         args = {
           id = self.input.security_group_id.value
         }
@@ -60,7 +60,7 @@ dashboard "alicloud_ecs_security_group_detail" {
       table {
         title = "Tags"
         width = 6
-        query = query.alicloud_ecs_security_group_tags
+        query = query.ecs_security_group_tags
         args = {
           id = self.input.security_group_id.value
         }
@@ -71,7 +71,7 @@ dashboard "alicloud_ecs_security_group_detail" {
 
       table {
         title = "Associated to"
-        query = query.alicloud_ecs_security_group_associated
+        query = query.ecs_security_group_associated
         args = {
           id = self.input.security_group_id.value
         }
@@ -81,7 +81,7 @@ dashboard "alicloud_ecs_security_group_detail" {
         }
 
         column "Name" {
-          href = "${dashboard.alicloud_ecs_instance_detail.url_path}?input.instance_arn={{.ARN | @uri}}"
+          href = "${dashboard.ecs_instance_detail.url_path}?input.instance_arn={{.ARN | @uri}}"
         }
       }
     }
@@ -95,7 +95,7 @@ dashboard "alicloud_ecs_security_group_detail" {
     flow {
       base  = flow.security_group_rules_sankey
       title = "Ingress Analysis"
-      query = query.alicloud_ecs_security_group_ingress_rule_sankey
+      query = query.ecs_security_group_ingress_rule_sankey
       args = {
         id = self.input.security_group_id.value
       }
@@ -103,7 +103,7 @@ dashboard "alicloud_ecs_security_group_detail" {
 
     table {
       title = "Ingress Rules"
-      query = query.alicloud_ecs_security_group_ingress_rules
+      query = query.ecs_security_group_ingress_rules
       args = {
         id = self.input.security_group_id.value
       }
@@ -118,7 +118,7 @@ dashboard "alicloud_ecs_security_group_detail" {
     flow {
       base  = flow.security_group_rules_sankey
       title = "Egress Analysis"
-      query = query.alicloud_ecs_security_group_egress_rule_sankey
+      query = query.ecs_security_group_egress_rule_sankey
       args = {
         id = self.input.security_group_id.value
       }
@@ -126,7 +126,7 @@ dashboard "alicloud_ecs_security_group_detail" {
 
     table {
       title = "Egress Rules"
-      query = query.alicloud_ecs_security_group_egress_rules
+      query = query.ecs_security_group_egress_rules
       args = {
         id = self.input.security_group_id.value
       }
@@ -149,7 +149,7 @@ flow "security_group_rules_sankey" {
 
 }
 
-query "alicloud_ecs_security_group_input" {
+query "ecs_security_group_input" {
   sql = <<-EOQ
     select
       title as label,
@@ -166,7 +166,7 @@ query "alicloud_ecs_security_group_input" {
   EOQ
 }
 
-query "alicloud_ecs_security_group_unassociated" {
+query "ecs_security_group_unassociated" {
   sql = <<-EOQ
     with associated_sg as (
       select
@@ -192,7 +192,7 @@ query "alicloud_ecs_security_group_unassociated" {
 
 }
 
-query "alicloud_ecs_security_unrestricted_ingress" {
+query "ecs_security_unrestricted_ingress" {
   sql = <<-EOQ
     with ingress_sg as (
       select
@@ -221,7 +221,7 @@ query "alicloud_ecs_security_unrestricted_ingress" {
 
 }
 
-query "alicloud_ecs_security_unrestricted_egress" {
+query "ecs_security_unrestricted_egress" {
   sql = <<-EOQ
     with egress_sg as (
       select
@@ -249,7 +249,7 @@ query "alicloud_ecs_security_unrestricted_egress" {
   param "id" {}
 }
 
-query "alicloud_ecs_security_group_overview" {
+query "ecs_security_group_overview" {
   sql = <<-EOQ
     select
       name as "Group Name",
@@ -268,7 +268,7 @@ query "alicloud_ecs_security_group_overview" {
   param "id" {}
 }
 
-query "alicloud_ecs_security_group_tags" {
+query "ecs_security_group_tags" {
   sql = <<-EOQ
     select
       tag ->> 'TagKey' as "Key",
@@ -285,7 +285,7 @@ query "alicloud_ecs_security_group_tags" {
   param "id" {}
 }
 
-query "alicloud_ecs_security_group_associated" {
+query "ecs_security_group_associated" {
   sql = <<-EOQ
     select
       name as "Name",
@@ -303,7 +303,7 @@ query "alicloud_ecs_security_group_associated" {
   param "id" {}
 }
 
-query "alicloud_ecs_security_group_ingress_rules" {
+query "ecs_security_group_ingress_rules" {
   sql = <<-EOQ
     select
       concat(text(p ->> 'SourceCidrIp'), text(p ->> 'Ipv6SourceCidrIp'), text(p ->> 'SourceGroupId'),text(p ->> 'SourcePrefixListId')) as "Source",
@@ -329,7 +329,7 @@ query "alicloud_ecs_security_group_ingress_rules" {
   param "id" {}
 }
 
-query "alicloud_ecs_security_group_egress_rules" {
+query "ecs_security_group_egress_rules" {
   sql = <<-EOQ
     select
       concat(text(p ->> 'DestCidrIp'), text(p ->> 'Ipv6DestCidrIp'), text(p ->> 'DestGroupId'),text(p ->> 'DestPrefixListId')) as "Destination",
@@ -355,7 +355,7 @@ query "alicloud_ecs_security_group_egress_rules" {
   param "id" {}
 }
 
-query "alicloud_ecs_security_group_ingress_rule_sankey" {
+query "ecs_security_group_ingress_rule_sankey" {
   sql = <<-EOQ
    with associations as (
     select
@@ -468,7 +468,7 @@ query "alicloud_ecs_security_group_ingress_rule_sankey" {
   param "id" {}
 }
 
-query "alicloud_ecs_security_group_egress_rule_sankey" {
+query "ecs_security_group_egress_rule_sankey" {
   sql = <<-EOQ
    with associations as (
     select

@@ -1,4 +1,4 @@
-dashboard "alicloud_kms_key_detail" {
+dashboard "kms_key_detail" {
 
   title         = "AliCloud Key Detail"
   documentation = file("./dashboards/kms/docs/kms_key_detail.md")
@@ -10,7 +10,7 @@ dashboard "alicloud_kms_key_detail" {
 
   input "key_arn" {
     title = "Select a key:"
-    query = query.alicloud_kms_key_input
+    query = query.kms_key_input
     width = 4
   }
 
@@ -18,7 +18,7 @@ dashboard "alicloud_kms_key_detail" {
 
     card {
       width = 2
-      query = query.alicloud_kms_key_origin
+      query = query.kms_key_origin
       args = {
         arn = self.input.key_arn.value
       }
@@ -26,7 +26,7 @@ dashboard "alicloud_kms_key_detail" {
 
     card {
       width = 3
-      query = query.alicloud_kms_key_state
+      query = query.kms_key_state
       args = {
         arn = self.input.key_arn.value
       }
@@ -34,7 +34,7 @@ dashboard "alicloud_kms_key_detail" {
 
     card {
       width = 2
-      query = query.alicloud_kms_key_rotation_enabled
+      query = query.kms_key_rotation_enabled
       args = {
         arn = self.input.key_arn.value
       }
@@ -42,7 +42,7 @@ dashboard "alicloud_kms_key_detail" {
 
     card {
       width = 2
-      query = query.alicloud_kms_deletion_protection
+      query = query.kms_deletion_protection
       args = {
         arn = self.input.key_arn.value
       }
@@ -50,7 +50,7 @@ dashboard "alicloud_kms_key_detail" {
 
     card {
       width = 3
-      query = query.alicloud_kms_protection_level
+      query = query.kms_protection_level
       args = {
         arn = self.input.key_arn.value
       }
@@ -68,7 +68,7 @@ dashboard "alicloud_kms_key_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.alicloud_kms_key_overview
+        query = query.kms_key_overview
         args = {
           arn = self.input.key_arn.value
         }
@@ -78,7 +78,7 @@ dashboard "alicloud_kms_key_detail" {
       table {
         title = "Tags"
         width = 6
-        query = query.alicloud_kms_key_tags
+        query = query.kms_key_tags
         args = {
           arn = self.input.key_arn.value
         }
@@ -92,7 +92,7 @@ dashboard "alicloud_kms_key_detail" {
 
       table {
         title = "Key Age"
-        query = query.alicloud_kms_key_age
+        query = query.kms_key_age
         args = {
           arn = self.input.key_arn.value
         }
@@ -104,7 +104,7 @@ dashboard "alicloud_kms_key_detail" {
 
   table {
     title = "Key Aliases"
-    query = query.alicloud_kms_key_aliases
+    query = query.kms_key_aliases
     args = {
       arn = self.input.key_arn.value
     }
@@ -112,7 +112,7 @@ dashboard "alicloud_kms_key_detail" {
 
 }
 
-query "alicloud_kms_key_input" {
+query "kms_key_input" {
   sql = <<-EOQ
     select
       title as label,
@@ -128,7 +128,7 @@ query "alicloud_kms_key_input" {
   EOQ
 }
 
-query "alicloud_kms_key_origin" {
+query "kms_key_origin" {
   sql = <<-EOQ
     select
       'Origin' as label,
@@ -142,7 +142,7 @@ query "alicloud_kms_key_origin" {
   param "arn" {}
 }
 
-query "alicloud_kms_key_state" {
+query "kms_key_state" {
   sql = <<-EOQ
     select
       'State' as label,
@@ -156,7 +156,7 @@ query "alicloud_kms_key_state" {
   param "arn" {}
 }
 
-query "alicloud_kms_key_rotation_enabled" {
+query "kms_key_rotation_enabled" {
   sql = <<-EOQ
     select
       'Key Rotation' as label,
@@ -171,7 +171,7 @@ query "alicloud_kms_key_rotation_enabled" {
   param "arn" {}
 }
 
-query "alicloud_kms_deletion_protection" {
+query "kms_deletion_protection" {
   sql = <<-EOQ
     select
       'Deletion Protection' as label,
@@ -186,7 +186,7 @@ query "alicloud_kms_deletion_protection" {
   param "arn" {}
 }
 
-query "alicloud_kms_protection_level" {
+query "kms_protection_level" {
   sql = <<-EOQ
     select
       'Protection Level' as label,
@@ -201,7 +201,7 @@ query "alicloud_kms_protection_level" {
   param "arn" {}
 }
 
-query "alicloud_kms_key_overview" {
+query "kms_key_overview" {
   sql = <<-EOQ
     select
       key_id as "ID",
@@ -219,7 +219,7 @@ query "alicloud_kms_key_overview" {
   param "arn" {}
 }
 
-query "alicloud_kms_key_tags" {
+query "kms_key_tags" {
   sql = <<-EOQ
     select
       tag ->> 'TagKey' as "Key",
@@ -236,7 +236,7 @@ query "alicloud_kms_key_tags" {
   param "arn" {}
 }
 
-query "alicloud_kms_key_age" {
+query "kms_key_age" {
   sql = <<-EOQ
     select
       creation_date as "Creation Date",
@@ -251,7 +251,7 @@ query "alicloud_kms_key_age" {
   param "arn" {}
 }
 
-query "alicloud_kms_key_aliases" {
+query "kms_key_aliases" {
   sql = <<-EOQ
     select
       p ->> 'AliasArn' as "Alias Arn",

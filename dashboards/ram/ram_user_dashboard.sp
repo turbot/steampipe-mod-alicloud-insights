@@ -1,4 +1,4 @@
-dashboard "alicloud_ram_user_dashboard" {
+dashboard "ram_user_dashboard" {
 
   title         = "AliCloud RAM User Dashboard"
   documentation = file("./dashboards/ram/docs/ram_user_dashboard.md")
@@ -11,20 +11,20 @@ dashboard "alicloud_ram_user_dashboard" {
 
     # Analysis
     card {
-      query = query.alicloud_ram_user_count
+      query = query.ram_user_count
       width = 2
     }
 
     # Assessments
 
     card {
-      query = query.alicloud_ram_user_no_mfa_count
+      query = query.ram_user_no_mfa_count
       width = 2
-      href  = dashboard.alicloud_ram_user_mfa_report.url_path
+      href  = dashboard.ram_user_mfa_report.url_path
     }
 
     card {
-      query = query.alicloud_ram_users_with_direct_policy_count
+      query = query.ram_users_with_direct_policy_count
       width = 2
     }
 
@@ -35,7 +35,7 @@ dashboard "alicloud_ram_user_dashboard" {
 
     chart {
       title = "MFA Status"
-      query = query.alicloud_ram_users_by_mfa_enabled
+      query = query.ram_users_by_mfa_enabled
       type  = "donut"
       width = 3
 
@@ -51,7 +51,7 @@ dashboard "alicloud_ram_user_dashboard" {
 
     chart {
       title = "Direct Attached Policies"
-      query = query.alicloud_ram_users_with_direct_attached_policy
+      query = query.ram_users_with_direct_attached_policy
       type  = "donut"
       width = 3
 
@@ -71,14 +71,14 @@ dashboard "alicloud_ram_user_dashboard" {
 
     chart {
       title = "Users by Account"
-      query = query.alicloud_ram_users_by_account
+      query = query.ram_users_by_account
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Users by Age"
-      query = query.alicloud_ram_user_by_creation_month
+      query = query.ram_user_by_creation_month
       type  = "column"
       width = 4
     }
@@ -89,7 +89,7 @@ dashboard "alicloud_ram_user_dashboard" {
 
 # Card Queries
 
-query "alicloud_ram_user_count" {
+query "ram_user_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -99,7 +99,7 @@ query "alicloud_ram_user_count" {
   EOQ
 }
 
-query "alicloud_ram_user_no_mfa_count" {
+query "ram_user_no_mfa_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -112,7 +112,7 @@ query "alicloud_ram_user_no_mfa_count" {
   EOQ
 }
 
-query "alicloud_ram_users_with_direct_policy_count" {
+query "ram_users_with_direct_policy_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -127,7 +127,7 @@ query "alicloud_ram_users_with_direct_policy_count" {
 
 # Assessment Queries
 
-query "alicloud_ram_users_by_mfa_enabled" {
+query "ram_users_by_mfa_enabled" {
   sql = <<-EOQ
     with mfa_stat as (
       select
@@ -148,7 +148,7 @@ query "alicloud_ram_users_by_mfa_enabled" {
   EOQ
 }
 
-query "alicloud_ram_users_with_direct_attached_policy" {
+query "ram_users_with_direct_attached_policy" {
   sql = <<-EOQ
     with direct_attached_policies as (
       select
@@ -171,7 +171,7 @@ query "alicloud_ram_users_with_direct_attached_policy" {
 
 # Analysis Queries
 
-query "alicloud_ram_users_by_account" {
+query "ram_users_by_account" {
   sql = <<-EOQ
     select
       a.title,
@@ -188,7 +188,7 @@ query "alicloud_ram_users_by_account" {
   EOQ
 }
 
-query "alicloud_ram_user_by_creation_month" {
+query "ram_user_by_creation_month" {
   sql = <<-EOQ
     with users as (
       select

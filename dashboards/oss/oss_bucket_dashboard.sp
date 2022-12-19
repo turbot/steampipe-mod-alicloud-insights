@@ -1,4 +1,4 @@
-dashboard "alicloud_oss_bucket_dashboard" {
+dashboard "oss_bucket_dashboard" {
 
   title         = "AliCloud OSS Bucket Dashboard"
   documentation = file("./dashboards/oss/docs/oss_bucket_dashboard.md")
@@ -11,38 +11,38 @@ dashboard "alicloud_oss_bucket_dashboard" {
 
     # Analysis
     card {
-      query = query.alicloud_oss_bucket_count
+      query = query.oss_bucket_count
       width = 2
     }
 
     # Assessments
     card {
-      query = query.alicloud_oss_bucket_public_access_not_blocked_count
+      query = query.oss_bucket_public_access_not_blocked_count
       width = 2
-      href  = dashboard.alicloud_oss_bucket_public_access_report.url_path
+      href  = dashboard.oss_bucket_public_access_report.url_path
     }
 
     card {
-      query = query.alicloud_oss_bucket_unencrypted_count
+      query = query.oss_bucket_unencrypted_count
       width = 2
-      href  = dashboard.alicloud_oss_bucket_encryption_report.url_path
+      href  = dashboard.oss_bucket_encryption_report.url_path
     }
 
     card {
-      query = query.alicloud_oss_bucket_ssl_not_enforced_count
+      query = query.oss_bucket_ssl_not_enforced_count
       width = 2
     }
 
     card {
-      query = query.alicloud_oss_bucket_logging_disabled_count
+      query = query.oss_bucket_logging_disabled_count
       width = 2
-      href  = dashboard.alicloud_oss_bucket_logging_report.url_path
+      href  = dashboard.oss_bucket_logging_report.url_path
     }
 
     card {
-      query = query.alicloud_oss_bucket_versioning_disabled_count
+      query = query.oss_bucket_versioning_disabled_count
       width = 2
-      href  = dashboard.alicloud_oss_bucket_lifecycle_report.url_path
+      href  = dashboard.oss_bucket_lifecycle_report.url_path
     }
 
   }
@@ -53,7 +53,7 @@ dashboard "alicloud_oss_bucket_dashboard" {
 
     chart {
       title = "Public/Private"
-      query = query.alicloud_oss_bucket_by_public_access_blocked_status
+      query = query.oss_bucket_by_public_access_blocked_status
       type  = "donut"
       width = 4
 
@@ -69,7 +69,7 @@ dashboard "alicloud_oss_bucket_dashboard" {
 
     chart {
       title = "Encryption Status"
-      query = query.alicloud_oss_bucket_by_default_encryption_status
+      query = query.oss_bucket_by_default_encryption_status
       type  = "donut"
       width = 4
 
@@ -85,7 +85,7 @@ dashboard "alicloud_oss_bucket_dashboard" {
 
     chart {
       title = "HTTPS Enforcement Status"
-      query = query.alicloud_oss_bucket_by_ssl_enforced_status
+      query = query.oss_bucket_by_ssl_enforced_status
       type  = "donut"
       width = 4
 
@@ -101,7 +101,7 @@ dashboard "alicloud_oss_bucket_dashboard" {
 
     chart {
       title = "Logging Status"
-      query = query.alicloud_oss_bucket_by_logging_status
+      query = query.oss_bucket_by_logging_status
       type  = "donut"
       width = 4
 
@@ -117,7 +117,7 @@ dashboard "alicloud_oss_bucket_dashboard" {
 
     chart {
       title = "Versioning Status"
-      query = query.alicloud_oss_bucket_by_versioning_status
+      query = query.oss_bucket_by_versioning_status
       type  = "donut"
       width = 4
 
@@ -139,28 +139,28 @@ dashboard "alicloud_oss_bucket_dashboard" {
 
     chart {
       title = "Buckets by Account"
-      query = query.alicloud_oss_bucket_by_account
+      query = query.oss_bucket_by_account
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Buckets by Region"
-      query = query.alicloud_oss_bucket_by_region
+      query = query.oss_bucket_by_region
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Buckets by Age"
-      query = query.alicloud_oss_bucket_by_creation_month
+      query = query.oss_bucket_by_creation_month
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Buckets by Storage"
-      query = query.alicloud_oss_bucket_by_storage_class
+      query = query.oss_bucket_by_storage_class
       type  = "column"
       width = 3
     }
@@ -171,13 +171,13 @@ dashboard "alicloud_oss_bucket_dashboard" {
 
 # Card Queries
 
-query "alicloud_oss_bucket_count" {
+query "oss_bucket_count" {
   sql = <<-EOQ
     select count(*) as "Buckets" from alicloud_oss_bucket;
   EOQ
 }
 
-query "alicloud_oss_bucket_public_access_not_blocked_count" {
+query "oss_bucket_public_access_not_blocked_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -190,7 +190,7 @@ query "alicloud_oss_bucket_public_access_not_blocked_count" {
   EOQ
 }
 
-query "alicloud_oss_bucket_unencrypted_count" {
+query "oss_bucket_unencrypted_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -203,7 +203,7 @@ query "alicloud_oss_bucket_unencrypted_count" {
   EOQ
 }
 
-query "alicloud_oss_bucket_logging_disabled_count" {
+query "oss_bucket_logging_disabled_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -216,7 +216,7 @@ query "alicloud_oss_bucket_logging_disabled_count" {
   EOQ
 }
 
-query "alicloud_oss_bucket_versioning_disabled_count" {
+query "oss_bucket_versioning_disabled_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -229,7 +229,7 @@ query "alicloud_oss_bucket_versioning_disabled_count" {
   EOQ
 }
 
-query "alicloud_oss_bucket_ssl_not_enforced_count" {
+query "oss_bucket_ssl_not_enforced_count" {
   sql = <<-EOQ
     with ssl_ok as (
       select
@@ -262,7 +262,7 @@ query "alicloud_oss_bucket_ssl_not_enforced_count" {
 
 # Assessment Queries
 
-query "alicloud_oss_bucket_by_public_access_blocked_status" {
+query "oss_bucket_by_public_access_blocked_status" {
   sql = <<-EOQ
     with public_block_status as (
       select
@@ -284,7 +284,7 @@ query "alicloud_oss_bucket_by_public_access_blocked_status" {
   EOQ
 }
 
-query "alicloud_oss_bucket_by_default_encryption_status" {
+query "oss_bucket_by_default_encryption_status" {
   sql = <<-EOQ
     with default_encryption as (
       select
@@ -303,7 +303,7 @@ query "alicloud_oss_bucket_by_default_encryption_status" {
   EOQ
 }
 
-query "alicloud_oss_bucket_by_logging_status" {
+query "oss_bucket_by_logging_status" {
   sql = <<-EOQ
     with logging_status as (
       select
@@ -322,7 +322,7 @@ query "alicloud_oss_bucket_by_logging_status" {
   EOQ
 }
 
-query "alicloud_oss_bucket_by_versioning_status" {
+query "oss_bucket_by_versioning_status" {
   sql = <<-EOQ
     with versioning_status as (
       select
@@ -342,7 +342,7 @@ query "alicloud_oss_bucket_by_versioning_status" {
   EOQ
 }
 
-query "alicloud_oss_bucket_by_ssl_enforced_status" {
+query "oss_bucket_by_ssl_enforced_status" {
   sql = <<-EOQ
     with ssl_ok as (
       select
@@ -381,7 +381,7 @@ query "alicloud_oss_bucket_by_ssl_enforced_status" {
 
 # Analysis Queries
 
-query "alicloud_oss_bucket_by_account" {
+query "oss_bucket_by_account" {
   sql = <<-EOQ
     select
       a.title as "account",
@@ -397,7 +397,7 @@ query "alicloud_oss_bucket_by_account" {
   EOQ
 }
 
-query "alicloud_oss_bucket_by_region" {
+query "oss_bucket_by_region" {
   sql = <<-EOQ
     select
       region,
@@ -409,7 +409,7 @@ query "alicloud_oss_bucket_by_region" {
   EOQ
 }
 
-query "alicloud_oss_bucket_by_creation_month" {
+query "oss_bucket_by_creation_month" {
   sql = <<-EOQ
     with buckets as (
       select
@@ -454,7 +454,7 @@ query "alicloud_oss_bucket_by_creation_month" {
   EOQ
 }
 
-query "alicloud_oss_bucket_by_storage_class" {
+query "oss_bucket_by_storage_class" {
   sql = <<-EOQ
     select
       storage_class,

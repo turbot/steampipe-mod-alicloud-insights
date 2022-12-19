@@ -1,4 +1,4 @@
-dashboard "alicloud_ecs_snapshot_dashboard" {
+dashboard "ecs_snapshot_dashboard" {
 
   title         = "AliCloud ECS Snapshot Dashboard"
   documentation = file("./dashboards/ecs/docs/ecs_snapshot_dashboard.md")
@@ -10,22 +10,22 @@ dashboard "alicloud_ecs_snapshot_dashboard" {
   container {
 
     card {
-      query = query.alicloud_ecs_snapshot_count
+      query = query.ecs_snapshot_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ecs_snapshot_storage_total
+      query = query.ecs_snapshot_storage_total
       width = 2
     }
 
     card {
-      query = query.alicloud_ecs_unused_snapshot_count
+      query = query.ecs_unused_snapshot_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ecs_unencrypted_snapshot_count
+      query = query.ecs_unencrypted_snapshot_count
       width = 2
     }
 
@@ -37,7 +37,7 @@ dashboard "alicloud_ecs_snapshot_dashboard" {
 
     chart {
       title = "Unused Snapshot Status"
-      query = query.alicloud_ecs_snapshot_by_usage
+      query = query.ecs_snapshot_by_usage
       type  = "donut"
       width = 4
 
@@ -53,7 +53,7 @@ dashboard "alicloud_ecs_snapshot_dashboard" {
 
     chart {
       title = "Encryption Status"
-      query = query.alicloud_ecs_snapshot_by_encryption_status
+      query = query.ecs_snapshot_by_encryption_status
       type  = "donut"
       width = 4
 
@@ -75,21 +75,21 @@ dashboard "alicloud_ecs_snapshot_dashboard" {
 
     chart {
       title = "Snapshots by Account"
-      query = query.alicloud_ecs_snapshot_by_account
+      query = query.ecs_snapshot_by_account
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Snapshots by Region"
-      query = query.alicloud_ecs_snapshot_by_region
+      query = query.ecs_snapshot_by_region
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Snapshots by Age"
-      query = query.alicloud_ecs_snapshot_by_creation_month
+      query = query.ecs_snapshot_by_creation_month
       type  = "column"
       width = 4
     }
@@ -100,7 +100,7 @@ dashboard "alicloud_ecs_snapshot_dashboard" {
 
     chart {
       title = "Storage by Account (GB)"
-      query = query.alicloud_ecs_snapshot_storage_by_account
+      query = query.ecs_snapshot_storage_by_account
       type  = "column"
       width = 4
 
@@ -111,7 +111,7 @@ dashboard "alicloud_ecs_snapshot_dashboard" {
 
     chart {
       title = "Storage by Region (GB)"
-      query = query.alicloud_ecs_snapshot_storage_by_region
+      query = query.ecs_snapshot_storage_by_region
       type  = "column"
       width = 4
 
@@ -122,7 +122,7 @@ dashboard "alicloud_ecs_snapshot_dashboard" {
 
     chart {
       title = "Storage by Age (GB)"
-      query = query.alicloud_ecs_snapshot_storage_by_age
+      query = query.ecs_snapshot_storage_by_age
       type  = "column"
       width = 4
 
@@ -138,13 +138,13 @@ dashboard "alicloud_ecs_snapshot_dashboard" {
 
 # Card Queries
 
-query "alicloud_ecs_snapshot_count" {
+query "ecs_snapshot_count" {
   sql = <<-EOQ
     select count(*) as "Snapshots" from alicloud_ecs_snapshot;
   EOQ
 }
 
-query "alicloud_ecs_snapshot_storage_total" {
+query "ecs_snapshot_storage_total" {
   sql = <<-EOQ
     select
         sum(CAST (source_disk_size AS INTEGER)) as "Total Storage (GB)"
@@ -153,7 +153,7 @@ query "alicloud_ecs_snapshot_storage_total" {
   EOQ
 }
 
-query "alicloud_ecs_unused_snapshot_count" {
+query "ecs_unused_snapshot_count" {
   sql = <<-EOQ
     select
         count(*) as value,
@@ -166,7 +166,7 @@ query "alicloud_ecs_unused_snapshot_count" {
   EOQ
 }
 
-query "alicloud_ecs_unencrypted_snapshot_count" {
+query "ecs_unencrypted_snapshot_count" {
   sql = <<-EOQ
     select
         count(*) as value,
@@ -181,7 +181,7 @@ query "alicloud_ecs_unencrypted_snapshot_count" {
 
 # Assessment Queries
 
-query "alicloud_ecs_snapshot_by_usage" {
+query "ecs_snapshot_by_usage" {
   sql = <<-EOQ
     select
       snapshot_usage,
@@ -202,7 +202,7 @@ query "alicloud_ecs_snapshot_by_usage" {
   EOQ
 }
 
-query "alicloud_ecs_snapshot_by_encryption_status" {
+query "ecs_snapshot_by_encryption_status" {
   sql = <<-EOQ
     select
       encryption_status,
@@ -225,7 +225,7 @@ query "alicloud_ecs_snapshot_by_encryption_status" {
 
 # Analysis Queries
 
-query "alicloud_ecs_snapshot_by_account" {
+query "ecs_snapshot_by_account" {
   sql = <<-EOQ
     select
       a.title as "Account",
@@ -242,7 +242,7 @@ query "alicloud_ecs_snapshot_by_account" {
   EOQ
 }
 
-query "alicloud_ecs_snapshot_by_region" {
+query "ecs_snapshot_by_region" {
   sql = <<-EOQ
     select
       region as "Region",
@@ -256,7 +256,7 @@ query "alicloud_ecs_snapshot_by_region" {
   EOQ
 }
 
-query "alicloud_ecs_snapshot_by_creation_month" {
+query "ecs_snapshot_by_creation_month" {
   sql = <<-EOQ
     with snapshots as (
       select
@@ -301,7 +301,7 @@ query "alicloud_ecs_snapshot_by_creation_month" {
   EOQ
 }
 
-query "alicloud_ecs_snapshot_storage_by_account" {
+query "ecs_snapshot_storage_by_account" {
   sql = <<-EOQ
     select
       a.title as "Account",
@@ -318,7 +318,7 @@ query "alicloud_ecs_snapshot_storage_by_account" {
   EOQ
 }
 
-query "alicloud_ecs_snapshot_storage_by_region" {
+query "ecs_snapshot_storage_by_region" {
   sql = <<-EOQ
     select
       region as "Region",
@@ -332,7 +332,7 @@ query "alicloud_ecs_snapshot_storage_by_region" {
   EOQ
 }
 
-query "alicloud_ecs_snapshot_storage_by_age" {
+query "ecs_snapshot_storage_by_age" {
   sql = <<-EOQ
     with snapshots as (
       select

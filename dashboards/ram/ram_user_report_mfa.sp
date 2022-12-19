@@ -1,4 +1,4 @@
-dashboard "alicloud_ram_user_mfa_report" {
+dashboard "ram_user_mfa_report" {
 
   title         = "AliCloud RAM User MFA Report"
   documentation = file("./dashboards/ram/docs/ram_user_report_mfa.md")
@@ -11,12 +11,12 @@ dashboard "alicloud_ram_user_mfa_report" {
   container {
 
     card {
-      query = query.alicloud_ram_user_count
+      query = query.ram_user_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ram_user_no_mfa_count
+      query = query.ram_user_no_mfa_count
       width = 2
     }
   }
@@ -31,15 +31,15 @@ dashboard "alicloud_ram_user_mfa_report" {
     }
 
     column "User Name" {
-      href = "${dashboard.alicloud_ram_user_detail.url_path}?input.user_arn={{.ARN | @uri}}"
+      href = "${dashboard.ram_user_detail.url_path}?input.user_arn={{.ARN | @uri}}"
     }
 
-    query = query.alicloud_ram_user_mfa_table
+    query = query.ram_user_mfa_table
   }
 
 }
 
-query "alicloud_ram_user_mfa_table" {
+query "ram_user_mfa_table" {
   sql = <<-EOQ
     select
       u.name as "User Name",

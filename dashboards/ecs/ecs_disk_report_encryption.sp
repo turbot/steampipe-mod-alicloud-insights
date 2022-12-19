@@ -1,4 +1,4 @@
-dashboard "alicloud_ecs_disk_encryption_report" {
+dashboard "ecs_disk_encryption_report" {
 
   title         = "AliCloud ECS Disk Encryption Report"
   documentation = file("./dashboards/ecs/docs/ecs_disk_report_encryption.md")
@@ -11,12 +11,12 @@ dashboard "alicloud_ecs_disk_encryption_report" {
   container {
 
     card {
-      query = query.alicloud_ecs_disk_count
+      query = query.ecs_disk_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ecs_disk_unencrypted_count
+      query = query.ecs_disk_unencrypted_count
       width = 2
     }
 
@@ -32,15 +32,15 @@ dashboard "alicloud_ecs_disk_encryption_report" {
     }
 
     column "Disk ID" {
-      href = "${dashboard.alicloud_ecs_disk_detail.url_path}?input.disk_arn={{.ARN | @uri}}"
+      href = "${dashboard.ecs_disk_detail.url_path}?input.disk_arn={{.ARN | @uri}}"
     }
 
-    query = query.alicloud_ecs_disk_encryption_table
+    query = query.ecs_disk_encryption_table
   }
 
 }
 
-query "alicloud_ecs_disk_encryption_table" {
+query "ecs_disk_encryption_table" {
   sql = <<-EOQ
     select
       d.disk_id as "Disk ID",
