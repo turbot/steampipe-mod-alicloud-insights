@@ -18,41 +18,31 @@ dashboard "alicloud_oss_bucket_detail" {
     card {
       width = 2
       query = query.alicloud_oss_bucket_versioning
-      args = {
-        arn = self.input.bucket_arn.value
-      }
+      args = [self.input.bucket_arn.value]
     }
 
     card {
       width = 2
       query = query.alicloud_oss_bucket_access_type
-      args = {
-        arn = self.input.bucket_arn.value
-      }
+      args = [self.input.bucket_arn.value]
     }
 
     card {
       query = query.alicloud_oss_bucket_logging_enabled
       width = 2
-      args = {
-        arn = self.input.bucket_arn.value
-      }
+      args = [self.input.bucket_arn.value]
     }
 
     card {
       width = 2
       query = query.alicloud_oss_bucket_encryption
-      args = {
-        arn = self.input.bucket_arn.value
-      }
+      args = [self.input.bucket_arn.value]
     }
 
     card {
       width = 2
       query = query.alicloud_oss_bucket_https_enforce
-      args = {
-        arn = self.input.bucket_arn.value
-      }
+      args = [self.input.bucket_arn.value]
     }
 
   }
@@ -67,20 +57,14 @@ dashboard "alicloud_oss_bucket_detail" {
         type  = "line"
         width = 6
         query = query.alicloud_oss_bucket_overview
-        args = {
-          arn = self.input.bucket_arn.value
-        }
-
+        args = [self.input.bucket_arn.value]
       }
 
       table {
         title = "Tags"
         width = 6
         query = query.alicloud_oss_bucket_tags_detail
-        param "arn" {}
-        args = {
-          arn = self.input.bucket_arn.value
-        }
+        args = [self.input.bucket_arn.value]
       }
     }
 
@@ -90,9 +74,7 @@ dashboard "alicloud_oss_bucket_detail" {
       table {
         title = "Logging"
         query = query.alicloud_oss_bucket_logging
-        args = {
-          arn = self.input.bucket_arn.value
-        }
+        args = [self.input.bucket_arn.value]
       }
 
     }
@@ -102,9 +84,7 @@ dashboard "alicloud_oss_bucket_detail" {
       table {
         title = "Policy"
         query = query.alicloud_oss_bucket_policy
-        args = {
-          arn = self.input.bucket_arn.value
-        }
+        args = [self.input.bucket_arn.value]
       }
     }
 
@@ -113,9 +93,7 @@ dashboard "alicloud_oss_bucket_detail" {
       table {
         title = "Lifecycle Rules"
         query = query.alicloud_oss_bucket_lifecycle_policy
-        args = {
-          arn = self.input.bucket_arn.value
-        }
+        args = [self.input.bucket_arn.value]
       }
     }
 
@@ -124,9 +102,7 @@ dashboard "alicloud_oss_bucket_detail" {
       table {
         title = "Server Side Encryption"
         query = query.alicloud_oss_bucket_server_side_encryption
-        args = {
-          arn = self.input.bucket_arn.value
-        }
+        args = [self.input.bucket_arn.value]
       }
     }
 
@@ -162,7 +138,6 @@ query "alicloud_oss_bucket_versioning" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "alicloud_oss_bucket_access_type" {
@@ -177,7 +152,6 @@ query "alicloud_oss_bucket_access_type" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "alicloud_oss_bucket_logging_enabled" {
@@ -192,7 +166,6 @@ query "alicloud_oss_bucket_logging_enabled" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "alicloud_oss_bucket_encryption" {
@@ -207,7 +180,6 @@ query "alicloud_oss_bucket_encryption" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "alicloud_oss_bucket_https_enforce" {
@@ -239,7 +211,6 @@ query "alicloud_oss_bucket_https_enforce" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "alicloud_oss_bucket_overview" {
@@ -257,7 +228,6 @@ query "alicloud_oss_bucket_overview" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "alicloud_oss_bucket_tags_detail" {
@@ -274,7 +244,6 @@ query "alicloud_oss_bucket_tags_detail" {
       tag ->> 'Key';
   EOQ
 
-  param "arn" {}
 }
 
 query "alicloud_oss_bucket_logging" {
@@ -290,7 +259,6 @@ query "alicloud_oss_bucket_logging" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "alicloud_oss_bucket_policy" {
@@ -308,7 +276,6 @@ query "alicloud_oss_bucket_policy" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "alicloud_oss_bucket_lifecycle_policy" {
@@ -334,7 +301,6 @@ query "alicloud_oss_bucket_lifecycle_policy" {
       r ->> 'ID';
   EOQ
 
-  param "arn" {}
 }
 
 query "alicloud_oss_bucket_server_side_encryption" {
@@ -349,5 +315,4 @@ query "alicloud_oss_bucket_server_side_encryption" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
