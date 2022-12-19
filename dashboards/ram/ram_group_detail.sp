@@ -1,4 +1,4 @@
-dashboard "alicloud_ram_group_detail" {
+dashboard "ram_group_detail" {
 
   title         = "AliCloud RAM Group Detail"
   documentation = file("./dashboards/ram/docs/ram_group_detail.md")
@@ -10,7 +10,7 @@ dashboard "alicloud_ram_group_detail" {
 
   input "group_arn" {
     title = "Select a group:"
-    query = query.alicloud_ram_group_input
+    query = query.ram_group_input
     width = 2
   }
 
@@ -18,7 +18,7 @@ dashboard "alicloud_ram_group_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ram_groups_users_count
+      query = query.ram_groups_users_count
       args = {
         arn = self.input.group_arn.value
       }
@@ -26,7 +26,7 @@ dashboard "alicloud_ram_group_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ram_groups_policies_count
+      query = query.ram_groups_policies_count
       args = {
         arn = self.input.group_arn.value
       }
@@ -43,7 +43,7 @@ dashboard "alicloud_ram_group_detail" {
       table {
         type  = "line"
         width = 6
-        query = query.alicloud_ram_group_overview
+        query = query.ram_group_overview
         args = {
           arn = self.input.group_arn.value
         }
@@ -62,10 +62,10 @@ dashboard "alicloud_ram_group_detail" {
       title = "Users"
       width = 6
       column "User Name" {
-        href = "${dashboard.alicloud_ram_user_detail.url_path}?input.user_arn={{.'User ARN' | @uri}}"
+        href = "${dashboard.ram_user_detail.url_path}?input.user_arn={{.'User ARN' | @uri}}"
       }
 
-      query = query.alicloud_ram_users_for_group
+      query = query.ram_users_for_group
       args = {
         arn = self.input.group_arn.value
       }
@@ -79,7 +79,7 @@ dashboard "alicloud_ram_group_detail" {
     table {
       title = "Policies"
       width = 6
-      query = query.alicloud_ram_all_policies_for_group
+      query = query.ram_all_policies_for_group
       args = {
         arn = self.input.group_arn.value
       }
@@ -89,7 +89,7 @@ dashboard "alicloud_ram_group_detail" {
 
 }
 
-query "alicloud_ram_group_input" {
+query "ram_group_input" {
   sql = <<-EOQ
     select
       title as label,
@@ -104,7 +104,7 @@ query "alicloud_ram_group_input" {
   EOQ
 }
 
-query "alicloud_ram_groups_users_count" {
+query "ram_groups_users_count" {
   sql = <<-EOQ
     select
       jsonb_array_length(users) as value,
@@ -119,7 +119,7 @@ query "alicloud_ram_groups_users_count" {
   param "arn" {}
 }
 
-query "alicloud_ram_groups_policies_count" {
+query "ram_groups_policies_count" {
   sql = <<-EOQ
     select
       jsonb_array_length(attached_policy) as value,
@@ -134,7 +134,7 @@ query "alicloud_ram_groups_policies_count" {
   param "arn" {}
 }
 
-query "alicloud_ram_group_overview" {
+query "ram_group_overview" {
   sql = <<-EOQ
     select
       name as "Name",
@@ -150,7 +150,7 @@ query "alicloud_ram_group_overview" {
   param "arn" {}
 }
 
-query "alicloud_ram_users_for_group" {
+query "ram_users_for_group" {
   sql = <<-EOQ
     select
       u ->> 'UserName' as "User Name",
@@ -167,7 +167,7 @@ query "alicloud_ram_users_for_group" {
   param "arn" {}
 }
 
-query "alicloud_ram_all_policies_for_group" {
+query "ram_all_policies_for_group" {
   sql = <<-EOQ
     select
       policies ->> 'PolicyName' as "Name",

@@ -1,4 +1,4 @@
-dashboard "alicloud_ram_user_detail" {
+dashboard "ram_user_detail" {
 
   title         = "AliCloud RAM User Detail"
   documentation = file("./dashboards/ram/docs/ram_user_detail.md")
@@ -9,7 +9,7 @@ dashboard "alicloud_ram_user_detail" {
 
   input "user_arn" {
     title = "Select a user:"
-    query = query.alicloud_ram_user_input
+    query = query.ram_user_input
     width = 4
   }
 
@@ -17,7 +17,7 @@ dashboard "alicloud_ram_user_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ram_user_mfa_for_user
+      query = query.ram_user_mfa_for_user
       args = {
         arn = self.input.user_arn.value
       }
@@ -25,7 +25,7 @@ dashboard "alicloud_ram_user_detail" {
 
     card {
       width = 2
-      query = query.alicloud_ram_user_direct_attached_policy_count_for_user
+      query = query.ram_user_direct_attached_policy_count_for_user
       args = {
         arn = self.input.user_arn.value
       }
@@ -42,7 +42,7 @@ dashboard "alicloud_ram_user_detail" {
       table {
         title = "Overview"
         type  = "line"
-        query = query.alicloud_ram_user_overview
+        query = query.ram_user_overview
         args = {
           arn = self.input.user_arn.value
         }
@@ -56,7 +56,7 @@ dashboard "alicloud_ram_user_detail" {
 
       table {
         title = "Access Keys"
-        query = query.alicloud_ram_user_access_keys
+        query = query.ram_user_access_keys
         args = {
           arn = self.input.user_arn.value
         }
@@ -64,7 +64,7 @@ dashboard "alicloud_ram_user_detail" {
 
       table {
         title = "MFA Devices"
-        query = query.alicloud_ram_user_mfa_devices
+        query = query.ram_user_mfa_devices
         args = {
           arn = self.input.user_arn.value
         }
@@ -81,12 +81,12 @@ dashboard "alicloud_ram_user_detail" {
     flow {
       type  = "sankey"
       title = "Attached Policies"
-      query = query.alicloud_ram_user_manage_policies_sankey
+      query = query.ram_user_manage_policies_sankey
       args = {
         arn = self.input.user_arn.value
       }
 
-      category "alicloud_ram_group" {
+      category "ram_group" {
         color = "ok"
       }
     }
@@ -94,14 +94,14 @@ dashboard "alicloud_ram_user_detail" {
     table {
       title = "Groups"
       width = 6
-      query = query.alicloud_ram_groups_for_user
+      query = query.ram_groups_for_user
       args = {
         arn = self.input.user_arn.value
       }
 
       column "Name" {
         // cyclic dependency prevents use of url_path, hardcode for now
-        href = "/alicloud_insights.dashboard.alicloud_ram_group_detail?input.group_arn={{.'Group ARN' | @uri}}"
+        href = "/alicloud_insights.dashboard.ram_group_detail?input.group_arn={{.'Group ARN' | @uri}}"
 
       }
     }
@@ -109,7 +109,7 @@ dashboard "alicloud_ram_user_detail" {
     table {
       title = "Policies"
       width = 6
-      query = query.alicloud_ram_all_policies_for_user
+      query = query.ram_all_policies_for_user
       args = {
         arn = self.input.user_arn.value
       }
@@ -118,7 +118,7 @@ dashboard "alicloud_ram_user_detail" {
   }
 }
 
-query "alicloud_ram_user_input" {
+query "ram_user_input" {
   sql = <<-EOQ
     select
       title as label,
@@ -133,7 +133,7 @@ query "alicloud_ram_user_input" {
   EOQ
 }
 
-query "alicloud_ram_user_mfa_for_user" {
+query "ram_user_mfa_for_user" {
   sql = <<-EOQ
     select
       case when mfa_enabled then 'Enabled' else 'Disabled' end as value,
@@ -148,7 +148,7 @@ query "alicloud_ram_user_mfa_for_user" {
   param "arn" {}
 }
 
-query "alicloud_ram_user_direct_attached_policy_count_for_user" {
+query "ram_user_direct_attached_policy_count_for_user" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -163,7 +163,7 @@ query "alicloud_ram_user_direct_attached_policy_count_for_user" {
   param "arn" {}
 }
 
-query "alicloud_ram_user_overview" {
+query "ram_user_overview" {
   sql = <<-EOQ
     select
       name as "Name",
@@ -180,7 +180,7 @@ query "alicloud_ram_user_overview" {
   param "arn" {}
 }
 
-query "alicloud_ram_user_access_keys" {
+query "ram_user_access_keys" {
   sql = <<-EOQ
     select
       access_key_id  as "Access Key ID",
@@ -195,7 +195,7 @@ query "alicloud_ram_user_access_keys" {
   param "arn" {}
 }
 
-query "alicloud_ram_user_mfa_devices" {
+query "ram_user_mfa_devices" {
   sql = <<-EOQ
     select
       mfa -> 'User' ->> 'UserId' as "User Id",
@@ -211,7 +211,7 @@ query "alicloud_ram_user_mfa_devices" {
   param "arn" {}
 }
 
-query "alicloud_ram_user_manage_policies_sankey" {
+query "ram_user_manage_policies_sankey" {
   sql = <<-EOQ
 
     with args as (
@@ -280,7 +280,7 @@ query "alicloud_ram_user_manage_policies_sankey" {
   param "arn" {}
 }
 
-query "alicloud_ram_groups_for_user" {
+query "ram_groups_for_user" {
   sql = <<-EOQ
     select
       g ->> 'GroupName' as "Name",
@@ -296,7 +296,7 @@ query "alicloud_ram_groups_for_user" {
   param "arn" {}
 }
 
-query "alicloud_ram_all_policies_for_user" {
+query "ram_all_policies_for_user" {
   sql = <<-EOQ
 
     -- Policies (attached to groups)

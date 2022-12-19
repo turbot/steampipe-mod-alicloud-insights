@@ -1,4 +1,4 @@
-dashboard "alicloud_kms_key_dashboard" {
+dashboard "kms_key_dashboard" {
 
   title         = "AliCloud KMS Key Dashboard"
   documentation = file("./dashboards/kms/docs/kms_key_dashboard.md")
@@ -11,29 +11,29 @@ dashboard "alicloud_kms_key_dashboard" {
 
     # Analysis
     card {
-      query = query.alicloud_kms_key_count
+      query = query.kms_key_count
       width = 2
     }
 
     card {
-      query = query.alicloud_hsm_based_keys
+      query = query.hsm_based_keys
       width = 2
     }
 
     # Assessments
     card {
-      query = query.alicloud_kms_key_disabled_count
+      query = query.kms_key_disabled_count
       width = 2
     }
 
     card {
-      query = query.alicloud_kms_cmk_rotation_disabled_count
+      query = query.kms_cmk_rotation_disabled_count
       width = 2
-      href  = dashboard.alicloud_kms_key_lifecycle_report.url_path
+      href  = dashboard.kms_key_lifecycle_report.url_path
     }
 
     card {
-      query = query.alicloud_kms_deletion_protection_disabled_count
+      query = query.kms_deletion_protection_disabled_count
       width = 2
     }
   }
@@ -44,7 +44,7 @@ dashboard "alicloud_kms_key_dashboard" {
 
     chart {
       title = "Enabled/Disabled Status"
-      query = query.alicloud_kms_key_disabled_status
+      query = query.kms_key_disabled_status
       type  = "donut"
       width = 3
 
@@ -60,7 +60,7 @@ dashboard "alicloud_kms_key_dashboard" {
 
     chart {
       title = "CMK Rotation Status"
-      query = query.alicloud_kms_key_rotation_status
+      query = query.kms_key_rotation_status
       type  = "donut"
       width = 3
 
@@ -76,7 +76,7 @@ dashboard "alicloud_kms_key_dashboard" {
 
     chart {
       title = "CMK Deletion Protection Status"
-      query = query.alicloud_kms_key_rotation_status
+      query = query.kms_key_rotation_status
       type  = "donut"
       width = 3
 
@@ -98,35 +98,35 @@ dashboard "alicloud_kms_key_dashboard" {
 
     chart {
       title = "Keys by Account"
-      query = query.alicloud_kms_key_by_account
+      query = query.kms_key_by_account
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Keys by Region"
-      query = query.alicloud_kms_key_by_region
+      query = query.kms_key_by_region
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Keys by State"
-      query = query.alicloud_kms_key_by_state
+      query = query.kms_key_by_state
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Keys by Age"
-      query = query.alicloud_kms_key_by_creation_month
+      query = query.kms_key_by_creation_month
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Keys by Protection Level"
-      query = query.alicloud_kms_key_by_protection_level
+      query = query.kms_key_by_protection_level
       type  = "column"
       width = 3
     }
@@ -139,13 +139,13 @@ dashboard "alicloud_kms_key_dashboard" {
 
 # Analysis Card Queries
 
-query "alicloud_kms_key_count" {
+query "kms_key_count" {
   sql = <<-EOQ
     select count(*) as "Keys" from alicloud_kms_key;
   EOQ
 }
 
-query "alicloud_hsm_based_keys" {
+query "hsm_based_keys" {
   sql = <<-EOQ
     select
       count(*) as "HSM Based Keys"
@@ -158,7 +158,7 @@ query "alicloud_hsm_based_keys" {
 
 # Assessments Card Queries
 
-query "alicloud_kms_key_disabled_count" {
+query "kms_key_disabled_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -171,7 +171,7 @@ query "alicloud_kms_key_disabled_count" {
   EOQ
 }
 
-query "alicloud_kms_cmk_rotation_disabled_count" {
+query "kms_cmk_rotation_disabled_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -184,7 +184,7 @@ query "alicloud_kms_cmk_rotation_disabled_count" {
   EOQ
 }
 
-query "alicloud_kms_deletion_protection_disabled_count" {
+query "kms_deletion_protection_disabled_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -199,7 +199,7 @@ query "alicloud_kms_deletion_protection_disabled_count" {
 
 # Assessment Queries
 
-query "alicloud_kms_key_disabled_status" {
+query "kms_key_disabled_status" {
   sql = <<-EOQ
     select
       lower(disabled_status),
@@ -218,7 +218,7 @@ query "alicloud_kms_key_disabled_status" {
   EOQ
 }
 
-query "alicloud_kms_key_rotation_status" {
+query "kms_key_rotation_status" {
   sql = <<-EOQ
     select
       lower(rotation_status),
@@ -235,7 +235,7 @@ query "alicloud_kms_key_rotation_status" {
   EOQ
 }
 
-query "alicloud_kms_key_deletion_protection_status" {
+query "kms_key_deletion_protection_status" {
   sql = <<-EOQ
     select
       lower(deletion_protection),
@@ -254,7 +254,7 @@ query "alicloud_kms_key_deletion_protection_status" {
 
 # Analysis Queries
 
-query "alicloud_kms_key_by_account" {
+query "kms_key_by_account" {
   sql = <<-EOQ
     select
       a.title as "Account",
@@ -271,7 +271,7 @@ query "alicloud_kms_key_by_account" {
   EOQ
 }
 
-query "alicloud_kms_key_by_region" {
+query "kms_key_by_region" {
   sql = <<-EOQ
     select
       region,
@@ -283,7 +283,7 @@ query "alicloud_kms_key_by_region" {
   EOQ
 }
 
-query "alicloud_kms_key_by_state" {
+query "kms_key_by_state" {
   sql = <<-EOQ
     select
       key_state,
@@ -295,7 +295,7 @@ query "alicloud_kms_key_by_state" {
   EOQ
 }
 
-query "alicloud_kms_key_by_protection_level" {
+query "kms_key_by_protection_level" {
   sql = <<-EOQ
     select
       protection_level,
@@ -307,7 +307,7 @@ query "alicloud_kms_key_by_protection_level" {
   EOQ
 }
 
-query "alicloud_kms_key_by_creation_month" {
+query "kms_key_by_creation_month" {
   sql = <<-EOQ
     with keys as (
       select

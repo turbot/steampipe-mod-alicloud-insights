@@ -1,4 +1,4 @@
-mod "alicloud_insights" {
+mod "insights" {
   # hub metadata
   title         = "Alibaba Cloud Insights"
   description   = "Create dashboards and reports for your Alibaba Cloud resources using Steampipe."

@@ -1,4 +1,4 @@
-dashboard "alicloud_oss_bucket_detail" {
+dashboard "oss_bucket_detail" {
 
   title         = "AliCloud OSS Bucket Detail"
   documentation = file("./dashboards/oss/docs/oss_bucket_detail.md")
@@ -9,7 +9,7 @@ dashboard "alicloud_oss_bucket_detail" {
 
   input "bucket_arn" {
     title = "Select a bucket:"
-    query = query.alicloud_oss_bucket_input
+    query = query.oss_bucket_input
     width = 4
   }
 
@@ -28,7 +28,7 @@ dashboard "alicloud_oss_bucket_detail" {
     }
 
     card {
-      query = query.alicloud_oss_bucket_logging_enabled
+      query = query.oss_bucket_logging_enabled
       width = 2
       args = [self.input.bucket_arn.value]
     }
@@ -110,7 +110,7 @@ dashboard "alicloud_oss_bucket_detail" {
 
 }
 
-query "alicloud_oss_bucket_input" {
+query "oss_bucket_input" {
   sql = <<-EOQ
     select
       title as label,
@@ -126,7 +126,7 @@ query "alicloud_oss_bucket_input" {
   EOQ
 }
 
-query "alicloud_oss_bucket_versioning" {
+query "oss_bucket_versioning" {
   sql = <<-EOQ
     select
       'Versioning' as label,
@@ -140,7 +140,7 @@ query "alicloud_oss_bucket_versioning" {
 
 }
 
-query "alicloud_oss_bucket_access_type" {
+query "oss_bucket_access_type" {
   sql = <<-EOQ
     select
       'Public Access' as label,
@@ -154,7 +154,7 @@ query "alicloud_oss_bucket_access_type" {
 
 }
 
-query "alicloud_oss_bucket_logging_enabled" {
+query "oss_bucket_logging_enabled" {
   sql = <<-EOQ
     select
       'Logging' as label,
@@ -168,7 +168,7 @@ query "alicloud_oss_bucket_logging_enabled" {
 
 }
 
-query "alicloud_oss_bucket_encryption" {
+query "oss_bucket_encryption" {
   sql = <<-EOQ
     select
       'Encryption' as label,
@@ -182,7 +182,7 @@ query "alicloud_oss_bucket_encryption" {
 
 }
 
-query "alicloud_oss_bucket_https_enforce" {
+query "oss_bucket_https_enforce" {
   sql = <<-EOQ
     with ssl_ok as (
       select
@@ -213,7 +213,7 @@ query "alicloud_oss_bucket_https_enforce" {
 
 }
 
-query "alicloud_oss_bucket_overview" {
+query "oss_bucket_overview" {
   sql = <<-EOQ
     select
       name as "Name",
@@ -230,7 +230,7 @@ query "alicloud_oss_bucket_overview" {
 
 }
 
-query "alicloud_oss_bucket_tags_detail" {
+query "oss_bucket_tags_detail" {
   sql = <<-EOQ
     select
       tag ->> 'Key' as "Key",
@@ -246,7 +246,7 @@ query "alicloud_oss_bucket_tags_detail" {
 
 }
 
-query "alicloud_oss_bucket_logging" {
+query "oss_bucket_logging" {
   sql = <<-EOQ
     select
       logging ->> 'TargetBucket' as "Target Bucket",
@@ -261,7 +261,7 @@ query "alicloud_oss_bucket_logging" {
 
 }
 
-query "alicloud_oss_bucket_policy" {
+query "oss_bucket_policy" {
   sql = <<-EOQ
     select
       p -> 'Principal' as "Principal",
@@ -278,7 +278,7 @@ query "alicloud_oss_bucket_policy" {
 
 }
 
-query "alicloud_oss_bucket_lifecycle_policy" {
+query "oss_bucket_lifecycle_policy" {
   sql = <<-EOQ
     select
       r ->> 'ID' as "ID",
@@ -303,7 +303,7 @@ query "alicloud_oss_bucket_lifecycle_policy" {
 
 }
 
-query "alicloud_oss_bucket_server_side_encryption" {
+query "oss_bucket_server_side_encryption" {
   sql = <<-EOQ
     select
       server_side_encryption ->> 'KMSMasterKeyID' as "KMS Master Key ID",

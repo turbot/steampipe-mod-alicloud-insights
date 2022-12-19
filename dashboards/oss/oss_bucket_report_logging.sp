@@ -1,4 +1,4 @@
-dashboard "alicloud_oss_bucket_logging_report" {
+dashboard "oss_bucket_logging_report" {
 
   title         = "AliCloud OSS Bucket Logging Report"
   documentation = file("./dashboards/oss/docs/oss_bucket_report_logging.md")
@@ -11,12 +11,12 @@ dashboard "alicloud_oss_bucket_logging_report" {
   container {
 
     card {
-      query = query.alicloud_oss_bucket_count
+      query = query.oss_bucket_count
       width = 2
     }
 
     card {
-      query = query.alicloud_oss_bucket_logging_disabled_count
+      query = query.oss_bucket_logging_disabled_count
       width = 2
     }
 
@@ -32,15 +32,15 @@ dashboard "alicloud_oss_bucket_logging_report" {
     }
 
     column "Name" {
-      href = "${dashboard.alicloud_oss_bucket_detail.url_path}?input.bucket_arn={{.ARN | @uri}}"
+      href = "${dashboard.oss_bucket_detail.url_path}?input.bucket_arn={{.ARN | @uri}}"
     }
 
-    query = query.alicloud_oss_bucket_logging_table
+    query = query.oss_bucket_logging_table
   }
 
 }
 
-query "alicloud_oss_bucket_logging_table" {
+query "oss_bucket_logging_table" {
   sql = <<-EOQ
     select
       b.name as "Name",
