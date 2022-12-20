@@ -18,44 +18,127 @@ dashboard "ecs_disk_detail" {
     card {
       width = 2
       query = query.ecs_disk_storage
-      args = {
-        arn = self.input.disk_arn.value
-      }
+      args  = [self.input.disk_arn.value]
     }
 
     card {
       width = 2
       query = query.ecs_disk_iops
-      args = {
-        arn = self.input.disk_arn.value
-      }
+      args  = [self.input.disk_arn.value]
     }
 
     card {
       width = 2
       query = query.ecs_disk_category
-      args = {
-        arn = self.input.disk_arn.value
-      }
+      args  = [self.input.disk_arn.value]
     }
 
     card {
       width = 2
       query = query.ecs_disk_attached_instances_count
-      args = {
-        arn = self.input.disk_arn.value
-      }
+      args  = [self.input.disk_arn.value]
     }
 
     card {
       width = 2
       query = query.ecs_disk_encryption
-      args = {
-        arn = self.input.disk_arn.value
-      }
+      args  = [self.input.disk_arn.value]
     }
 
   }
+
+  with "ecs_snapshots" {
+    query = query.ecs_disk_ecs_snapshots
+    args  = [self.input.disk_arn.value]
+  }
+
+  with "ecs_images" {
+    query = query.ecs_disk_ecs_images
+    args  = [self.input.disk_arn.value]
+  }
+
+  with "ecs_instances" {
+    query = query.ecs_disk_ecs_instances
+    args  = [self.input.disk_arn.value]
+  }
+
+  with "kms_keys" {
+    query = query.ecs_disk_kms_keys
+    args  = [self.input.disk_arn.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.ecs_snapshot
+        args = {
+          ecs_snapshot_arns = with.ecs_snapshots.rows[*].snapshot_arn
+        }
+      }
+
+      node {
+        base = node.ecs_disk
+        args = {
+          ecs_disk_arns = [self.input.disk_arn.value]
+        }
+      }
+
+      node {
+        base = node.ecs_image
+        args = {
+          ecs_image_ids = with.ecs_images.rows[*].image_id
+        }
+      }
+
+      node {
+        base = node.ecs_instance
+        args = {
+          ecs_instance_arns = with.ecs_instances.rows[*].instance_arn
+        }
+      }
+
+      node {
+        base = node.kms_key
+        args = {
+          kms_key_arns = with.kms_keys.rows[*].key_arn
+        }
+      }
+
+      edge {
+        base = edge.ecs_disk_to_ecs_image
+        args = {
+          ecs_disk_arns = [self.input.disk_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.ecs_disk_to_ecs_snapshot
+        args = {
+          ecs_disk_arns = [self.input.disk_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.ecs_disk_to_kms_key
+        args = {
+          ecs_disk_arns = [self.input.disk_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.ecs_instance_to_ecs_disk
+        args = {
+          ecs_instance_arns = with.ecs_instances.rows[*].instance_arn
+        }
+      }
+    }
+  }
+
 
   container {
 
@@ -68,18 +151,14 @@ dashboard "ecs_disk_detail" {
         type  = "line"
         width = 6
         query = query.ecs_disk_overview
-        args = {
-          arn = self.input.disk_arn.value
-        }
+        args  = [self.input.disk_arn.value]
       }
 
       table {
         title = "Tags"
         width = 6
         query = query.ecs_disk_tags
-        args = {
-          arn = self.input.disk_arn.value
-        }
+        args  = [self.input.disk_arn.value]
       }
     }
 
@@ -90,9 +169,7 @@ dashboard "ecs_disk_detail" {
       table {
         title = "Attached To"
         query = query.ecs_disk_attached_instances
-        args = {
-          arn = self.input.disk_arn.value
-        }
+        args  = [self.input.disk_arn.value]
 
         column "Instance ARN" {
           display = "none"
@@ -109,9 +186,7 @@ dashboard "ecs_disk_detail" {
           href = "${dashboard.kms_key_detail.url_path}?input.key_arn={{.'KMS Key ID' | @uri}}"
         }
         query = query.ecs_disk_encryption_status
-        args = {
-          arn = self.input.disk_arn.value
-        }
+        args  = [self.input.disk_arn.value]
       }
     }
   }
@@ -135,6 +210,8 @@ query "ecs_disk_input" {
   EOQ
 }
 
+# card queries
+
 query "ecs_disk_storage" {
   sql = <<-EOQ
     select
@@ -146,7 +223,6 @@ query "ecs_disk_storage" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ecs_disk_iops" {
@@ -160,7 +236,6 @@ query "ecs_disk_iops" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ecs_disk_category" {
@@ -174,7 +249,6 @@ query "ecs_disk_category" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ecs_disk_attached_instances_count" {
@@ -195,7 +269,6 @@ query "ecs_disk_attached_instances_count" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ecs_disk_encryption" {
@@ -210,8 +283,62 @@ query "ecs_disk_encryption" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
+
+# with queries
+
+query "ecs_disk_ecs_snapshots" {
+  sql = <<-EOQ
+    select
+      s.arn as snapshot_arn
+    from
+      alicloud_ecs_snapshot s
+      left join alicloud_ecs_disk as d on s.snapshot_id = d.source_snapshot_id
+    where
+      d.arn = $1
+      and s.arn is not null;
+  EOQ
+}
+
+query "ecs_disk_ecs_images" {
+  sql = <<-EOQ
+    select
+      image_id as image_id
+    from
+      alicloud_ecs_disk
+    where
+      arn = $1
+      and image_id is not null;
+  EOQ
+}
+
+query "ecs_disk_ecs_instances" {
+  sql = <<-EOQ
+    select
+      i.arn as instance_arn
+    from
+      alicloud_ecs_instance i
+      left join alicloud_ecs_disk as d on i.instance_id = d.instance_id
+    where
+      d.arn = $1
+      and i.arn is not null;
+  EOQ
+}
+
+query "ecs_disk_kms_keys" {
+  sql = <<-EOQ
+    select
+      k.arn as key_arn
+    from
+      alicloud_kms_key k
+      left join alicloud_ecs_disk as d on k.key_id = d.kms_key_id
+    where
+      d.arn = $1
+      and k.arn is not null;
+  EOQ
+}
+
+# table queries
 
 query "ecs_disk_attached_instances" {
   sql = <<-EOQ
@@ -232,7 +359,6 @@ query "ecs_disk_attached_instances" {
       i.instance_id;
   EOQ
 
-  param "arn" {}
 }
 
 query "ecs_disk_encryption_status" {
@@ -246,7 +372,6 @@ query "ecs_disk_encryption_status" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ecs_disk_overview" {
@@ -266,7 +391,6 @@ query "ecs_disk_overview" {
       arn = $1
   EOQ
 
-  param "arn" {}
 }
 
 query "ecs_disk_tags" {
@@ -283,5 +407,4 @@ query "ecs_disk_tags" {
       tag ->> 'Key';
   EOQ
 
-  param "arn" {}
 }

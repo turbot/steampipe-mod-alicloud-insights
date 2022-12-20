@@ -1,3 +1,34 @@
+edge "ecs_disk_to_ecs_image" {
+  title = "image"
+
+  sql = <<-EOQ
+    select
+      d.arn as from_id,
+      d.image_id as to_id
+    from
+      alicloud_ecs_disk as d
+    where
+      d.arn = any($1);
+  EOQ
+
+  param "ecs_disk_arns" {}
+}
+
+edge "ecs_disk_to_ecs_snapshot" {
+  title = "snapshot"
+
+  sql = <<-EOQ
+      select
+        d.arn as from_id,
+        s.arn as to_id
+      from
+        alicloud_ecs_snapshot s
+        left join alicloud_ecs_disk as d on s.snapshot_id = d.source_snapshot_id
+      where
+        d.arn = any($1);
+  EOQ
+}
+
 edge "ecs_disk_to_kms_key" {
   title = "encrypted with"
 
@@ -13,6 +44,23 @@ edge "ecs_disk_to_kms_key" {
   EOQ
 
   param "ecs_disk_arns" {}
+}
+
+edge "ecs_instance_to_ecs_disk" {
+  title = "ecs_instance"
+
+  sql = <<-EOQ
+    select
+      i.arn as from_id,
+      d.arn as to_id
+    from
+      alicloud_ecs_instance i
+      left join alicloud_ecs_disk as d on i.instance_id = d.instance_id
+    where
+      i.arn = any($1);
+  EOQ
+
+  param "ecs_instance_arns" {}
 }
 
 edge "ecs_snapshot_to_kms_key" {

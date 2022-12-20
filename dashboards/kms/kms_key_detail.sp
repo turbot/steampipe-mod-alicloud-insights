@@ -49,22 +49,22 @@ dashboard "kms_key_detail" {
   }
 
   with "kms_secrets" {
-    query = query.kms_keys_kms_secrets
+    query = query.kms_key_kms_secrets
     args = [self.input.key_arn.value]
   }
 
   with "oss_buckets" {
-    query = query.kms_keys_oss_buckets
+    query = query.kms_key_oss_buckets
     args = [self.input.key_arn.value]
   }
 
   with "ecs_disks" {
-    query = query.kms_keys_ecs_disks
+    query = query.kms_key_ecs_disks
     args = [self.input.key_arn.value]
   }
 
   with "ecs_snapshots" {
-    query = query.kms_keys_ecs_snapshots
+    query = query.kms_key_ecs_snapshots
     args = [self.input.key_arn.value]
   }
 
@@ -274,7 +274,7 @@ query "kms_protection_level" {
 
 # with queries
 
-query "kms_keys_kms_secrets" {
+query "kms_key_kms_secrets" {
     sql = <<-EOQ
     select
       s.arn as secret_arn
@@ -287,7 +287,7 @@ query "kms_keys_kms_secrets" {
   EOQ
 }
 
-query "kms_keys_oss_buckets" {
+query "kms_key_oss_buckets" {
     sql = <<-EOQ
     select
       b.arn as bucket_arn
@@ -300,7 +300,7 @@ query "kms_keys_oss_buckets" {
   EOQ
 }
 
-query "kms_keys_ecs_disks" {
+query "kms_key_ecs_disks" {
   sql = <<-EOQ
     select
       d.arn as disk_arn
@@ -313,7 +313,7 @@ query "kms_keys_ecs_disks" {
   EOQ
 }
 
-query "kms_keys_ecs_snapshots" {
+query "kms_key_ecs_snapshots" {
   sql = <<-EOQ
     select
       s.arn as snapshot_arn
