@@ -15,3 +15,21 @@ edge "oss_bucket_to_kms_key" {
 
   param "oss_bucket_arns" {}
 }
+
+edge "oss_bucket_to_oss_bucket" {
+  title = "logs to"
+
+  sql = <<-EOQ
+    select
+      b.arn as from_id,
+      lb.arn as to_id
+    from
+      alicloud_oss_bucket as lb,
+      alicloud_oss_bucket as b
+    where
+      b.arn = any($1)
+      and lb.name = b.logging ->> 'TargetBucket';
+  EOQ
+
+  param "oss_bucket_arns" {}
+}
