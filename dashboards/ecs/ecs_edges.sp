@@ -23,10 +23,29 @@ edge "ecs_disk_to_ecs_snapshot" {
         s.arn as to_id
       from
         alicloud_ecs_snapshot s
+        left join alicloud_ecs_disk as d on s.source_disk_id = d.disk_id
+      where
+        s.arn = any($1);
+  EOQ
+
+    param "ecs_snapshot_arns" {}
+}
+
+edge "ecs_snapshot_to_disk" {
+  title = "disk"
+
+  sql = <<-EOQ
+      select
+        s.arn as from_id,
+        d.arn as to_id
+      from
+        alicloud_ecs_snapshot s
         left join alicloud_ecs_disk as d on s.snapshot_id = d.source_snapshot_id
       where
-        d.arn = any($1);
+        s.arn = any($1);
   EOQ
+
+    param "ecs_snapshot_arns" {}
 }
 
 edge "ecs_disk_to_kms_key" {

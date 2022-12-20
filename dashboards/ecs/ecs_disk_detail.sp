@@ -47,8 +47,13 @@ dashboard "ecs_disk_detail" {
 
   }
 
-  with "ecs_snapshots" {
-    query = query.ecs_disk_ecs_snapshots
+  with "from_ecs_snapshots" {
+    query = query.ecs_disk_from_ecs_snapshots
+    args  = [self.input.disk_arn.value]
+  }
+
+  with "to_ecs_snapshots" {
+    query = query.ecs_disk_to_ecs_snapshots
     args  = [self.input.disk_arn.value]
   }
 
@@ -77,7 +82,14 @@ dashboard "ecs_disk_detail" {
       node {
         base = node.ecs_snapshot
         args = {
-          ecs_snapshot_arns = with.ecs_snapshots.rows[*].snapshot_arn
+          ecs_snapshot_arns = with.from_ecs_snapshots.rows[*].snapshot_arn
+        }
+      }
+
+      node {
+        base = node.ecs_snapshot
+        args = {
+          ecs_snapshot_arns = with.to_ecs_snapshots.rows[*].snapshot_arn
         }
       }
 
@@ -119,7 +131,14 @@ dashboard "ecs_disk_detail" {
       edge {
         base = edge.ecs_disk_to_ecs_snapshot
         args = {
-          ecs_disk_arns = [self.input.disk_arn.value]
+          ecs_snapshot_arns = with.to_ecs_snapshots.rows[*].snapshot_arn
+        }
+      }
+
+      edge {
+        base = edge.ecs_snapshot_to_disk
+        args = {
+          ecs_snapshot_arns = with.from_ecs_snapshots.rows[*].snapshot_arn
         }
       }
 
@@ -287,13 +306,26 @@ query "ecs_disk_encryption" {
 
 # with queries
 
-query "ecs_disk_ecs_snapshots" {
+query "ecs_disk_from_ecs_snapshots" {
   sql = <<-EOQ
     select
       s.arn as snapshot_arn
     from
       alicloud_ecs_snapshot s
       left join alicloud_ecs_disk as d on s.snapshot_id = d.source_snapshot_id
+    where
+      d.arn = $1
+      and s.arn is not null;
+  EOQ
+}
+
+query "ecs_disk_to_ecs_snapshots" {
+  sql = <<-EOQ
+    select
+      s.arn as snapshot_arn
+    from
+      alicloud_ecs_snapshot s
+      left join alicloud_ecs_disk as d on s.source_disk_id = d.disk_id
     where
       d.arn = $1
       and s.arn is not null;
