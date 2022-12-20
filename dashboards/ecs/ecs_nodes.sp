@@ -6,7 +6,7 @@ node "ecs_disk" {
       arn as id,
       title as title,
       jsonb_build_object(
-        'ID', volume_id,
+        'ID', disk_id,
         'ARN', arn,
         'Size', size,
         'Account ID', account_id,
@@ -21,6 +21,7 @@ node "ecs_disk" {
 
   param "ecs_disk_arns" {}
 }
+
 node "ecs_snapshot" {
   category = category.ecs_snapshot
 
@@ -31,7 +32,6 @@ node "ecs_snapshot" {
       jsonb_build_object(
         'ID', snapshot_id,
         'ARN', arn,
-        'Start Time', start_time,
         'Account ID', account_id,
         'Region', region
       ) as properties

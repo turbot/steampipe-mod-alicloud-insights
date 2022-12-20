@@ -13,6 +13,6 @@ category "ecs_disk" {
 
 category "ecs_snapshot" {
   title = "ECS Snapshot"
-  icon  = "heroicons-outline:inbox-stack"
+  icon  = "heroicons-outline:viewfinder-circle"
   color = local.storage_color
 }

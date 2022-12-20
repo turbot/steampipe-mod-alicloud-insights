@@ -11,3 +11,10 @@ category "kms_key" {
   icon  = "heroicons-outline:key"
   color = local.security_color
 }
+
+
+category "kms_secret" {
+  title = "KMS Secret"
+  icon  = "heroicons-outline:key"
+  color = local.security_color
+}

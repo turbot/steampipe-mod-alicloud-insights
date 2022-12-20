@@ -3,12 +3,13 @@ edge "ecs_disk_to_kms_key" {
 
   sql = <<-EOQ
     select
-      arn as from_id,
-      kms_key_id as to_id
+      d.arn as from_id,
+      k.arn as to_id
     from
-      alicloud_ecs_disk 
+      alicloud_ecs_disk as d
+      left join alicloud_kms_key k on d.kms_key_id = k.key_id
     where
-      arn = any($1);
+      d.arn = any($1);
   EOQ
 
   param "ecs_disk_arns" {}
@@ -19,12 +20,13 @@ edge "ecs_snapshot_to_kms_key" {
 
   sql = <<-EOQ
     select
-      arn as from_id,
-      kms_key_id as to_id
+      s.arn as from_id,
+      k.arn as to_id
     from
-      alicloud_ecs_snapshot 
+      alicloud_ecs_snapshot as s
+      left join alicloud_kms_key k on s.kms_key_id = k.key_id
     where
-      arn = any($1);
+      s.arn = any($1);
   EOQ
 
   param "ecs_snapshot_arns" {}

@@ -48,6 +48,11 @@ dashboard "kms_key_detail" {
 
   }
 
+  with "kms_secrets" {
+    query = query.kms_keys_kms_secrets
+    args = [self.input.key_arn.value]
+  }
+
   with "oss_buckets" {
     query = query.kms_keys_oss_buckets
     args = [self.input.key_arn.value]
@@ -77,47 +82,61 @@ dashboard "kms_key_detail" {
         }
       }
 
-      // node {
-      //   base = node.ecs_disk
-      //   args = {
-      //     ecs_disk_arns = with.ecs_disks.rows[*].disk_arn
-      //   }
-      // }
+      node {
+        base = node.kms_secret
+        args = {
+          kms_secret_arns = with.kms_secrets.rows[*].secret_arn
+        }
+      }
 
-      // node {
-      //   base = node.ecs_snapshot
-      //   args = {
-      //     ecs_snapshot_arns = with.ecs_snapshots.rows[*].snapshot_arn
-      //   }
-      // }
+      node {
+        base = node.ecs_disk
+        args = {
+          ecs_disk_arns = with.ecs_disks.rows[*].disk_arn
+        }
+      }
 
-      // node {
-      //   base = node.oss_bucket
-      //   args = {
-      //     oss_bucket_arns = with.oss_buckets.rows[*].bucket_arn
-      //   }
-      // }
+      node {
+        base = node.ecs_snapshot
+        args = {
+          ecs_snapshot_arns = with.ecs_snapshots.rows[*].snapshot_arn
+        }
+      }
 
-      // edge {
-      //   base = edge.ecs_disk_to_kms_key
-      //   args = {
-      //     ecs_disk_arns = with.ecs_disks.rows[*].disk_arn
-      //   }
-      // }
+      node {
+        base = node.oss_bucket
+        args = {
+          oss_bucket_arns = with.oss_buckets.rows[*].bucket_arn
+        }
+      }
 
-      // edge {
-      //   base = edge.ecs_snapshot_to_kms_key
-      //   args = {
-      //     ecs_snapshot_arns = with.ecs_snapshots.rows[*].snapshot_arn
-      //   }
-      // }
+      edge {
+        base = edge.ecs_disk_to_kms_key
+        args = {
+          ecs_disk_arns = with.ecs_disks.rows[*].disk_arn
+        }
+      }
 
-      // edge {
-      //   base = edge.oss_bucket_to_kms_key
-      //   args = {
-      //     oss_bucket_arns = with.oss_buckets.rows[*].bucket_arn
-      //   }
-      // }
+      edge {
+        base = edge.ecs_snapshot_to_kms_key
+        args = {
+          ecs_snapshot_arns = with.ecs_snapshots.rows[*].snapshot_arn
+        }
+      }
+
+      edge {
+        base = edge.kms_secret_to_kms_key
+        args = {
+          kms_secret_arns = with.kms_secrets.rows[*].secret_arn
+        }
+      }
+
+      edge {
+        base = edge.oss_bucket_to_kms_key
+        args = {
+          oss_bucket_arns = with.oss_buckets.rows[*].bucket_arn
+        }
+      }
     }
   }
 
@@ -255,6 +274,19 @@ query "kms_protection_level" {
 
 # with queries
 
+query "kms_keys_kms_secrets" {
+    sql = <<-EOQ
+    select
+      s.arn as secret_arn
+    from
+      alicloud_kms_secret as s
+      left join alicloud_kms_key k on s.encryption_key_id = k.key_id
+    where
+      k.arn = $1
+      and s.arn is not null;
+  EOQ
+}
+
 query "kms_keys_oss_buckets" {
     sql = <<-EOQ
     select
@@ -271,24 +303,26 @@ query "kms_keys_oss_buckets" {
 query "kms_keys_ecs_disks" {
   sql = <<-EOQ
     select
-      arn as disk_arn
+      d.arn as disk_arn
     from
-      alicloud_ecs_disk
+      alicloud_ecs_disk as d
+      left join alicloud_kms_key k on d.kms_key_id = k.key_id
     where
-      kms_key_id = $1
-      and arn is not null;
+      k.arn = $1
+      and d.arn is not null;
   EOQ
 }
 
 query "kms_keys_ecs_snapshots" {
   sql = <<-EOQ
     select
-      arn as snapshot_arn
+      s.arn as snapshot_arn
     from
-      alicloud_ecs_snapshot
+      alicloud_ecs_snapshot as s
+      left join alicloud_kms_key k on s.kms_key_id = k.key_id
     where
-      kms_key_id = $1
-      and arn is not null;
+      k.arn = $1
+      and s.arn is not null;
   EOQ
 }
 
