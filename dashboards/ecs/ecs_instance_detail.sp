@@ -18,52 +18,272 @@ dashboard "ecs_instance_detail" {
     card {
       width = 2
       query = query.ecs_instance_status
-      args = {
-        arn = self.input.instance_arn.value
-      }
+      args  = [self.input.instance_arn.value]
     }
 
     card {
       width = 2
       query = query.ecs_instance_type
-      args = {
-        arn = self.input.instance_arn.value
-      }
+      args  = [self.input.instance_arn.value]
     }
 
     card {
       width = 2
       query = query.ecs_instance_total_cores
-      args = {
-        arn = self.input.instance_arn.value
-      }
+      args  = [self.input.instance_arn.value]
     }
 
     card {
       width = 2
       query = query.ecs_instance_os_type
-      args = {
-        arn = self.input.instance_arn.value
-      }
+      args  = [self.input.instance_arn.value]
     }
 
     card {
       width = 2
       query = query.ecs_instance_public_access
-      args = {
-        arn = self.input.instance_arn.value
-      }
+      args  = [self.input.instance_arn.value]
     }
 
     card {
       width = 2
       query = query.ecs_instance_io_optimized
-      args = {
-        arn = self.input.instance_arn.value
-      }
+      args  = [self.input.instance_arn.value]
     }
 
   }
+
+  with "ecs_disks" {
+    query = query.ecs_instance_ecs_disks
+    args  = [self.input.instance_arn.value]
+  }
+
+  with "ecs_images" {
+    query = query.ecs_instance_ecs_images
+    args  = [self.input.instance_arn.value]
+  }
+
+  with "ecs_network_interfaces" {
+    query = query.ecs_instance_ecs_network_interfaces
+    args  = [self.input.instance_arn.value]
+  }
+
+  with "ecs_snapshots" {
+    query = query.ecs_instance_ecs_snapshots
+    args  = [self.input.instance_arn.value]
+  }
+
+  with "ecs_security_groups" {
+    query = query.ecs_instance_ecs_security_groups
+    args  = [self.input.instance_arn.value]
+  }
+
+  with "vpc_eips" {
+    query = query.ecs_instance_vpc_eips
+    args  = [self.input.instance_arn.value]
+  }
+
+  with "vpc_vswitches" {
+    query = query.ecs_instance_vpc_vswitches
+    args  = [self.input.instance_arn.value]
+  }
+
+  with "vpc_vpcs" {
+    query = query.ecs_instance_vpc_vpcs
+    args  = [self.input.instance_arn.value]
+  }
+
+  container {
+
+    graph {
+
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.cms_monitor_host
+        args = {
+          ecs_instance_arns = [self.input.instance_arn.value]
+        }
+      }
+
+      // node {
+      //   base = node.cs_kubernetes_cluster_node
+      //   args = {
+      //     ecs_instance_arns = [self.input.instance_arn.value]
+      //   }
+      // }
+
+      node {
+        base = node.ecs_autoscaling_group
+        args = {
+          ecs_instance_arns = [self.input.instance_arn.value]
+        }
+      }
+
+      node {
+        base = node.ecs_auto_provisioning_group
+        args = {
+          ecs_instance_arns = [self.input.instance_arn.value]
+        }
+      }
+
+      node {
+        base = node.ecs_disk
+        args = {
+          ecs_disk_arns = with.ecs_disks.rows[*].disk_arn
+        }
+      }
+
+      node {
+        base = node.ecs_image
+        args = {
+          ecs_image_ids = with.ecs_images.rows[*].image_id
+        }
+      }
+
+      node {
+        base = node.ecs_instance
+        args = {
+          ecs_instance_arns = [self.input.instance_arn.value]
+        }
+      }
+
+      node {
+        base = node.ecs_key_pair
+        args = {
+          ecs_instance_arns = [self.input.instance_arn.value]
+        }
+      }
+
+      node {
+        base = node.ecs_network_interface
+        args = {
+          ecs_network_interface_ids = with.ecs_network_interfaces.rows[*].network_interface_id
+        }
+      }
+
+      node {
+        base = node.ecs_snapshot
+        args = {
+          ecs_snapshot_arns = with.ecs_snapshots.rows[*].snapshot_arn
+        }
+      }
+
+      node {
+        base = node.ecs_security_group
+        args = {
+          ecs_security_group_ids = with.ecs_security_groups.rows[*].security_group_id
+        }
+      }
+
+      node {
+        base = node.vpc_eip
+        args = {
+          vpc_eip_arns = with.vpc_eips.rows[*].eip_arn
+        }
+      }
+
+      node {
+        base = node.vpc_vswitch
+        args = {
+          vpc_vswitch_ids = with.vpc_vswitches.rows[*].vpc_vswitch_id
+        }
+      }
+
+      node {
+        base = node.vpc_vpc
+        args = {
+          vpc_vpc_ids = with.vpc_vpcs.rows[*].vpc_id
+        }
+      }
+
+      edge {
+        base = edge.ecs_instance_to_ecs_disk
+        args = {
+          ecs_instance_arns = [self.input.instance_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.cms_monitor_host_to_ecs_instance
+        args = {
+          ecs_instance_arns = [self.input.instance_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.ecs_autoscaling_group_to_ecs_instance
+        args = {
+          ecs_instance_arns = [self.input.instance_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.ecs_auto_provisioning_group_to_ecs_instance
+        args = {
+          ecs_instance_arns = [self.input.instance_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.ecs_image_to_ecs_instance
+        args = {
+          ecs_instance_arns = [self.input.instance_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.ecs_instance_to_ecs_key_pair
+        args = {
+          ecs_instance_arns = [self.input.instance_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.ecs_disk_to_ecs_snapshot
+        args = {
+          ecs_snapshot_arns = with.ecs_snapshots.rows[*].snapshot_arn
+        }
+      }
+
+      edge {
+        base = edge.ecs_instance_to_ecs_network_interface
+        args = {
+          ecs_instance_arns = [self.input.instance_arn.value]
+        }
+      }
+
+      // edge {
+      //   base = edge.ecs_network_interface_to_vpc_eip
+      //   args = {
+      //     ecs_network_interface_ids = with.ecs_network_interfaces.rows[*].network_interface_id
+      //   }
+      // }
+
+      edge {
+        base = edge.ecs_instance_to_ecs_security_group
+        args = {
+          ecs_instance_arns = [self.input.instance_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.ecs_instance_to_vcs_vswitch
+        args = {
+          ecs_instance_arns = [self.input.instance_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.vpc_vswitch_to_vpc_vpc
+        args = {
+          vpc_vswitch_ids = with.vpc_vswitches.rows[*].vpc_vswitch_id
+        }
+      }
+  }
+}
 
   container {
 
@@ -75,9 +295,7 @@ dashboard "ecs_instance_detail" {
         type  = "line"
         width = 6
         query = query.ecs_instance_overview
-        args = {
-          arn = self.input.instance_arn.value
-        }
+        args  = [self.input.instance_arn.value]
 
       }
 
@@ -85,9 +303,7 @@ dashboard "ecs_instance_detail" {
         title = "Tags"
         width = 6
         query = query.ecs_instance_tags
-        args = {
-          arn = self.input.instance_arn.value
-        }
+        args  = [self.input.instance_arn.value]
       }
     }
     container {
@@ -96,9 +312,7 @@ dashboard "ecs_instance_detail" {
       table {
         title = " CPU cores"
         query = query.ecs_instance_cpu_cores
-        args = {
-          arn = self.input.instance_arn.value
-        }
+        args  = [self.input.instance_arn.value]
       }
     }
 
@@ -110,9 +324,7 @@ dashboard "ecs_instance_detail" {
     table {
       title = "Network Interfaces"
       query = query.ecs_instance_network_interfaces
-      args = {
-        arn = self.input.instance_arn.value
-      }
+      args  = [self.input.instance_arn.value]
     }
 
   }
@@ -123,9 +335,7 @@ dashboard "ecs_instance_detail" {
     table {
       title = "Dedicated Host"
       query = query.ecs_instance_dedicated_host
-      args = {
-        arn = self.input.instance_arn.value
-      }
+      args  = [self.input.instance_arn.value]
     }
 
   }
@@ -136,9 +346,7 @@ dashboard "ecs_instance_detail" {
     table {
       title = "Security Groups"
       query = query.ecs_instance_security_groups
-      args = {
-        arn = self.input.instance_arn.value
-      }
+      args  = [self.input.instance_arn.value]
     }
 
   }
@@ -149,9 +357,7 @@ dashboard "ecs_instance_detail" {
     table {
       title = "VPC Details"
       query = query.ecs_instance_vpc
-      args = {
-        arn = self.input.instance_arn.value
-      }
+      args  = [self.input.instance_arn.value]
     }
 
   }
@@ -186,7 +392,6 @@ query "ecs_instance_status" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 
 }
 
@@ -201,7 +406,6 @@ query "ecs_instance_os_type" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 
 }
 
@@ -216,7 +420,6 @@ query "ecs_instance_type" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ecs_instance_total_cores" {
@@ -230,7 +433,6 @@ query "ecs_instance_total_cores" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ecs_instance_public_access" {
@@ -245,7 +447,6 @@ query "ecs_instance_public_access" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ecs_instance_io_optimized" {
@@ -260,7 +461,108 @@ query "ecs_instance_io_optimized" {
       arn = $1;
   EOQ
 
-  param "arn" {}
+}
+
+# with queries
+
+query "ecs_instance_ecs_disks" {
+
+  sql = <<-EOQ
+    select
+      d.arn as disk_arn
+    from
+      alicloud_ecs_instance i
+      left join alicloud_ecs_disk as d on i.instance_id = d.instance_id
+    where
+      i.arn = $1;
+  EOQ
+
+}
+
+query "ecs_instance_ecs_images" {
+    sql = <<-EOQ
+    select
+      image_id as image_id
+    from
+      alicloud_ecs_instance
+    where
+      arn = $1
+      and image_id is not null;
+  EOQ
+}
+
+query "ecs_instance_ecs_network_interfaces" {
+    sql = <<-EOQ
+    select
+      p ->> 'NetworkInterfaceId' as network_interface_id
+    from
+      alicloud_ecs_instance,
+      jsonb_array_elements(network_interfaces) as p
+    where
+      arn = $1
+      and  p ->> 'NetworkInterfaceId' is not null;
+  EOQ
+}
+
+query "ecs_instance_ecs_snapshots" {
+  sql = <<-EOQ
+    select
+      s.arn as snapshot_arn
+    from
+      alicloud_ecs_snapshot s
+      join alicloud_ecs_disk as d on s.source_disk_id = d.disk_id
+      join alicloud_ecs_instance as i on i.instance_id = d.instance_id
+    where
+      i.arn = $1;
+  EOQ
+}
+
+query "ecs_instance_vpc_vswitches" {
+  sql = <<-EOQ
+    select
+      vswitch_id as vpc_vswitch_id
+    from
+      alicloud_ecs_instance i
+      join alicloud_vpc_vswitch as s on s.vpc_id = i.vpc_id
+    where
+      i.arn = $1;
+  EOQ
+}
+
+query "ecs_instance_ecs_security_groups" {
+  sql = <<-EOQ
+    select
+      group_id  as security_group_id
+    from
+      alicloud_ecs_instance as i,
+      jsonb_array_elements_text(security_group_ids) as group_id
+    where
+      i.arn = $1;
+  EOQ
+}
+
+query "ecs_instance_vpc_eips" {
+  sql = <<-EOQ
+    select
+      e.arn as eip_arn
+    from
+      alicloud_ecs_instance i
+      left join alicloud_vpc_eip as e on i.instance_id = e.instance_id
+    where
+      i.arn = $1
+      and e.arn is not null;
+  EOQ
+}
+
+query "ecs_instance_vpc_vpcs" {
+  sql = <<-EOQ
+    select
+      vpc_attributes ->> 'VpcId' as vpc_id
+    from
+      alicloud_ecs_instance
+    where
+      arn = $1;
+  EOQ
 }
 
 query "ecs_instance_overview" {
@@ -283,7 +585,6 @@ query "ecs_instance_overview" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ecs_instance_tags" {
@@ -300,7 +601,6 @@ query "ecs_instance_tags" {
       tag ->> 'TagKey';
     EOQ
 
-  param "arn" {}
 }
 
 query "ecs_instance_cpu_cores" {
@@ -314,7 +614,6 @@ query "ecs_instance_cpu_cores" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ecs_instance_network_interfaces" {
@@ -334,7 +633,6 @@ query "ecs_instance_network_interfaces" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ecs_instance_dedicated_host" {
@@ -351,7 +649,6 @@ query "ecs_instance_dedicated_host" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ecs_instance_security_groups" {
@@ -367,7 +664,6 @@ query "ecs_instance_security_groups" {
       i.arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ecs_instance_vpc" {
@@ -383,5 +679,4 @@ query "ecs_instance_vpc" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }

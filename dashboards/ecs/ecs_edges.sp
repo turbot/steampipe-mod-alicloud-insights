@@ -1,3 +1,148 @@
+edge "ecs_autoscaling_group_to_ecs_instance" {
+  title = "launches"
+
+  sql = <<-EOQ
+    select
+      asg.scaling_group_id as from_id,
+      i.arn as to_id
+    from
+      alicloud_ecs_autoscaling_group as asg,
+      jsonb_array_elements(asg.scaling_instances) as group_instance,
+      alicloud_ecs_instance as i
+    where
+      i.arn = any($1)
+      and group_instance ->> 'InstanceId' = i.instance_id;
+  EOQ
+
+  param "ecs_instance_arns" {}
+}
+
+edge "ecs_auto_provisioning_group_to_ecs_instance" {
+  title = "deploys"
+
+  sql = <<-EOQ
+    select
+      apg.auto_provisioning_group_id as from_id,
+      i.arn as to_id
+    from
+      alicloud_ecs_auto_provisioning_group as apg,
+      jsonb_array_elements(apg.instances) as group_instance,
+      alicloud_ecs_instance as i
+    where
+      i.arn = any($1)
+      and group_instance ->> 'InstanceId' = i.instance_id;
+  EOQ
+
+  param "ecs_instance_arns" {}
+}
+
+edge "ecs_image_to_ecs_instance" {
+  title = "instance"
+
+  sql = <<-EOQ
+    select
+      image_id as from_id,
+      arn as to_id
+    from
+      alicloud_ecs_instance as i
+    where
+      arn = any($1);
+  EOQ
+
+  param "ecs_instance_arns" {}
+}
+
+edge "ecs_instance_to_ecs_key_pair" {
+  title = "key pair"
+
+  sql = <<-EOQ
+    select
+      arn as from_id,
+      key_pair_name as to_id
+    from
+      alicloud_ecs_instance as i
+    where
+      key_pair_name is not null
+      and i.arn = any($1);
+  EOQ
+
+  param "ecs_instance_arns" {}
+}
+
+edge "ecs_instance_to_ecs_network_interface" {
+  title = "eni"
+
+  sql = <<-EOQ
+    select
+      arn as from_id,
+      i ->> 'NetworkInterfaceId' as to_id
+    from
+      alicloud_ecs_instance,
+      jsonb_array_elements(network_interfaces) as i
+    where
+      arn = any($1)
+      and  i ->> 'NetworkInterfaceId' is not null;
+  EOQ
+
+  param "ecs_instance_arns" {}
+}
+
+edge "ecs_network_interface_to_vpc_eip" {
+  title = "eip"
+
+  sql = <<-EOQ
+    select
+      i.network_interface_id as from_id,
+      e.arn as to_id
+    from
+      alicloud_vpc_eip as e
+      join alicloud_ecs_network_interface as i on e.instance_id = i.instance_id
+    where
+      i.network_interface_id = any($1);
+  EOQ
+
+  param "ecs_network_interface_ids" {}
+}
+
+edge "ecs_instance_to_ecs_security_group" {
+  title = "security groups"
+
+  sql = <<-EOQ
+    select
+      coalesce(
+        n ->> 'NetworkInterfaceId',
+        i.arn
+      ) as from_id,
+      group_id as to_id
+    from
+      alicloud_ecs_instance as i
+      join jsonb_array_elements(network_interfaces) as n on true
+      join jsonb_array_elements(security_group_ids) as group_id on true
+    where
+      i.arn = any($1);
+  EOQ
+
+  param "ecs_instance_arns" {}
+}
+
+edge "ecs_instance_to_vcs_vswitch" {
+  title = "vswitch"
+
+  sql = <<-EOQ
+    select
+      group_id as from_id,
+      s.vswitch_id as to_id
+    from
+      alicloud_ecs_instance as i
+      join alicloud_vpc_vswitch as s on s.vpc_id = i.vpc_id
+      join jsonb_array_elements(security_group_ids) as group_id on true
+    where
+      i.arn = any($1);
+  EOQ
+
+  param "ecs_instance_arns" {}
+}
+
 edge "ecs_disk_to_ecs_image" {
   title = "image"
 
@@ -66,7 +211,7 @@ edge "ecs_disk_to_kms_key" {
 }
 
 edge "ecs_instance_to_ecs_disk" {
-  title = "ecs_instance"
+  title = "disk"
 
   sql = <<-EOQ
     select
