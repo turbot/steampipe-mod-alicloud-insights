@@ -87,6 +87,23 @@ edge "ecs_instance_to_ecs_network_interface" {
   param "ecs_instance_arns" {}
 }
 
+edge "ecs_security_group_to_ecs_network_interface" {
+    title = "eni"
+  
+  sql = <<-EOQ
+    select
+      group_id as from_id,
+      network_interface_id  as to_id
+    from
+      alicloud_ecs_network_interface,
+      jsonb_array_elements_text(security_group_ids) as group_id
+    where
+      group_id = any($1);
+  EOQ
+
+    param "ecs_security_group_ids" {}
+}
+
 edge "ecs_network_interface_to_vpc_eip" {
   title = "eip"
 
@@ -174,6 +191,23 @@ edge "ecs_disk_to_ecs_snapshot" {
   EOQ
 
     param "ecs_snapshot_arns" {}
+}
+
+edge "ecs_security_group_to_ecs_instance" {
+    title = "instance"
+
+  sql = <<-EOQ
+    select
+      group_id as from_id,
+      i.arn  as to_id
+    from
+      alicloud_ecs_instance as i,
+      jsonb_array_elements_text(security_group_ids) as group_id
+    where
+      group_id = any($1);
+  EOQ
+
+    param "ecs_security_group_ids" {}
 }
 
 edge "ecs_snapshot_to_disk" {
