@@ -317,7 +317,8 @@ query "oss_bucket_kms_keys" {
       alicloud_oss_bucket as b
       left join alicloud_kms_key k on b.server_side_encryption ->> 'KMSMasterKeyID' = k.key_id
     where
-      b.arn = $1;
+      b.arn = $1
+      and k.arn is not null;
   EOQ
 }
 

@@ -255,12 +255,12 @@ dashboard "ecs_instance_detail" {
         }
       }
 
-      // edge {
-      //   base = edge.ecs_network_interface_to_vpc_eip
-      //   args = {
-      //     ecs_network_interface_ids = with.ecs_network_interfaces.rows[*].network_interface_id
-      //   }
-      // }
+      edge {
+        base = edge.ecs_network_interface_to_vpc_eip
+        args = {
+          ecs_network_interface_ids = with.ecs_network_interfaces.rows[*].network_interface_id
+        }
+      }
 
       edge {
         base = edge.ecs_instance_to_ecs_security_group

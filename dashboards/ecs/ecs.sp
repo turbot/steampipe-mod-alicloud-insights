@@ -6,7 +6,7 @@ locals {
 
 category "ecs_auto_provisioning_group" {
   title = "ECS Autoprovisioning Group"
-  icon  = "text:APG"
+  icon  = "rocket-launch"
   color = local.compute_color
 }
 
