@@ -136,7 +136,7 @@ dashboard "ecs_disk_detail" {
       }
 
       edge {
-        base = edge.ecs_snapshot_to_disk
+        base = edge.ecs_snapshot_to_ecs_disk
         args = {
           ecs_snapshot_arns = with.from_ecs_snapshots.rows[*].snapshot_arn
         }

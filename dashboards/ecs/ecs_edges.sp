@@ -210,7 +210,7 @@ edge "ecs_security_group_to_ecs_instance" {
     param "ecs_security_group_ids" {}
 }
 
-edge "ecs_snapshot_to_disk" {
+edge "ecs_snapshot_to_ecs_disk" {
   title = "disk"
 
   sql = <<-EOQ
@@ -259,6 +259,24 @@ edge "ecs_instance_to_ecs_disk" {
   EOQ
 
   param "ecs_instance_arns" {}
+}
+
+edge "ecs_snapshot_to_ecs_image" {
+  title = "image"
+  
+  sql = <<-EOQ
+    select
+      images.image_id as to_id,
+      s.arn as from_id
+    from
+      alicloud_ecs_image as images,
+      jsonb_array_elements(images.disk_device_mappings) as ddm,
+      alicloud_ecs_snapshot as s
+    where
+      ddm ->> 'SnapshotId' = s.snapshot_id
+      and s.arn = any($1);
+  EOQ
+  param "ecs_snapshot_arns" {}
 }
 
 edge "ecs_snapshot_to_kms_key" {
