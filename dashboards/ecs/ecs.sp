@@ -16,6 +16,12 @@ category "ecs_autoscaling_group" {
   color = local.compute_color
 }
 
+category "ecs_launch_template" {
+  title = "ECS Launch Template"
+  icon  = "text:LT"
+  color = local.compute_color
+}
+
 category "ecs_security_group" {
   title = "ECS Security Group"
   icon  = "enhanced-encryption"

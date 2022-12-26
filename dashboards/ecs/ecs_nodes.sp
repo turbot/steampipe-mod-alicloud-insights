@@ -121,6 +121,29 @@ node "ecs_image" {
   param "ecs_image_ids" {}
 }
 
+node "ecs_launch_template" {
+  category = category.ecs_launch_template
+
+  sql = <<-EOQ
+    select
+      launch_template_id as id,
+      title as title,
+      jsonb_build_object(
+        'Template Id', launch_template_id,
+        'Creation Time', create_time,
+        'Creator', created_by,
+        'Account ID', account_id,
+        'Region', region
+      ) as properties
+    from
+      alicloud_ecs_launch_template
+    where
+      launch_template_id = any($1);
+  EOQ
+
+  param "launch_template_ids" {}
+}
+
 node "ecs_instance" {
   category = category.ecs_instance
 

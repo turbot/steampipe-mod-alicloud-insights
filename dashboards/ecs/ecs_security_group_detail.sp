@@ -45,6 +45,11 @@ dashboard "ecs_security_group_detail" {
     args  = [self.input.security_group_id.value]
   }
 
+  with "ecs_launch_templates" {
+    query = query.ecs_security_group_ecs_launch_templates
+    args  = [self.input.security_group_id.value]
+  }
+
   // with "vpc_vswitches" {
   //   query = query.ecs_security_group_vpc_vswitches
   //   args  = [self.input.security_group_id.value]
@@ -66,6 +71,13 @@ dashboard "ecs_security_group_detail" {
         base = node.ecs_instance
         args = {
           ecs_instance_arns = with.ecs_instances.rows[*].instance_arn
+        }
+      }
+
+      node {
+        base = node.ecs_launch_template
+        args = {
+          launch_template_ids = with.ecs_launch_templates.rows[*].launch_template_id
         }
       }
 
@@ -99,6 +111,13 @@ dashboard "ecs_security_group_detail" {
 
       edge {
         base = edge.ecs_security_group_to_ecs_instance
+        args = {
+          ecs_security_group_ids = [self.input.security_group_id.value]
+        }
+      }
+
+      edge {
+        base = edge.ecs_security_group_to_ecs_launch_template
         args = {
           ecs_security_group_ids = [self.input.security_group_id.value]
         }
@@ -332,6 +351,17 @@ query "ecs_security_group_ecs_network_interfaces" {
       jsonb_array_elements_text(security_group_ids) as group_id
     where
       group_id = $1;
+  EOQ
+}
+
+query "ecs_security_group_ecs_launch_templates" {
+  sql = <<-EOQ
+    select
+      launch_template_id as launch_template_id
+    from
+      alicloud_ecs_launch_template
+    where
+      latest_version_details -> 'LaunchTemplateData' ->> 'SecurityGroupId' = $1;
   EOQ
 }
 

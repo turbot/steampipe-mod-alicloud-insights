@@ -176,6 +176,25 @@ edge "ecs_disk_to_ecs_image" {
   param "ecs_disk_arns" {}
 }
 
+edge "ecs_launch_template_to_ecs_snapshot" {
+  title = "snapshot"
+  sql = <<-EOQ
+    select
+      launch_template_id as from_id,
+      s.arn as to_id
+    from
+      alicloud_ecs_snapshot as s,
+      alicloud_ecs_launch_template as t,
+      jsonb_array_elements(t.latest_version_details -> 'LaunchTemplateData' -> 'DataDisks' -> 'DataDisk') as disk_config
+    where
+      t.launch_template_id = any($1)
+      and disk_config ->> 'SnapshotId' is not null
+      and disk_config ->> 'SnapshotId' = s.snapshot_id;
+  EOQ
+
+    param "launch_template_ids" {}
+}
+
 edge "ecs_disk_to_ecs_snapshot" {
   title = "snapshot"
 
@@ -208,6 +227,20 @@ edge "ecs_security_group_to_ecs_instance" {
   EOQ
 
     param "ecs_security_group_ids" {}
+}
+
+edge "ecs_security_group_to_ecs_launch_template" {
+  title = "launch template"
+  sql = <<-EOQ
+    select
+      latest_version_details -> 'LaunchTemplateData' ->> 'SecurityGroupId' as from_id,
+      launch_template_id as to_id
+    from
+      alicloud_ecs_launch_template
+    where
+      latest_version_details -> 'LaunchTemplateData' ->> 'SecurityGroupId' = any($1);
+  EOQ
+  param "ecs_security_group_ids" {}
 }
 
 edge "ecs_snapshot_to_ecs_disk" {
@@ -263,7 +296,7 @@ edge "ecs_instance_to_ecs_disk" {
 
 edge "ecs_snapshot_to_ecs_image" {
   title = "image"
-  
+
   sql = <<-EOQ
     select
       images.image_id as to_id,

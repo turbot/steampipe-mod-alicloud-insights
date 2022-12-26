@@ -51,6 +51,11 @@ dashboard "ecs_snapshot_detail" {
     args  = [self.input.snapshot_arn.value]
   }
 
+  with "ecs_launch_templates" {
+    query = query.ecs_snapshot_ecs_launch_templates
+    args  = [self.input.snapshot_arn.value]
+  }
+
   with "from_ecs_disks" {
     query = query.ecs_snapshot_from_ecs_disks
     args  = [self.input.snapshot_arn.value]
@@ -102,6 +107,13 @@ dashboard "ecs_snapshot_detail" {
       }
 
       node {
+        base = node.ecs_launch_template
+        args = {
+          launch_template_ids = with.ecs_launch_templates.rows[*].launch_template_id
+        }
+      }
+
+      node {
         base = node.ecs_snapshot
         args = {
           ecs_snapshot_arns = [self.input.snapshot_arn.value]
@@ -119,6 +131,13 @@ dashboard "ecs_snapshot_detail" {
         base = edge.ecs_instance_to_ecs_disk
         args = {
           ecs_instance_arns = with.ecs_instances.rows[*].instance_arn
+        }
+      }
+
+      edge {
+        base = edge.ecs_launch_template_to_ecs_snapshot
+        args = {
+          launch_template_ids = with.ecs_launch_templates.rows[*].launch_template_id
         }
       }
 
@@ -325,6 +344,21 @@ query "ecs_snapshot_ecs_instances" {
       join alicloud_ecs_instance as i on i.instance_id = d.instance_id
     where
       s.arn = $1;
+  EOQ
+}
+
+query "ecs_snapshot_ecs_launch_templates" {
+  sql = <<-EOQ
+    select
+      launch_template_id as launch_template_id
+    from
+      alicloud_ecs_snapshot as s,
+      alicloud_ecs_launch_template,
+      jsonb_array_elements(latest_version_details -> 'LaunchTemplateData' -> 'DataDisks' -> 'DataDisk') as disk_config
+    where
+      s.arn = $1
+      and disk_config ->> 'SnapshotId' is not null
+      and disk_config ->> 'SnapshotId' = s.snapshot_id;
   EOQ
 }
 
