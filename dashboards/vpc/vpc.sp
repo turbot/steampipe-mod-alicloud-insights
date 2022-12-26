@@ -7,7 +7,7 @@ locals {
 category "vpc_eip" {
   title = "VPC EIP"
   color = local.networking_color
-  icon  = "swipe-right-alt"
+  icon  = "swipe_right_alt"
 }
 
 category "vpc_vswitch" {

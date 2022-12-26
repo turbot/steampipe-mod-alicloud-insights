@@ -101,7 +101,7 @@ edge "ecs_security_group_to_ecs_network_interface" {
       group_id = any($1);
   EOQ
 
-    param "ecs_security_group_ids" {}
+  param "ecs_security_group_ids" {}
 }
 
 edge "ecs_network_interface_to_vpc_eip" {
@@ -192,7 +192,7 @@ edge "ecs_launch_template_to_ecs_snapshot" {
       and disk_config ->> 'SnapshotId' = s.snapshot_id;
   EOQ
 
-    param "launch_template_ids" {}
+  param "launch_template_ids" {}
 }
 
 edge "ecs_disk_to_ecs_snapshot" {
@@ -209,7 +209,7 @@ edge "ecs_disk_to_ecs_snapshot" {
         s.arn = any($1);
   EOQ
 
-    param "ecs_snapshot_arns" {}
+  param "ecs_snapshot_arns" {}
 }
 
 edge "ecs_security_group_to_ecs_instance" {
@@ -226,7 +226,7 @@ edge "ecs_security_group_to_ecs_instance" {
       group_id = any($1);
   EOQ
 
-    param "ecs_security_group_ids" {}
+  param "ecs_security_group_ids" {}
 }
 
 edge "ecs_security_group_to_ecs_launch_template" {
@@ -257,7 +257,7 @@ edge "ecs_snapshot_to_ecs_disk" {
         s.arn = any($1);
   EOQ
 
-    param "ecs_snapshot_arns" {}
+  param "ecs_snapshot_arns" {}
 }
 
 edge "ecs_disk_to_kms_key" {

@@ -6,13 +6,13 @@ locals {
 
 category "ecs_auto_provisioning_group" {
   title = "ECS Autoprovisioning Group"
-  icon  = "rocket-launch"
+  icon  = "rocket_launch"
   color = local.compute_color
 }
 
 category "ecs_autoscaling_group" {
   title = "ECS Autoscaling Group"
-  icon  = "library-add"
+  icon  = "library_add"
   color = local.compute_color
 }
 
@@ -24,21 +24,21 @@ category "ecs_launch_template" {
 
 category "ecs_security_group" {
   title = "ECS Security Group"
-  icon  = "enhanced-encryption"
+  icon  = "enhanced_encryption"
   color = local.compute_color
 }
 
 category "ecs_disk" {
   title = "ECS Disk"
   href  = "/alicloud_insights.dashboard.ecs_disk_detail?input.disk_arn={{.properties.'ARN' | @uri}}"
-  icon  = "heroicons-outline:inbox-stack"
+  icon  = "heroicons_outline:inbox_stack"
   color = local.storage_color
 }
 
 category "ecs_image" {
   title = "ECS Image"
   color = local.compute_color
-  icon  = "developer-board"
+  icon  = "developer_board"
 }
 
 category "ecs_instance" {
@@ -50,13 +50,13 @@ category "ecs_instance" {
 
 category "cs_kubernetes_cluster_node" {
   title = "Kubernetes Cluster Node"
-  icon  = "device-hub"
+  icon  = "device_hub"
   color = local.containers_color
 }
 
 category "ecs_key_pair" {
   title = "ECS Key Pair"
-  icon  = "vpn-key"
+  icon  = "vpn_key"
   color = local.compute_color
 }
 
@@ -68,6 +68,6 @@ category "ecs_network_interface" {
 
 category "ecs_snapshot" {
   title = "ECS Snapshot"
-  icon  = "heroicons-outline:viewfinder-circle"
+  icon  = "heroicons_outline:viewfinder_circle"
   color = local.storage_color
 }
