@@ -63,6 +63,11 @@ dashboard "ecs_instance_detail" {
     args  = [self.input.instance_arn.value]
   }
 
+  with "ecs_autoscaling_groups" {
+    query = query.ecs_instance_ecs_autoscaling_groups
+    args = [self.input.instance_arn.value]
+  }
+
   with "ecs_network_interfaces" {
     query = query.ecs_instance_ecs_network_interfaces
     args  = [self.input.instance_arn.value]
@@ -118,7 +123,7 @@ dashboard "ecs_instance_detail" {
       node {
         base = node.ecs_autoscaling_group
         args = {
-          ecs_instance_arns = [self.input.instance_arn.value]
+          ecs_autoscaling_group_ids = with.ecs_autoscaling_groups.rows[*].autoscaling_group_id
         }
       }
 
@@ -488,6 +493,20 @@ query "ecs_instance_ecs_images" {
     where
       arn = $1
       and image_id is not null;
+  EOQ
+}
+
+query "ecs_instance_ecs_autoscaling_groups" {
+sql = <<-EOQ
+    select
+      asg.scaling_group_id as autoscaling_group_id
+    from
+      alicloud_ecs_autoscaling_group as asg,
+      jsonb_array_elements(asg.scaling_instances) as group_instance,
+      alicloud_ecs_instance as i
+    where
+      i.arn = $1
+      and group_instance ->> 'InstanceId' = i.instance_id;
   EOQ
 }
 

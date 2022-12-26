@@ -29,24 +29,20 @@ node "ecs_autoscaling_group" {
 
   sql = <<-EOQ
     select
-      asg.scaling_group_id as id,
-      asg.title as title,
+      scaling_group_id as id,
+      title as title,
       jsonb_build_object(
-        'Name', asg.name,
-        'Instance Id', group_instance ->> 'InstanceId',
-        'Creation Date', asg.creation_time,
-        'Region', asg.region
+        'Name', name,
+        'Creation Date', creation_time,
+        'Region', region
       ) as properties
     from
-      alicloud_ecs_autoscaling_group as asg,
-      jsonb_array_elements(asg.scaling_instances) as group_instance,
-      alicloud_ecs_instance as i
+      alicloud_ecs_autoscaling_group as asg
     where
-      i.arn = any($1)
-      and group_instance ->> 'InstanceId' = i.instance_id;
+      scaling_group_id = any($1);
   EOQ
 
-  param "ecs_instance_arns" {}
+  param "ecs_autoscaling_group_ids" {}
 }
 
 node "ecs_auto_provisioning_group" {

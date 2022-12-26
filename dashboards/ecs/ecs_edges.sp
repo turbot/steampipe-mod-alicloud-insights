@@ -17,6 +17,25 @@ edge "ecs_autoscaling_group_to_ecs_instance" {
   param "ecs_instance_arns" {}
 }
 
+edge "ecs_autoscaling_group_to_rds_instance" {
+  title = "launches"
+
+  sql = <<-EOQ
+    select
+      asg.scaling_group_id as from_id,
+      rdi.arn as to_id
+    from
+      alicloud_rds_instance as rdi,
+      alicloud_ecs_autoscaling_group as asg,
+      jsonb_array_elements_text(asg.db_instance_ids) as id
+    where
+      asg.scaling_group_id = any($1)
+      and rdi.db_instance_id = id;
+  EOQ
+
+  param "ecs_autoscaling_group_ids" {}
+}
+
 edge "ecs_auto_provisioning_group_to_ecs_instance" {
   title = "deploys"
 
