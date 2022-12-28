@@ -8,7 +8,7 @@ locals {
 category "kms_key" {
   title = "KMS Key"
   href  = "/alicloud_insights.dashboard.kms_key_detail?input.key_arn={{.properties.'ARN' | @uri}}"
-  icon  = "heroicons_outline:key"
+  icon  = "key"
   color = local.security_color
 }
 

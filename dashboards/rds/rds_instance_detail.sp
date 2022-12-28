@@ -1,6 +1,6 @@
 dashboard "rds_instance_detail" {
 
-  title         = "AWS RDS Instance Detail"
+  title         = "Alicloud RDS Instance Detail"
   documentation = file("./dashboards/rds/docs/rds_instance_detail.md")
 
   tags = merge(local.rds_common_tags, {
@@ -35,7 +35,13 @@ dashboard "rds_instance_detail" {
 
     card {
       width = 2
-      query = query.rds_instance_instance_network_type
+      query = query.rds_instance_instance_public_access
+      args  = [self.input.db_instance_arn.value]
+    }
+
+    card {
+      width = 2
+      query = query.rds_instance_instance_tde_status
       args  = [self.input.db_instance_arn.value]
     }
 
@@ -47,10 +53,25 @@ dashboard "rds_instance_detail" {
 
   }
 
-  // with "ecs_security_groups" {
-  //   query = query.rds_instance_ecs_security_groups
-  //   args  = [self.input.db_instance_arn.value]
-  // }
+  with "ecs_security_groups" {
+    query = query.rds_instance_ecs_security_groups
+    args  = [self.input.db_instance_arn.value]
+  }
+
+  with "rds_read_only_db_instances" {
+    query = query.rds_instance_rds_read_only_db_instances
+    args = [self.input.db_instance_arn.value]
+  }
+
+  with "rds_databases"{
+    query = query.rds_instance_rds_database_names
+    args = [self.input.db_instance_arn.value]
+  }
+
+  with "rds_backups"{
+    query = query.rds_instance_rds_backup_ids
+    args = [self.input.db_instance_arn.value]
+  }
 
   with "ecs_autoscaling_groups" {
     query = query.rds_instance_ecs_autoscaling_groups
@@ -75,6 +96,20 @@ dashboard "rds_instance_detail" {
       direction = "top-down"
 
       node {
+        base = node.rds_database
+        args = {
+          rds_database_names = with.rds_databases.rows[*].database_name
+        }
+      }
+
+      node {
+        base = node.rds_backup
+        args = {
+          rds_database_backup_ids = with.rds_backups.rows[*].backup_id
+        }
+      }
+
+      node {
         base = node.rds_instance
         args = {
           rds_db_instance_arns = [self.input.db_instance_arn.value]
@@ -88,12 +123,26 @@ dashboard "rds_instance_detail" {
         }
       }
 
-      // node {
-      //   base = node.ecs_security_group
-      //   args = {
-      //     ecs_security_group_ids = with.ecs_security_groups.rows[*].security_group_id
-      //   }
-      // }
+      node {
+        base = node.rds_instance
+        args = {
+          rds_db_instance_arns = with.rds_read_only_db_instances.rows[*].db_instance_arn
+        }
+      }
+
+      node {
+        base = node.rds_instance
+        args = {
+          rds_db_instance_arns = with.rds_read_only_db_instances.rows[*].db_instance_arn
+        }
+      }
+
+      node {
+        base = node.ecs_security_group
+        args = {
+          ecs_security_group_ids = with.ecs_security_groups.rows[*].security_group_id
+        }
+      }
 
       node {
         base = node.vpc_vswitch
@@ -116,15 +165,50 @@ dashboard "rds_instance_detail" {
         }
       }
 
-      // edge {
-      //   base = edge.rds_db_instance_to_vpc_security_group
-      //   args = {
-      //     rds_db_instance_arns = [self.input.db_instance_arn.value]
-      //   }
-      // }
+      edge {
+        base = edge.rds_db_instance_to_ecs_security_group
+        args = {
+          rds_db_instance_arns = [self.input.db_instance_arn.value]
+        }
+      }
 
       edge {
         base = edge.rds_instance_to_vpc_vswitch
+        args = {
+          rds_db_instance_arns = [self.input.db_instance_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.rds_instance_to_vpc_vswitch
+        args = {
+          rds_db_instance_arns = [self.input.db_instance_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.rds_db_instance_to_read_only_db_instances
+        args = {
+          rds_db_instance_arns = [self.input.db_instance_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.rds_db_instance_to_read_only_db_instances
+        args = {
+          rds_db_instance_arns = with.rds_read_only_db_instances.rows[*].db_instance_arn
+        }
+      }
+
+      edge {
+        base = edge.rds_db_instance_to_rds_database
+        args = {
+          rds_db_instance_arns = [self.input.db_instance_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.rds_db_instance_to_rds_backup
         args = {
           rds_db_instance_arns = [self.input.db_instance_arn.value]
         }
@@ -178,19 +262,10 @@ dashboard "rds_instance_detail" {
       width = 12
 
       table {
-        width = 6
-        title = "Security Groups"
-        query = query.rds_instance_security_groups
+        title = "Security IPs"
+        query = query.rds_instance_security_ips
         args  = [self.input.db_instance_arn.value]
       }
-
-      table {
-        width = 6
-        title = "Storage"
-        query = query.rds_instance_storage
-        args  = [self.input.db_instance_arn.value]
-      }
-
     }
 
   }
@@ -253,6 +328,59 @@ query "rds_instance_vpc_vpcs" {
   EOQ
 }
 
+query "rds_instance_rds_read_only_db_instances" {
+  sql = <<-EOQ
+    select
+      related_instances.arn as db_instance_arn
+    from
+      alicloud_rds_instance as self,
+      alicloud_rds_instance as related_instances
+    where
+      self.arn = $1
+      and (related_instances.master_instance_id = self.db_instance_id or self.master_instance_id = related_instances.db_instance_id)
+  EOQ
+}
+
+query "rds_instance_rds_database_names" {
+  sql = <<-EOQ
+    select
+      d.db_name as database_name
+    from
+      alicloud_rds_instance as i,
+      alicloud_rds_database as d
+    where
+      i.arn = $1
+      and d.db_instance_id = i.db_instance_id;
+  EOQ
+}
+
+query "rds_instance_rds_backup_ids" {
+  sql = <<-EOQ
+    select
+      b.backup_id as backup_id
+    from
+      alicloud_rds_instance as i,
+      alicloud_rds_backup as b
+    where
+      i.arn = $1
+      and b.db_instance_id = i.db_instance_id;
+  EOQ
+}
+
+query "rds_instance_ecs_security_groups" {
+  sql = <<-EOQ
+    select
+      isg->>'SecurityGroupId' as security_group_id
+    from
+      alicloud_rds_instance as i,
+      jsonb_array_elements(i.security_group_configuration) as isg,
+      alicloud_ecs_security_group as sg
+    where
+      i.arn = $1
+      and isg->>'SecurityGroupId' = sg.security_group_id;
+  EOQ
+}
+
 # Card queries
 
 query "rds_instance_engine_type" {
@@ -282,7 +410,7 @@ query "rds_instance_class" {
 query "rds_instance_storage" {
   sql = <<-EOQ
     select
-      'Storage' as label,
+      'Storage (in GB)' as label,
       db_instance_storage as value
     from
       alicloud_rds_instance
@@ -291,11 +419,25 @@ query "rds_instance_storage" {
   EOQ
 }
 
-query "rds_instance_instance_network_type" {
+query "rds_instance_instance_public_access" {
   sql = <<-EOQ
     select
-      'Network Type' as label,
-      instance_network_type as value
+      'Public Access' as label,
+      case when db_instance_net_type = 'Extranet' then 'Enabled' else 'Disabled' end as value,
+      case when db_instance_net_type = 'Extranet' then 'alert' else 'ok' end as type
+    from
+      alicloud_rds_instance
+    where
+      arn = $1;
+  EOQ
+}
+
+query "rds_instance_instance_tde_status" {
+  sql = <<-EOQ
+    select
+      'Encryption' as label,
+      case when tde_status = 'Enabled' then 'Enabled' else 'Disabled' end as value,
+      case when tde_status = 'Enabled' then 'ok' else 'alert' end as type
     from
       alicloud_rds_instance
     where
@@ -306,7 +448,7 @@ query "rds_instance_instance_network_type" {
 query "rds_instance_ssl_enabled" {
   sql = <<-EOQ
     select
-      'SSL Status' as label,
+      'SSL' as label,
       case when ssl_status = 'Enabled' then 'Enabled' else 'Disabled' end as value,
       case when ssl_status = 'Enabled' then 'ok' else 'alert' end as type
     from
@@ -331,7 +473,7 @@ query "rds_instance_parameter_groups" {
   EOQ
 }
 
-query "rds_instance_security_groups" {
+query "rds_instance_security_ips" {
   sql = <<-EOQ
     select
       s ->> 'DBInstanceIPArrayName' as "Instance IP Name",
@@ -355,9 +497,11 @@ query "rds_instance_overview" {
         else 'N/A'
       end as "VPC ID",
       creation_time as "Create Time",
+      pay_type as "Pay Type",
       title as "Title",
       region as "Region",
       account_id as "Account ID",
+      instance_network_type as "Instance Network Type",
       arn as "ARN"
     from
       alicloud_rds_instance

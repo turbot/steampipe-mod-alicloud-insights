@@ -31,7 +31,7 @@ category "ecs_security_group" {
 category "ecs_disk" {
   title = "ECS Disk"
   href  = "/alicloud_insights.dashboard.ecs_disk_detail?input.disk_arn={{.properties.'ARN' | @uri}}"
-  icon  = "heroicons_outline:inbox_stack"
+  icon  = "hard_drive"
   color = local.storage_color
 }
 
@@ -44,7 +44,7 @@ category "ecs_image" {
 category "ecs_instance" {
   title = "ECS Instance"
   href  = "/alicloud_insights.dashboard.ecs_instance_detail?input.instance_arn={{.properties.'ARN' | @uri}}"
-  icon  = "dns"
+  icon  = "memory"
   color = local.compute_color
 }
 
@@ -62,12 +62,12 @@ category "ecs_key_pair" {
 
 category "ecs_network_interface" {
   title = "ECS Network Interface"
-  icon  = "memory"
+  icon  = "settings_input_antenna"
   color = local.compute_color
 }
 
 category "ecs_snapshot" {
   title = "ECS Snapshot"
-  icon  = "heroicons_outline:viewfinder_circle"
+  icon  = "add_a_photo"
   color = local.storage_color
 }
