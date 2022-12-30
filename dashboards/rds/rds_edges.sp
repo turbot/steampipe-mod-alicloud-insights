@@ -3,14 +3,16 @@ edge "rds_instance_to_vpc_vswitch" {
 
   sql = <<-EOQ
     select
-      coalesce(isg->>'SecurityGroupId',
-      arn) as from_id,
-      vswitch_id as to_id
+      coalesce(
+        isg->>'SecurityGroupId',
+        i.arn
+      ) as from_id,
+      i.vswitch_id as to_id
     from
-      alicloud_rds_instance,
-      jsonb_array_elements(security_group_configuration) as isg
+      alicloud_rds_instance as i,
+      jsonb_array_elements(coalesce(security_group_configuration, '[{}]')) as isg
     where
-      arn = any($1);
+      i.arn = any($1);
   EOQ
 
   param "rds_db_instance_arns" {}

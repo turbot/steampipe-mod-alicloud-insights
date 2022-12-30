@@ -180,13 +180,6 @@ dashboard "rds_instance_detail" {
       }
 
       edge {
-        base = edge.rds_instance_to_vpc_vswitch
-        args = {
-          rds_db_instance_arns = [self.input.db_instance_arn.value]
-        }
-      }
-
-      edge {
         base = edge.rds_db_instance_to_read_only_db_instances
         args = {
           rds_db_instance_arns = [self.input.db_instance_arn.value]

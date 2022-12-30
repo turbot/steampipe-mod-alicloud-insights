@@ -23,6 +23,51 @@ node "vpc_eip" {
   param "vpc_eip_arns" {}
 }
 
+node "vpc_network_acl" {
+  category = category.vpc_network_acl
+
+  sql = <<-EOQ
+    select
+      network_acl_id as id,
+      title as title,
+      jsonb_build_object(
+        'Network Acl Entry Id', i ->> 'NetworkAclEntryId',
+        'Source Cidr IP', i ->> 'SourceCidrIp',
+        'Region', region,
+        'Account ID', account_id
+      ) as properties
+    from
+      alicloud_vpc_network_acl,
+      jsonb_array_elements(ingress_acl_entries) as i
+    where
+      network_acl_id = any($1);
+  EOQ
+
+  param "vpc_network_acl_ids" {}
+}
+
+
+node "vpc_route_table" {
+  category = category.vpc_route_table
+
+  sql = <<-EOQ
+    select
+      route_table_id as id,
+      title as title,
+      jsonb_build_object(
+        'Owner ID', owner_id,
+        'Region', region,
+        'Account ID', account_id
+      ) as properties
+    from
+      alicloud_vpc_route_table
+    where
+      route_table_id = any($1);
+  EOQ
+
+  param "vpc_route_table_ids" {}
+}
+
 node "vpc_vswitch" {
     category = category.vpc_vswitch
 
@@ -44,7 +89,6 @@ node "vpc_vswitch" {
 
   param "vpc_vswitch_ids" {}
 }
-
 
 node "vpc_vpc" {
   category = category.vpc_vpc

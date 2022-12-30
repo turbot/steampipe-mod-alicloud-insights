@@ -10,6 +10,18 @@ category "vpc_eip" {
   icon  = "swipe_right_alt"
 }
 
+category "vpc_network_acl" {
+  title = "VPC Network ACL"
+  icon  = "rule"
+  color = local.networking_color
+}
+
+category "vpc_route_table" {
+  title = "VPC Route Table"
+  icon  = "table_rows"
+  color = local.networking_color
+}
+
 category "vpc_vswitch" {
   title = "VPC VSwitch"
   color = local.networking_color
