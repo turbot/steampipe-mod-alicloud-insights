@@ -23,6 +23,27 @@ node "vpc_eip" {
   param "vpc_eip_arns" {}
 }
 
+node "vpc_availability_zone" {
+  category = category.availability_zone
+
+  sql = <<-EOQ
+    select
+      distinct on (zone_id)
+      zone_id as id,
+      jsonb_build_object(
+        'Availability Zone ID', zone_id,
+        'Region', region,
+        'Account ID', account_id
+      ) as properties
+    from
+      alicloud_vpc_vswitch
+    where
+      vpc_id = any($1)
+  EOQ
+
+  param "vpc_vpc_ids" {}
+}
+
 node "vpc_network_acl" {
   category = category.vpc_network_acl
 
@@ -88,6 +109,50 @@ node "vpc_vswitch" {
   EOQ
 
   param "vpc_vswitch_ids" {}
+}
+
+node "vpc_nat_gateway" {
+  category = category.vpc_nat_gateway
+
+  sql = <<-EOQ
+    select
+      nat_gateway_id as id,
+      title as title,
+      jsonb_build_object(
+        'NAT Gateway ID', nat_gateway_id,
+        'Status', status,
+        'Account ID', account_id,
+        'Region', region
+      ) as properties
+    from
+      alicloud_vpc_nat_gateway
+    where
+      nat_gateway_id = any($1);
+  EOQ
+
+  param "vpc_nat_gateway_ids" {}
+}
+
+node "vpc_vpn_gateway" {
+  category = category.vpc_vpn_gateway
+
+  sql = <<-EOQ
+    select
+      vpn_gateway_id as id,
+      title as title,
+      jsonb_build_object(
+        'ID', vpn_gateway_id,
+        'Status',status,
+        'Region', region,
+        'Account ID', account_id
+      ) as properties
+    from
+      alicloud_vpc_vpn_gateway
+    where
+      vpc_id = any($1);
+  EOQ
+
+  param "vpc_vpc_ids" {}
 }
 
 node "vpc_vpc" {

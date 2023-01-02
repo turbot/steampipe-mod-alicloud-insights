@@ -55,25 +55,20 @@ dashboard "vpc_vswitch_detail" {
     args  = [self.input.vswitch_id.value]
   }
 
-  // with "lambda_functions" {
-  //   query = query.vpc_vswitch_lambda_functions
-  //   args  = [self.input.vswitch_id.value]
-  // }
-
   with "rds_db_instances" {
     query = query.vpc_vswitch_rds_instances
     args  = [self.input.vswitch_id.value]
   }
 
-  // with "sagemaker_notebook_instances" {
-  //   query = query.vpc_vswitch_sagemaker_notebook_instances
-  //   args  = [self.input.vswitch_id.value]
-  // }
+  with "vpc_nat_gateways" {
+    query = query.vpc_vswitch_vpc_nat_gateways
+    args  = [self.input.vswitch_id.value]
+  }
 
-  // with "vpc_flow_logs" {
-  //   query = query.vpc_vswitch_vpc_flow_logs
-  //   args  = [self.input.vswitch_id.value]
-  // }
+  with "ecs_autoscaling_groups" {
+    query = query.vpc_vswitch_ecs_autoscaling_groups
+    args = [self.input.vswitch_id.value]
+  }
 
   with "vpc_vpcs" {
     query = query.vpc_vswitch_vpc_vpcs
@@ -86,6 +81,13 @@ dashboard "vpc_vswitch_detail" {
       title     = "Relationships"
       type      = "graph"
       direction = "TD"
+
+      node {
+        base = node.ecs_autoscaling_group
+        args = {
+          ecs_autoscaling_group_ids = with.ecs_autoscaling_groups.rows[*].autoscaling_group_id
+        }
+      }
 
       node {
         base = node.ecs_instance
@@ -130,9 +132,23 @@ dashboard "vpc_vswitch_detail" {
       }
 
       node {
+        base = node.vpc_nat_gateway
+        args = {
+          vpc_nat_gateway_ids = with.vpc_nat_gateways.rows[*].gateway_id
+        }
+      }
+
+      node {
         base = node.vpc_vpc
         args = {
           vpc_vpc_ids = with.vpc_vpcs.rows[*].vpc_id
+        }
+      }
+
+      edge {
+        base = edge.vpc_vswitch_to_ecs_autoscaling_group
+        args = {
+          vpc_vswitch_ids = [self.input.vswitch_id.value]
         }
       }
 
@@ -157,12 +173,12 @@ dashboard "vpc_vswitch_detail" {
         }
       }
 
-      // edge {
-      //   base = edge.vpc_vswitch_to_vpc_flow_log
-      //   args = {
-      //     vpc_vswitch_ids = [self.input.vswitch_id.value]
-      //   }
-      // }
+      edge {
+        base = edge.vpc_vswitch_to_nat_gateway
+        args = {
+          vpc_nat_gateway_ids = with.vpc_nat_gateways.rows[*].gateway_id
+        }
+      }
 
       edge {
         base = edge.vpc_vswitch_to_vpc_network_acl
@@ -306,6 +322,29 @@ query "vpc_vswitch_vpc_network_acls" {
   EOQ
 }
 
+query "vpc_vswitch_vpc_nat_gateways" {
+  sql   = <<-EOQ
+    select
+      nat_gateway_id as gateway_id
+    from
+      alicloud_vpc_nat_gateway
+    where
+      nat_gateway_private_info ->> 'VswitchId' = $1;
+  EOQ
+}
+
+query "vpc_vswitch_ecs_autoscaling_groups" {
+  sql   = <<-EOQ
+    select
+      scaling_group_id as autoscaling_group_id
+    from
+      alicloud_ecs_autoscaling_group,
+      jsonb_array_elements_text(vswitch_ids) as v
+    where
+      v = $1;
+  EOQ
+}
+
 query "vpc_vswitch_vpc_route_tables" {
   sql   = <<-EOQ
     select
@@ -324,9 +363,8 @@ query "vpc_vswitch_ecs_instances" {
       i.arn as instance_arn
     from
       alicloud_ecs_instance as i
-      join alicloud_vpc_vswitch as s on s.vpc_id = i.vpc_id
     where
-      s.vswitch_id = $1;
+      i.vpc_attributes ->> 'VSwitchId' = $1;
   EOQ
 }
 

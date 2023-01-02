@@ -18,35 +18,210 @@ dashboard "vpc_detail" {
     card {
       width = 2
       query = query.vpc_ipv4_count
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      args  = [self.input.vpc_id.value]
     }
 
     card {
       width = 2
       query = query.vpc_ipv6_count
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      args  = [self.input.vpc_id.value]
     }
 
     card {
       width = 2
       query = query.vpc_vswitch_count
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      args  = [self.input.vpc_id.value]
     }
 
     card {
       width = 2
       query = query.vpc_is_default
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      args  = [self.input.vpc_id.value]
     }
 
+  }
+
+  with "ecs_instances" {
+    query = query.vpc_vpc_ecs_instances
+    args  = [self.input.vpc_id.value]
+  }
+
+  with "ecs_network_interfaces" {
+    query = query.vpc_vpc_ecs_network_interfaces
+    args  = [self.input.vpc_id.value]
+  }
+
+  with "rds_db_instances" {
+    query = query.vpc_vpc_rds_db_instances
+    args  = [self.input.vpc_id.value]
+  }
+
+  with "vpc_route_tables" {
+    query = query.vpc_vpc_vpc_route_tables
+    args  = [self.input.vpc_id.value]
+  }
+
+  with "vpc_nat_gateways" {
+    query = query.vpc_vpc_vpc_nat_gateways
+    args  = [self.input.vpc_id.value]
+  }
+
+  with "ecs_security_groups" {
+    query = query.vpc_vpc_ecs_security_groups
+    args  = [self.input.vpc_id.value]
+  }
+
+  with "vpc_vswitch" {
+    query = query.vpc_vpc_vpc_vswitch
+    args  = [self.input.vpc_id.value]
+  }
+
+  container {
+    graph {
+      title = "Relationships"
+      width = 12
+      type  = "graph"
+
+      node {
+        base = node.vpc_availability_zone
+        args = {
+          vpc_vpc_ids = [self.input.vpc_id.value]
+        }
+      }
+
+      node {
+        base = node.ecs_instance
+        args = {
+          ecs_instance_arns = with.ecs_instances.rows[*].instance_arn
+        }
+      }
+
+      node {
+        base = node.ecs_network_interface
+        args = {
+          ecs_network_interface_ids = with.ecs_network_interfaces.rows[*].eni_id
+        }
+      }
+
+      node {
+        base = node.rds_instance
+        args = {
+          rds_db_instance_arns = with.rds_db_instances.rows[*].rds_instance_arn
+        }
+      }
+
+      node {
+        base = node.vpc_nat_gateway
+        args = {
+          vpc_nat_gateway_ids = with.vpc_nat_gateways.rows[*].gateway_id
+        }
+      }
+
+      node {
+        base = node.ecs_security_group
+        args = {
+          ecs_security_group_ids = with.ecs_security_groups.rows[*].security_group_id
+        }
+      }
+
+      node {
+        base = node.vpc_vswitch
+        args = {
+          vpc_vswitch_ids = with.vpc_vswitch.rows[*].vswitch_id
+        }
+      }
+
+      node {
+        base = node.vpc_route_table
+        args = {
+          vpc_route_table_ids = with.vpc_route_tables.rows[*].route_table_id
+        }
+      }
+
+      node {
+        base = node.vpc_vpc
+        args = {
+          vpc_vpc_ids = [self.input.vpc_id.value]
+        }
+      }
+
+      node {
+        base = node.vpc_vpn_gateway
+        args = {
+          vpc_vpc_ids = [self.input.vpc_id.value]
+        }
+      }
+
+      edge {
+        base = edge.vpc_availability_zone_to_vpc_vswitch
+        args = {
+          vpc_vpc_ids = [self.input.vpc_id.value]
+        }
+      }
+
+      edge {
+        base = edge.vpc_vswitch_to_ecs_instance
+        args = {
+          vpc_vswitch_ids = with.vpc_vswitch.rows[*].vswitch_id
+        }
+      }
+
+      edge {
+        base = edge.vpc_vswitch_to_ecs_network_interface
+        args = {
+          vpc_vswitch_ids = with.vpc_vswitch.rows[*].vswitch_id
+        }
+      }
+
+      edge {
+        base = edge.vpc_vswitch_to_rds_instance
+        args = {
+          vpc_vswitch_ids = with.vpc_vswitch.rows[*].vswitch_id
+        }
+      }
+
+      edge {
+        base = edge.vpc_vswitch_to_vpc_route_table
+        args = {
+          vpc_vswitch_ids = with.vpc_vswitch.rows[*].vswitch_id
+        }
+      }
+
+      edge {
+        base = edge.vpc_vswitch_to_nat_gateway
+        args = {
+          vpc_nat_gateway_ids = with.vpc_nat_gateways.rows[*].gateway_id
+        }
+      }
+
+      edge {
+        base = edge.vpc_vpc_to_vpc_availability_zone
+        args = {
+          vpc_vpc_ids = [self.input.vpc_id.value]
+        }
+      }
+
+      edge {
+        base = edge.vpc_vpc_to_vpc_route_table
+        args = {
+          vpc_vpc_ids = [self.input.vpc_id.value]
+        }
+      }
+
+      edge {
+        base = edge.vpc_vpc_to_ecs_security_group
+        args = {
+          vpc_vpc_ids = [self.input.vpc_id.value]
+        }
+      }
+
+      edge {
+        base = edge.vpc_vpc_to_vpc_vpn_gateway
+        args = {
+          vpc_vpc_ids = [self.input.vpc_id.value]
+        }
+      }
+    }
   }
 
   container {
@@ -60,18 +235,14 @@ dashboard "vpc_detail" {
         type  = "line"
         width = 6
         query = query.vpc_overview
-        args = {
-          vpc_id = self.input.vpc_id.value
-        }
+        args  = [self.input.vpc_id.value]
       }
 
       table {
         title = "Tags"
         width = 6
         query = query.vpc_tags
-        args = {
-          vpc_id = self.input.vpc_id.value
-        }
+        args  = [self.input.vpc_id.value]
       }
 
     }
@@ -83,17 +254,13 @@ dashboard "vpc_detail" {
       table {
         title = "CIDR Blocks"
         query = query.vpc_cidr_blocks
-        args = {
-          vpc_id = self.input.vpc_id.value
-        }
+        args  = [self.input.vpc_id.value]
       }
 
       table {
         title = "DHCP Options"
         query = query.vpc_dhcp_options
-        args = {
-          vpc_id = self.input.vpc_id.value
-        }
+        args  = [self.input.vpc_id.value]
       }
 
     }
@@ -109,18 +276,14 @@ dashboard "vpc_detail" {
       type  = "column"
       width = 4
       query = query.vpc_vswitch_by_az
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      args  = [self.input.vpc_id.value]
 
     }
 
     table {
       query = query.vpc_vswitches_detail
       width = 8
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      args  = [self.input.vpc_id.value]
     }
 
   }
@@ -131,18 +294,14 @@ dashboard "vpc_detail" {
       title = "Route Tables"
       query = query.vpc_route_tables_detail
       width = 6
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      args  = [self.input.vpc_id.value]
     }
 
     table {
       title = "Routes"
       query = query.vpc_routes_detail
       width = 6
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      args  = [self.input.vpc_id.value]
     }
 
   }
@@ -157,9 +316,7 @@ dashboard "vpc_detail" {
       title = "Ingress NACLs"
       width = 6
       query = query.vpc_ingress_nacl_sankey
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      args  = [self.input.vpc_id.value]
     }
 
 
@@ -168,9 +325,7 @@ dashboard "vpc_detail" {
       title = "Egress NACLs"
       width = 6
       query = query.vpc_egress_nacl_sankey
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      args  = [self.input.vpc_id.value]
     }
 
 
@@ -183,18 +338,14 @@ dashboard "vpc_detail" {
 
       query = query.vpc_security_groups_detail
       width = 6
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      args  = [self.input.vpc_id.value]
     }
 
     table {
       title = "Gateways"
       query = query.vpc_gateways_detail
       width = 6
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      args  = [self.input.vpc_id.value]
     }
 
   }
@@ -260,7 +411,6 @@ query "vpc_ipv4_count" {
       cidrs;
   EOQ
 
-  param "vpc_id" {}
 }
 
 query "vpc_ipv6_count" {
@@ -280,7 +430,6 @@ query "vpc_ipv6_count" {
       cidrs;
   EOQ
 
-  param "vpc_id" {}
 }
 
 query "vpc_vswitch_count" {
@@ -295,7 +444,6 @@ query "vpc_vswitch_count" {
       vpc_id = $1;
   EOQ
 
-  param "vpc_id" {}
 }
 
 query "vpc_is_default" {
@@ -310,7 +458,85 @@ query "vpc_is_default" {
       vpc_id = $1;
   EOQ
 
-  param "vpc_id" {}
+}
+
+# with queries
+
+query "vpc_vpc_ecs_instances" {
+  sql   = <<-EOQ
+    select
+      arn as instance_arn
+    from
+      alicloud_ecs_instance as i
+    where
+      vpc_id = $1;
+  EOQ
+}
+
+query "vpc_vpc_ecs_network_interfaces" {
+  sql   = <<-EOQ
+    select
+      network_interface_id as eni_id
+    from
+      alicloud_ecs_network_interface
+    where
+      vpc_id = $1;
+  EOQ
+}
+
+query "vpc_vpc_rds_db_instances" {
+  sql   = <<-EOQ
+    select
+      arn as rds_instance_arn
+    from
+      alicloud_rds_instance
+    where
+      vpc_id = $1;
+  EOQ
+}
+
+query "vpc_vpc_vpc_nat_gateways" {
+    sql   = <<-EOQ
+    select
+      nat_gateway_id as gateway_id
+    from
+      alicloud_vpc_nat_gateway
+    where
+      vpc_id = $1;
+  EOQ
+}
+
+query "vpc_vpc_ecs_security_groups" {
+  sql   = <<-EOQ
+    select
+      security_group_id as security_group_id
+    from
+      alicloud_ecs_security_group
+    where
+      vpc_id = $1;
+  EOQ
+}
+
+query "vpc_vpc_vpc_vswitch" {
+  sql   = <<-EOQ
+    select
+      vswitch_id as vswitch_id
+    from
+      alicloud_vpc_vswitch
+    where
+      vpc_id = $1;
+  EOQ
+}
+
+query "vpc_vpc_vpc_route_tables" {
+  sql   = <<-EOQ
+    select
+      route_table_id as route_table_id
+    from
+      alicloud_vpc_route_table
+    where
+      vpc_id = $1;
+  EOQ
 }
 
 query "vpc_overview" {
@@ -326,7 +552,6 @@ query "vpc_overview" {
       vpc_id = $1
   EOQ
 
-  param "vpc_id" {}
 }
 
 query "vpc_tags" {
@@ -343,7 +568,6 @@ query "vpc_tags" {
       tag ->> 'Key';
   EOQ
 
-  param "vpc_id" {}
 }
 
 query "vpc_cidr_blocks" {
@@ -375,7 +599,6 @@ query "vpc_cidr_blocks" {
       vpc_id = $1;
   EOQ
 
-  param "vpc_id" {}
 }
 
 query "vpc_dhcp_options" {
@@ -397,7 +620,6 @@ query "vpc_dhcp_options" {
       dhcp_options_set_id;
   EOQ
 
-  param "vpc_id" {}
 }
 
 query "vpc_vswitch_by_az" {
@@ -415,7 +637,6 @@ query "vpc_vswitch_by_az" {
       zone_id;
   EOQ
 
-  param "vpc_id" {}
 }
 
 query "vpc_vswitches_detail" {
@@ -447,7 +668,6 @@ query "vpc_vswitches_detail" {
       vswitch_id;
   EOQ
 
-  param "vpc_id" {}
 }
 
 query "vpc_route_tables_detail" {
@@ -463,7 +683,6 @@ query "vpc_route_tables_detail" {
       route_table_id;
   EOQ
 
-  param "vpc_id" {}
 }
 
 query "vpc_routes_detail" {
@@ -489,7 +708,6 @@ query "vpc_routes_detail" {
       "Associated To";
   EOQ
 
-  param "vpc_id" {}
 }
 
 query "vpc_security_groups_detail" {
@@ -505,7 +723,6 @@ query "vpc_security_groups_detail" {
       vpc_id = $1;
   EOQ
 
-  param "vpc_id" {}
 }
 
 query "vpc_gateways_detail" {
@@ -531,7 +748,6 @@ query "vpc_gateways_detail" {
        vpc_id = $1;
   EOQ
 
-  param "vpc_id" {}
 }
 
 query "vpc_ingress_nacl_sankey" {
@@ -636,7 +852,6 @@ query "vpc_ingress_nacl_sankey" {
     from aces
   EOQ
 
-  param "vpc_id" {}
 }
 
 query "vpc_egress_nacl_sankey" {
@@ -748,7 +963,6 @@ query "vpc_egress_nacl_sankey" {
     from aces
   EOQ
 
-  param "vpc_id" {}
 }
 
 
