@@ -14,3 +14,18 @@ edge "actiontrail_trail_to_oss_bucket" {
 
   param "action_trail_names" {}
 }
+
+edge "actiontrail_trail_to_ram_role" {
+  title = "assumes"
+
+    sql = <<-EOQ
+    select
+      name as from_id,
+      role_name as to_id
+    from
+      alicloud_action_trail
+    where
+      name = any($1);
+  EOQ
+  param "action_trail_names" {}
+}

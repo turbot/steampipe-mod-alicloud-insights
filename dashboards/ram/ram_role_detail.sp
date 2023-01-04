@@ -18,29 +18,76 @@ dashboard "ram_role_detail" {
     card {
       width = 2
       query = query.ram_role_policy_count_for_role
-      args = {
-        arn = self.input.role_arn.value
-      }
+      args  = [self.input.role_arn.value]
     }
 
     card {
       width = 2
       query = query.ram_role_with_admin_access
-      args = {
-        arn = self.input.role_arn.value
-      }
+      args  = [self.input.role_arn.value]
     }
 
     card {
       width = 2
       query = query.ram_role_with_cross_account_access
-      args = {
-        arn = self.input.role_arn.value
-      }
+      args  = [self.input.role_arn.value]
     }
 
   }
 
+  with "ram_policies" {
+    query = query.ram_role_ram_policies
+    args  = [self.input.role_arn.value]
+  }
+
+  with "action_trails" {
+    query = query.ram_role_action_trails
+    args  = [self.input.role_arn.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.ram_policy
+        args = {
+          ram_policy_names = with.ram_policies.rows[*].policy_name
+        }
+      }
+
+      node {
+        base = node.actiontrail_trail
+        args = {
+          action_trail_names = with.action_trails.rows[*].trail_name
+        }
+      }
+
+      node {
+        base = node.ram_role
+        args = {
+          ram_role_arns = [self.input.role_arn.value]
+        }
+      }
+      
+      edge {
+        base = edge.actiontrail_trail_to_ram_role
+        args = {
+          action_trail_names = with.action_trails.rows[*].trail_name
+        }
+      }
+
+      edge {
+        base = edge.ram_role_to_ram_policy
+        args = {
+          ram_role_arns = [self.input.role_arn.value]
+        }
+      }
+    }
+  }
   container {
 
     container {
@@ -52,9 +99,7 @@ dashboard "ram_role_detail" {
         type  = "line"
         width = 6
         query = query.ram_role_overview
-        args = {
-          arn = self.input.role_arn.value
-        }
+        args  = [self.input.role_arn.value]
       }
 
     }
@@ -68,9 +113,7 @@ dashboard "ram_role_detail" {
         width = 6
         title = "Attached Policies"
         query = query.ram_user_manage_policies_hierarchy
-        args = {
-          arn = self.input.role_arn.value
-        }
+        args  = [self.input.role_arn.value]
 
         category "managed_policy" {
           color = "ok"
@@ -83,9 +126,7 @@ dashboard "ram_role_detail" {
         title = "Policies"
         width = 6
         query = query.ram_policies_for_role
-        args = {
-          arn = self.input.role_arn.value
-        }
+        args  = [self.input.role_arn.value]
       }
 
     }
@@ -119,7 +160,6 @@ query "ram_role_policy_count_for_role" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ram_role_with_admin_access" {
@@ -144,7 +184,6 @@ query "ram_role_with_admin_access" {
       r.arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ram_role_with_cross_account_access" {
@@ -170,7 +209,32 @@ query "ram_role_with_cross_account_access" {
       r.arn = $1;
   EOQ
 
-  param "arn" {}
+}
+
+query "ram_role_ram_policies" {
+  sql = <<-EOQ
+    select
+      policy ->> 'PolicyName' as policy_name
+    from
+      alicloud_ram_role,
+      jsonb_array_elements(attached_policy) as policy
+    where
+      arn = $1
+      and policy ->> 'PolicyName' is not null;
+  EOQ
+}
+
+query "ram_role_action_trails" {
+  sql = <<-EOQ
+    select
+      t.name as trail_name
+    from
+      alicloud_action_trail as t,
+      alicloud_ram_role as r
+    where
+      r.arn = $1
+      and t.role_name = r.name;
+  EOQ
 }
 
 query "ram_role_overview" {
@@ -190,7 +254,6 @@ query "ram_role_overview" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ram_policies_for_role" {
@@ -207,7 +270,6 @@ query "ram_policies_for_role" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ram_user_manage_policies_hierarchy" {
@@ -235,5 +297,4 @@ query "ram_user_manage_policies_hierarchy" {
       r.arn = $1;
   EOQ
 
-  param "arn" {}
 }

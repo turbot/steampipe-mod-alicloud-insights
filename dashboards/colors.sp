@@ -14,7 +14,7 @@ locals {
   end_user_computing_color      = "green"
   front_end_web_color           = "red"
   game_tech_color               = "purple"
-  iam_color                     = "red"
+  ram_color                     = "red"
   iot_color                     = "green"
   management_governance_color   = "pink"
   media_color                   = "orange"
