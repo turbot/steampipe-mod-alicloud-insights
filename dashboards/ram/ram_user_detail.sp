@@ -18,21 +18,85 @@ dashboard "ram_user_detail" {
     card {
       width = 2
       query = query.ram_user_mfa_for_user
-      args = {
-        arn = self.input.user_arn.value
-      }
+      args  = [self.input.user_arn.value]
     }
 
     card {
       width = 2
       query = query.ram_user_direct_attached_policy_count_for_user
-      args = {
-        arn = self.input.user_arn.value
-      }
+      args  = [self.input.user_arn.value]
     }
 
   }
 
+  with "ram_groups" {
+    query = query.ram_user_ram_groups
+    args = [self.input.user_arn.value]
+  }
+
+  with "ram_policies" {
+    query = query.ram_user_ram_policies
+    args = [self.input.user_arn.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.ram_group
+        args = {
+          ram_group_arns = with.ram_groups.rows[*].group_arn
+        }
+      }
+
+      node {
+        base = node.ram_policy
+        args = {
+          ram_policy_names = with.ram_policies.rows[*].policy_name
+        }
+      }
+
+      node {
+        base = node.ram_user
+        args = {
+          ram_user_arns = [self.input.user_arn.value]
+        }
+      }
+
+      node {
+        base = node.ram_access_key
+        args = {
+          ram_user_arns = [self.input.user_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.ram_group_to_ram_user
+        args = {
+          ram_group_arns = with.ram_groups.rows[*].group_arn
+        }
+      }
+
+      edge {
+        base = edge.ram_user_to_ram_access_key
+        args = {
+          ram_user_arns = [self.input.user_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.ram_user_to_ram_policy
+        args = {
+          ram_user_arns = [self.input.user_arn.value]
+        }
+      }
+
+    }
+  }
   container {
 
     container {
@@ -43,9 +107,7 @@ dashboard "ram_user_detail" {
         title = "Overview"
         type  = "line"
         query = query.ram_user_overview
-        args = {
-          arn = self.input.user_arn.value
-        }
+        args  = [self.input.user_arn.value]
       }
 
     }
@@ -57,17 +119,13 @@ dashboard "ram_user_detail" {
       table {
         title = "Access Keys"
         query = query.ram_user_access_keys
-        args = {
-          arn = self.input.user_arn.value
-        }
+        args  = [self.input.user_arn.value]
       }
 
       table {
         title = "MFA Devices"
         query = query.ram_user_mfa_devices
-        args = {
-          arn = self.input.user_arn.value
-        }
+        args  = [self.input.user_arn.value]
       }
 
     }
@@ -82,9 +140,7 @@ dashboard "ram_user_detail" {
       type  = "sankey"
       title = "Attached Policies"
       query = query.ram_user_manage_policies_sankey
-      args = {
-        arn = self.input.user_arn.value
-      }
+      args  = [self.input.user_arn.value]
 
       category "ram_group" {
         color = "ok"
@@ -95,9 +151,7 @@ dashboard "ram_user_detail" {
       title = "Groups"
       width = 6
       query = query.ram_groups_for_user
-      args = {
-        arn = self.input.user_arn.value
-      }
+      args  = [self.input.user_arn.value]
 
       column "Name" {
         // cyclic dependency prevents use of url_path, hardcode for now
@@ -110,9 +164,7 @@ dashboard "ram_user_detail" {
       title = "Policies"
       width = 6
       query = query.ram_all_policies_for_user
-      args = {
-        arn = self.input.user_arn.value
-      }
+      args  = [self.input.user_arn.value]
     }
 
   }
@@ -145,7 +197,6 @@ query "ram_user_mfa_for_user" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ram_user_direct_attached_policy_count_for_user" {
@@ -160,7 +211,34 @@ query "ram_user_direct_attached_policy_count_for_user" {
      arn = $1 and attached_policy = '[]';
   EOQ
 
-  param "arn" {}
+}
+
+# With queries
+
+query "ram_user_ram_groups" {
+  sql = <<-EOQ
+    select
+      g.arn as group_arn
+    from
+      alicloud_ram_user as u,
+      alicloud_ram_group as g,
+      jsonb_array_elements(u.groups) as ugrp
+    where
+      u.arn = $1
+      and g.title = ugrp ->> 'GroupName';
+  EOQ
+}
+
+query "ram_user_ram_policies" {
+  sql = <<-EOQ
+    select
+      policy ->> 'PolicyName' as policy_name
+    from
+      alicloud_ram_user,
+      jsonb_array_elements(attached_policy) as policy
+    where
+      arn = $1
+  EOQ
 }
 
 query "ram_user_overview" {
@@ -177,7 +255,6 @@ query "ram_user_overview" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ram_user_access_keys" {
@@ -192,7 +269,6 @@ query "ram_user_access_keys" {
       u.arn  = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ram_user_mfa_devices" {
@@ -208,7 +284,6 @@ query "ram_user_mfa_devices" {
       arn  = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ram_user_manage_policies_sankey" {
@@ -277,7 +352,6 @@ query "ram_user_manage_policies_sankey" {
       and u.arn in (select ram_user_arn from args);
   EOQ
 
-  param "arn" {}
 }
 
 query "ram_groups_for_user" {
@@ -293,7 +367,6 @@ query "ram_groups_for_user" {
       u.arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "ram_all_policies_for_user" {
@@ -326,5 +399,4 @@ query "ram_all_policies_for_user" {
       and u.arn = $1;
   EOQ
 
-  param "arn" {}
 }
