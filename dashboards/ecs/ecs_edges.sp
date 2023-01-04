@@ -123,6 +123,23 @@ edge "ecs_security_group_to_ecs_network_interface" {
   param "ecs_security_group_ids" {}
 }
 
+edge "ecs_security_group_to_rds_instance" {
+  title = "rds instance"
+
+  sql = <<-EOQ
+    select
+      isg->>'SecurityGroupId' as from_id,
+      arn as to_id
+    from
+      alicloud_rds_instance as i,
+      jsonb_array_elements(i.security_group_configuration) as isg
+    where
+      isg->>'SecurityGroupId' = any($1);
+  EOQ
+
+  param "ecs_security_group_ids" {}
+}
+
 edge "ecs_network_interface_to_vpc_eip" {
   title = "eip"
 

@@ -19,5 +19,5 @@ category "rds_database" {
 category "rds_backup" {
   title = "RDS Backup"
   color = local.database_color
-  icon  = "text:BKP"
+  icon  = "add_a_photo"
 }

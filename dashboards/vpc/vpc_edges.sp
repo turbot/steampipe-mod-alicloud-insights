@@ -107,7 +107,7 @@ edge "vpc_vswitch_to_vpc_network_acl" {
 }
 
 edge "vpc_vswitch_to_nat_gateway" {
-    title = "nat_gateway"
+    title = "nat gateway"
   sql   = <<-EOQ
     select
       nat_gateway_private_info ->> 'VswitchId' as from_id,

@@ -50,6 +50,11 @@ dashboard "ecs_security_group_detail" {
     args  = [self.input.security_group_id.value]
   }
 
+  with "rds_instances" {
+    query = query.ecs_security_group_rds_instances
+    args  = [self.input.security_group_id.value]
+  }
+
   // with "vpc_vswitches" {
   //   query = query.ecs_security_group_vpc_vswitches
   //   args  = [self.input.security_group_id.value]
@@ -95,6 +100,13 @@ dashboard "ecs_security_group_detail" {
         }
       }
 
+      node {
+        base = node.rds_instance
+        args = {
+          rds_db_instance_arns = with.rds_instances.rows[*].rds_instance_arn
+        }
+      }
+
       // node {
       //   base = node.vpc_vswitch
       //   args = {
@@ -125,6 +137,13 @@ dashboard "ecs_security_group_detail" {
 
       edge {
         base = edge.ecs_security_group_to_ecs_network_interface
+        args = {
+          ecs_security_group_ids = [self.input.security_group_id.value]
+        }
+      }
+
+      edge {
+        base = edge.ecs_security_group_to_rds_instance
         args = {
           ecs_security_group_ids = [self.input.security_group_id.value]
         }
@@ -272,7 +291,6 @@ query "ecs_security_group_unassociated" {
       s.security_group_id = $1;
   EOQ
 
-
 }
 
 query "ecs_security_unrestricted_ingress" {
@@ -376,6 +394,18 @@ query "ecs_security_group_ecs_launch_templates" {
 //       security_group_id = $1
 //   EOQ
 // }
+
+query "ecs_security_group_rds_instances" {
+  sql = <<-EOQ
+    select
+      arn as rds_instance_arn
+    from
+      alicloud_rds_instance as i,
+      jsonb_array_elements(i.security_group_configuration) as isg
+    where
+      isg->>'SecurityGroupId' = $1;
+  EOQ
+}
 
 query "ecs_security_group_vpc_vpcs" {
   sql = <<-EOQ
