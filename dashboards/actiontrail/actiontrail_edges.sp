@@ -18,10 +18,10 @@ edge "actiontrail_trail_to_oss_bucket" {
 edge "actiontrail_trail_to_ram_role" {
   title = "assumes"
 
-    sql = <<-EOQ
+  sql = <<-EOQ
     select
       name as from_id,
-      role_name as to_id
+      sls_write_role_arn as to_id
     from
       alicloud_action_trail
     where
