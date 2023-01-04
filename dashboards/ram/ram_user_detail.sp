@@ -97,6 +97,7 @@ dashboard "ram_user_detail" {
 
     }
   }
+
   container {
 
     container {
