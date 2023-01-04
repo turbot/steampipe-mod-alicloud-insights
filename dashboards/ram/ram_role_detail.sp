@@ -72,7 +72,7 @@ dashboard "ram_role_detail" {
           ram_role_arns = [self.input.role_arn.value]
         }
       }
-      
+
       edge {
         base = edge.actiontrail_trail_to_ram_role
         args = {
@@ -233,7 +233,7 @@ query "ram_role_action_trails" {
       alicloud_ram_role as r
     where
       r.arn = $1
-      and t.role_name = r.name;
+      and t.sls_write_role_arn = r.arn;
   EOQ
 }
 
