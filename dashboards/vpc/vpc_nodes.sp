@@ -1,4 +1,25 @@
 
+node "vpc_availability_zone" {
+  category = category.availability_zone
+
+  sql = <<-EOQ
+    select
+      distinct on (zone_id)
+      zone_id as id,
+      jsonb_build_object(
+        'Availability Zone ID', zone_id,
+        'Region', region,
+        'Account ID', account_id
+      ) as properties
+    from
+      alicloud_vpc_vswitch
+    where
+      vpc_id = any($1)
+  EOQ
+
+  param "vpc_vpc_ids" {}
+}
+
 node "vpc_eip" {
   category = category.vpc_eip
 
@@ -23,25 +44,26 @@ node "vpc_eip" {
   param "vpc_eip_arns" {}
 }
 
-node "vpc_availability_zone" {
-  category = category.availability_zone
+node "vpc_nat_gateway" {
+  category = category.vpc_nat_gateway
 
   sql = <<-EOQ
     select
-      distinct on (zone_id)
-      zone_id as id,
+      nat_gateway_id as id,
+      title as title,
       jsonb_build_object(
-        'Availability Zone ID', zone_id,
-        'Region', region,
-        'Account ID', account_id
+        'NAT Gateway ID', nat_gateway_id,
+        'Status', status,
+        'Account ID', account_id,
+        'Region', region
       ) as properties
     from
-      alicloud_vpc_vswitch
+      alicloud_vpc_nat_gateway
     where
-      vpc_id = any($1)
+      nat_gateway_id = any($1);
   EOQ
 
-  param "vpc_vpc_ids" {}
+  param "vpc_nat_gateway_ids" {}
 }
 
 node "vpc_network_acl" {
@@ -66,7 +88,6 @@ node "vpc_network_acl" {
 
   param "vpc_network_acl_ids" {}
 }
-
 
 node "vpc_route_table" {
   category = category.vpc_route_table
@@ -109,28 +130,6 @@ node "vpc_vswitch" {
   EOQ
 
   param "vpc_vswitch_ids" {}
-}
-
-node "vpc_nat_gateway" {
-  category = category.vpc_nat_gateway
-
-  sql = <<-EOQ
-    select
-      nat_gateway_id as id,
-      title as title,
-      jsonb_build_object(
-        'NAT Gateway ID', nat_gateway_id,
-        'Status', status,
-        'Account ID', account_id,
-        'Region', region
-      ) as properties
-    from
-      alicloud_vpc_nat_gateway
-    where
-      nat_gateway_id = any($1);
-  EOQ
-
-  param "vpc_nat_gateway_ids" {}
 }
 
 node "vpc_vpn_gateway" {

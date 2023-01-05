@@ -47,16 +47,6 @@ dashboard "ecs_disk_detail" {
 
   }
 
-  with "from_ecs_snapshots" {
-    query = query.ecs_disk_from_ecs_snapshots
-    args  = [self.input.disk_arn.value]
-  }
-
-  with "to_ecs_snapshots" {
-    query = query.ecs_disk_to_ecs_snapshots
-    args  = [self.input.disk_arn.value]
-  }
-
   with "ecs_images" {
     query = query.ecs_disk_ecs_images
     args  = [self.input.disk_arn.value]
@@ -67,8 +57,18 @@ dashboard "ecs_disk_detail" {
     args  = [self.input.disk_arn.value]
   }
 
+  with "from_ecs_snapshots" {
+    query = query.ecs_disk_from_ecs_snapshots
+    args  = [self.input.disk_arn.value]
+  }
+
   with "kms_keys" {
     query = query.ecs_disk_kms_keys
+    args  = [self.input.disk_arn.value]
+  }
+
+  with "to_ecs_snapshots" {
+    query = query.ecs_disk_to_ecs_snapshots
     args  = [self.input.disk_arn.value]
   }
 
@@ -78,20 +78,6 @@ dashboard "ecs_disk_detail" {
       title     = "Relationships"
       type      = "graph"
       direction = "TD"
-
-      node {
-        base = node.ecs_snapshot
-        args = {
-          ecs_snapshot_arns = with.from_ecs_snapshots.rows[*].snapshot_arn
-        }
-      }
-
-      node {
-        base = node.ecs_snapshot
-        args = {
-          ecs_snapshot_arns = with.to_ecs_snapshots.rows[*].snapshot_arn
-        }
-      }
 
       node {
         base = node.ecs_disk
@@ -115,6 +101,20 @@ dashboard "ecs_disk_detail" {
       }
 
       node {
+        base = node.ecs_snapshot
+        args = {
+          ecs_snapshot_arns = with.from_ecs_snapshots.rows[*].snapshot_arn
+        }
+      }
+
+      node {
+        base = node.ecs_snapshot
+        args = {
+          ecs_snapshot_arns = with.to_ecs_snapshots.rows[*].snapshot_arn
+        }
+      }
+
+      node {
         base = node.kms_key
         args = {
           kms_key_arns = with.kms_keys.rows[*].key_arn
@@ -129,9 +129,23 @@ dashboard "ecs_disk_detail" {
       }
 
       edge {
+        base = edge.ecs_disk_to_kms_key
+        args = {
+          ecs_disk_arns = [self.input.disk_arn.value]
+        }
+      }
+
+      edge {
         base = edge.ecs_disk_to_ecs_snapshot
         args = {
           ecs_snapshot_arns = with.to_ecs_snapshots.rows[*].snapshot_arn
+        }
+      }
+
+      edge {
+        base = edge.ecs_instance_to_ecs_disk
+        args = {
+          ecs_instance_arns = with.ecs_instances.rows[*].instance_arn
         }
       }
 
@@ -142,19 +156,6 @@ dashboard "ecs_disk_detail" {
         }
       }
 
-      edge {
-        base = edge.ecs_disk_to_kms_key
-        args = {
-          ecs_disk_arns = [self.input.disk_arn.value]
-        }
-      }
-
-      edge {
-        base = edge.ecs_instance_to_ecs_disk
-        args = {
-          ecs_instance_arns = with.ecs_instances.rows[*].instance_arn
-        }
-      }
     }
   }
 

@@ -35,6 +35,11 @@ dashboard "vpc_vswitch_detail" {
 
   }
 
+  with "ecs_autoscaling_groups" {
+    query = query.vpc_vswitch_ecs_autoscaling_groups
+    args = [self.input.vswitch_id.value]
+  }
+
   with "ecs_instances" {
     query = query.vpc_vswitch_ecs_instances
     args  = [self.input.vswitch_id.value]
@@ -42,6 +47,11 @@ dashboard "vpc_vswitch_detail" {
 
   with "ecs_network_interfaces" {
     query = query.vpc_vswitch_ecs_network_interfaces
+    args  = [self.input.vswitch_id.value]
+  }
+
+  with "rds_db_instances" {
+    query = query.vpc_vswitch_rds_instances
     args  = [self.input.vswitch_id.value]
   }
 
@@ -55,19 +65,9 @@ dashboard "vpc_vswitch_detail" {
     args  = [self.input.vswitch_id.value]
   }
 
-  with "rds_db_instances" {
-    query = query.vpc_vswitch_rds_instances
-    args  = [self.input.vswitch_id.value]
-  }
-
   with "vpc_nat_gateways" {
     query = query.vpc_vswitch_vpc_nat_gateways
     args  = [self.input.vswitch_id.value]
-  }
-
-  with "ecs_autoscaling_groups" {
-    query = query.vpc_vswitch_ecs_autoscaling_groups
-    args = [self.input.vswitch_id.value]
   }
 
   with "vpc_vpcs" {

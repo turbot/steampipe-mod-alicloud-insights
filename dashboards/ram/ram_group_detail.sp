@@ -19,21 +19,71 @@ dashboard "ram_group_detail" {
     card {
       width = 2
       query = query.ram_groups_users_count
-      args = {
-        arn = self.input.group_arn.value
-      }
+      args  = [self.input.group_arn.value]
     }
 
     card {
       width = 2
       query = query.ram_groups_policies_count
-      args = {
-        arn = self.input.group_arn.value
-      }
+      args  = [self.input.group_arn.value]
     }
 
   }
 
+  with "ram_policies" {
+    query = query.ram_group_ram_policies
+    args = [self.input.group_arn.value]
+  }
+
+  with "ram_users" {
+    query = query.ram_group_ram_users
+    args  = [self.input.group_arn.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.ram_group
+        args = {
+          ram_group_arns = [self.input.group_arn.value]
+        }
+      }
+
+      node {
+        base = node.ram_policy
+        args = {
+          ram_policy_akas = with.ram_policies.rows[*].policy_akas
+        }
+      }
+
+      node {
+        base = node.ram_user
+        args = {
+          ram_user_arns = with.ram_users.rows[*].user_arn
+        }
+      }
+
+      edge {
+        base = edge.ram_group_to_ram_user
+        args = {
+          ram_group_arns = [self.input.group_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.ram_group_to_ram_policy
+        args = {
+          ram_group_arns = [self.input.group_arn.value]
+        }
+      }
+
+    }
+  }
   container {
 
     container {
@@ -44,9 +94,7 @@ dashboard "ram_group_detail" {
         type  = "line"
         width = 6
         query = query.ram_group_overview
-        args = {
-          arn = self.input.group_arn.value
-        }
+        args  = [self.input.group_arn.value]
 
       }
 
@@ -66,9 +114,7 @@ dashboard "ram_group_detail" {
       }
 
       query = query.ram_users_for_group
-      args = {
-        arn = self.input.group_arn.value
-      }
+      args  = [self.input.group_arn.value]
 
       column "User ARN" {
         display = "none"
@@ -80,9 +126,7 @@ dashboard "ram_group_detail" {
       title = "Policies"
       width = 6
       query = query.ram_all_policies_for_group
-      args = {
-        arn = self.input.group_arn.value
-      }
+      args  = [self.input.group_arn.value]
     }
 
   }
@@ -116,7 +160,6 @@ query "ram_groups_users_count" {
       arn = $1
   EOQ
 
-  param "arn" {}
 }
 
 query "ram_groups_policies_count" {
@@ -131,7 +174,34 @@ query "ram_groups_policies_count" {
       arn = $1
   EOQ
 
-  param "arn" {}
+}
+
+query "ram_group_ram_policies" {
+  sql = <<-EOQ
+    select
+      p.akas::text as policy_akas
+    from
+      alicloud_ram_group as g,
+      alicloud_ram_policy as p,
+      jsonb_array_elements(g.attached_policy) as policy
+    where
+      g.arn = $1
+      and policy ->> 'PolicyName' = p.policy_name;
+  EOQ
+}
+
+query "ram_group_ram_users" {
+  sql = <<-EOQ
+    select
+      u.arn as user_arn
+    from
+      alicloud_ram_user as u,
+      alicloud_ram_group as g,
+      jsonb_array_elements(users) as member
+    where
+      g.arn = $1
+      and member ->> 'UserName' = u.name;
+  EOQ
 }
 
 query "ram_group_overview" {
@@ -147,7 +217,6 @@ query "ram_group_overview" {
       arn = $1
   EOQ
 
-  param "arn" {}
 }
 
 query "ram_users_for_group" {
@@ -164,7 +233,6 @@ query "ram_users_for_group" {
       arn = $1
   EOQ
 
-  param "arn" {}
 }
 
 query "ram_all_policies_for_group" {
@@ -181,5 +249,4 @@ query "ram_all_policies_for_group" {
       arn = $1
   EOQ
 
-  param "arn" {}
 }

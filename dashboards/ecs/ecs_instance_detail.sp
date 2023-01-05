@@ -205,13 +205,6 @@ dashboard "ecs_instance_detail" {
       }
 
       edge {
-        base = edge.ecs_instance_to_ecs_disk
-        args = {
-          ecs_instance_arns = [self.input.instance_arn.value]
-        }
-      }
-
-      edge {
         base = edge.cms_monitor_host_to_ecs_instance
         args = {
           ecs_instance_arns = [self.input.instance_arn.value]
@@ -234,6 +227,13 @@ dashboard "ecs_instance_detail" {
 
       edge {
         base = edge.ecs_image_to_ecs_instance
+        args = {
+          ecs_instance_arns = [self.input.instance_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.ecs_instance_to_ecs_disk
         args = {
           ecs_instance_arns = [self.input.instance_arn.value]
         }
@@ -275,7 +275,7 @@ dashboard "ecs_instance_detail" {
       }
 
       edge {
-        base = edge.ecs_instance_to_vcs_vswitch
+        base = edge.ecs_instance_to_vpc_vswitch
         args = {
           ecs_instance_arns = [self.input.instance_arn.value]
         }
