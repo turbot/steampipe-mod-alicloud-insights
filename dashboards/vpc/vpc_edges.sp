@@ -209,6 +209,7 @@ edge "vpc_vpc_to_vpc_route_table" {
     from
       alicloud_vpc_route_table
     where
+      jsonb_array_length(vswitch_ids) = 0 and
       vpc_id = any($1);
   EOQ
 
