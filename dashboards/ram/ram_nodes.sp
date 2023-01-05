@@ -51,7 +51,7 @@ node "ram_policy" {
 
   sql = <<-EOQ
     select
-      akas as id,
+      akas::text as id,
       title as title,
       jsonb_build_object(
         'Policy Name', policy_name,

@@ -233,7 +233,7 @@ query "ram_user_ram_groups" {
 query "ram_user_ram_policies" {
   sql = <<-EOQ
     select
-      p.akas as policy_akas
+      p.akas::text as policy_akas
     from
       alicloud_ram_user as u,
       alicloud_ram_policy as p,

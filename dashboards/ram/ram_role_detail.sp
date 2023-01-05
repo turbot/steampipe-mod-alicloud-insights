@@ -214,7 +214,7 @@ query "ram_role_with_cross_account_access" {
 query "ram_role_ram_policies" {
   sql = <<-EOQ
     select
-      p.akas as policy_akas
+      p.akas::text as policy_akas
     from
       alicloud_ram_role as r,
       alicloud_ram_policy as p,

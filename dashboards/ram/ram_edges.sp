@@ -4,7 +4,7 @@ edge "ram_group_to_ram_policy" {
   sql = <<-EOQ
     select
       g.arn as from_id,
-      p.akas as to_id
+      p.akas::text as to_id
     from
       alicloud_ram_group as g,
       alicloud_ram_policy as p,
@@ -43,7 +43,7 @@ edge "ram_role_to_ram_policy" {
   sql = <<-EOQ
     select
       r.arn as from_id,
-      p.akas as to_id
+      p.akas::text as to_id
     from
       alicloud_ram_role as r,
       alicloud_ram_policy as p,
@@ -82,7 +82,7 @@ edge "ram_user_to_ram_policy" {
   sql = <<-EOQ
     select
       u.arn as from_id,
-      p.akas as to_id
+      p.akas::text as to_id
     from
       alicloud_ram_user as u,
       alicloud_ram_policy as p,

@@ -179,7 +179,7 @@ query "ram_groups_policies_count" {
 query "ram_group_ram_policies" {
   sql = <<-EOQ
     select
-      p.akas as policy_akas
+      p.akas::text as policy_akas
     from
       alicloud_ram_group as g,
       alicloud_ram_policy as p,
