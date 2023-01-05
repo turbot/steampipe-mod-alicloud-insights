@@ -3,13 +3,15 @@ edge "ram_group_to_ram_policy" {
 
   sql = <<-EOQ
     select
-      arn as from_id,
-      policy ->> 'PolicyName' as to_id
+      g.arn as from_id,
+      p.akas as to_id
     from
-      alicloud_ram_group,
-      jsonb_array_elements(attached_policy) as policy
+      alicloud_ram_group as g,
+      alicloud_ram_policy as p,
+      jsonb_array_elements(g.attached_policy) as policy
     where
-      arn = any($1);
+      g.arn = any($1)
+      and policy ->> 'PolicyName' = p.policy_name;
   EOQ
 
   param "ram_group_arns" {}
@@ -40,13 +42,15 @@ edge "ram_role_to_ram_policy" {
 
   sql = <<-EOQ
     select
-      arn as from_id,
-      policy_arn ->> 'PolicyName' as to_id
+      r.arn as from_id,
+      p.akas as to_id
     from
-      alicloud_ram_role,
-      jsonb_array_elements(attached_policy) as policy_arn
+      alicloud_ram_role as r,
+      alicloud_ram_policy as p,
+      jsonb_array_elements(r.attached_policy) as policy
     where
-      arn = any($1);
+      r.arn = any($1)
+      and policy ->> 'PolicyName' = p.policy_name;
   EOQ
 
   param "ram_role_arns" {}
@@ -77,13 +81,15 @@ edge "ram_user_to_ram_policy" {
 
   sql = <<-EOQ
     select
-      arn as from_id,
-      policy ->> 'PolicyName' as to_id
+      u.arn as from_id,
+      p.akas as to_id
     from
-      alicloud_ram_user,
-      jsonb_array_elements(attached_policy) as policy
+      alicloud_ram_user as u,
+      alicloud_ram_policy as p,
+      jsonb_array_elements(u.attached_policy) as policy
     where
-      arn = any($1);
+      u.arn = any($1)
+      and policy ->> 'PolicyName' = p.policy_name;
   EOQ
 
   param "ram_user_arns" {}

@@ -51,7 +51,7 @@ node "ram_policy" {
 
   sql = <<-EOQ
     select
-      policy_name as id,
+      akas as id,
       title as title,
       jsonb_build_object(
         'Policy Name', policy_name,
@@ -63,10 +63,10 @@ node "ram_policy" {
     from
       alicloud_ram_policy
     where
-      policy_name = any($1);
+      akas = any($1);
   EOQ
 
-  param "ram_policy_names" {}
+  param "ram_policy_akas" {}
 }
 
 node "ram_role" {

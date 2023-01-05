@@ -56,7 +56,7 @@ dashboard "ram_user_detail" {
       node {
         base = node.ram_policy
         args = {
-          ram_policy_names = with.ram_policies.rows[*].policy_name
+          ram_policy_akas = with.ram_policies.rows[*].policy_akas
         }
       }
 
@@ -233,12 +233,14 @@ query "ram_user_ram_groups" {
 query "ram_user_ram_policies" {
   sql = <<-EOQ
     select
-      policy ->> 'PolicyName' as policy_name
+      p.akas as policy_akas
     from
-      alicloud_ram_user,
-      jsonb_array_elements(attached_policy) as policy
+      alicloud_ram_user as u,
+      alicloud_ram_policy as p,
+      jsonb_array_elements(u.attached_policy) as policy
     where
-      arn = $1
+      u.arn = $1
+      and policy ->> 'PolicyName' = p.policy_name;
   EOQ
 }
 

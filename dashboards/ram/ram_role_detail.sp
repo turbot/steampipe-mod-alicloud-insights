@@ -55,7 +55,7 @@ dashboard "ram_role_detail" {
       node {
         base = node.ram_policy
         args = {
-          ram_policy_names = with.ram_policies.rows[*].policy_name
+          ram_policy_akas = with.ram_policies.rows[*].policy_akas
         }
       }
 
@@ -214,13 +214,14 @@ query "ram_role_with_cross_account_access" {
 query "ram_role_ram_policies" {
   sql = <<-EOQ
     select
-      policy ->> 'PolicyName' as policy_name
+      p.akas as policy_akas
     from
-      alicloud_ram_role,
-      jsonb_array_elements(attached_policy) as policy
+      alicloud_ram_role as r,
+      alicloud_ram_policy as p,
+      jsonb_array_elements(r.attached_policy) as policy
     where
-      arn = $1
-      and policy ->> 'PolicyName' is not null;
+      r.arn = $1
+      and policy ->> 'PolicyName' = p.policy_name;
   EOQ
 }
 
