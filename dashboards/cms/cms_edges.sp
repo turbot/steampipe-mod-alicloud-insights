@@ -3,7 +3,7 @@ edge "cms_monitor_host_to_ecs_instance" {
 
   sql = <<-EOQ
     select
-      cms.host_name as from_id,
+      cms.akas::text as from_id,
       i.arn as to_id
     from
       alicloud_ecs_instance i

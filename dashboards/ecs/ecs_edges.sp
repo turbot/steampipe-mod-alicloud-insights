@@ -77,11 +77,14 @@ edge "ecs_instance_to_ecs_key_pair" {
   sql = <<-EOQ
     select
       arn as from_id,
-      key_pair_name as to_id
+      k.akas::text as to_id
     from
-      alicloud_ecs_instance as i
+      alicloud_ecs_instance as i,
+      alicloud_ecs_key_pair as k
     where
-      key_pair_name is not null
+      i.key_pair_name = k.name
+      and i.account_id = k.account_id
+      and i.region = k.region
       and i.arn = any($1);
   EOQ
 

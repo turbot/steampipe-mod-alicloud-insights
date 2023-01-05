@@ -2,7 +2,7 @@ node "cms_monitor_host" {
   category = category.cms_monitor_host
   sql = <<-EOQ
     select
-      cms.host_name as id,
+      cms.akas::text as id,
       cms.title as title,
       jsonb_build_object(
         'Host Name', cms.host_name,

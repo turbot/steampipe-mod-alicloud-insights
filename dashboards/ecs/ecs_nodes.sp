@@ -168,7 +168,7 @@ node "ecs_key_pair" {
 
   sql = <<-EOQ
     select
-      k.name as id,
+      k.akas::text as id,
       k.title as title,
       jsonb_build_object(
         'Name', k.name,
