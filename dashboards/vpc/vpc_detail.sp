@@ -83,16 +83,16 @@ dashboard "vpc_detail" {
       type  = "graph"
 
       node {
-        base = node.vpc_availability_zone
+        base = node.ecs_instance
         args = {
-          vpc_vpc_ids = [self.input.vpc_id.value]
+          ecs_instance_arns = with.ecs_instances.rows[*].instance_arn
         }
       }
 
       node {
-        base = node.ecs_instance
+        base = node.ecs_security_group
         args = {
-          ecs_instance_arns = with.ecs_instances.rows[*].instance_arn
+          ecs_security_group_ids = with.ecs_security_groups.rows[*].security_group_id
         }
       }
 
@@ -111,16 +111,16 @@ dashboard "vpc_detail" {
       }
 
       node {
-        base = node.vpc_nat_gateway
+        base = node.vpc_availability_zone
         args = {
-          vpc_nat_gateway_ids = with.vpc_nat_gateways.rows[*].gateway_id
+          vpc_vpc_ids = [self.input.vpc_id.value]
         }
       }
 
       node {
-        base = node.ecs_security_group
+        base = node.vpc_nat_gateway
         args = {
-          ecs_security_group_ids = with.ecs_security_groups.rows[*].security_group_id
+          vpc_nat_gateway_ids = with.vpc_nat_gateways.rows[*].gateway_id
         }
       }
 

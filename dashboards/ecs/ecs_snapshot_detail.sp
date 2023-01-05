@@ -61,13 +61,13 @@ dashboard "ecs_snapshot_detail" {
     args  = [self.input.snapshot_arn.value]
   }
 
-  with "to_ecs_disks" {
-    query = query.ecs_snapshot_to_ecs_disks
+  with "kms_keys" {
+    query = query.ecs_snapshot_kms_keys
     args  = [self.input.snapshot_arn.value]
   }
 
-  with "kms_keys" {
-    query = query.ecs_snapshot_kms_keys
+  with "to_ecs_disks" {
+    query = query.ecs_snapshot_to_ecs_disks
     args  = [self.input.snapshot_arn.value]
   }
 
@@ -128,23 +128,23 @@ dashboard "ecs_snapshot_detail" {
       }
 
       edge {
+        base = edge.ecs_disk_to_ecs_snapshot
+        args = {
+          ecs_snapshot_arns = [self.input.snapshot_arn.value]
+        }
+      }
+
+      edge {
         base = edge.ecs_instance_to_ecs_disk
         args = {
           ecs_instance_arns = with.ecs_instances.rows[*].instance_arn
         }
       }
-
+      
       edge {
         base = edge.ecs_launch_template_to_ecs_snapshot
         args = {
           launch_template_ids = with.ecs_launch_templates.rows[*].launch_template_id
-        }
-      }
-
-      edge {
-        base = edge.ecs_disk_to_ecs_snapshot
-        args = {
-          ecs_snapshot_arns = [self.input.snapshot_arn.value]
         }
       }
 

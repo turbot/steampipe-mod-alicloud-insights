@@ -48,16 +48,6 @@ dashboard "kms_key_detail" {
 
   }
 
-  with "kms_secrets" {
-    query = query.kms_key_kms_secrets
-    args = [self.input.key_arn.value]
-  }
-
-  with "oss_buckets" {
-    query = query.kms_key_oss_buckets
-    args = [self.input.key_arn.value]
-  }
-
   with "ecs_disks" {
     query = query.kms_key_ecs_disks
     args = [self.input.key_arn.value]
@@ -68,26 +58,22 @@ dashboard "kms_key_detail" {
     args = [self.input.key_arn.value]
   }
 
+  with "kms_secrets" {
+    query = query.kms_key_kms_secrets
+    args = [self.input.key_arn.value]
+  }
+
+  with "oss_buckets" {
+    query = query.kms_key_oss_buckets
+    args = [self.input.key_arn.value]
+  }
+
   container {
 
     graph {
       title     = "Relationships"
       type      = "graph"
       direction = "TD"
-
-      node {
-        base = node.kms_key
-        args = {
-          kms_key_arns = [self.input.key_arn.value]
-        }
-      }
-
-      node {
-        base = node.kms_secret
-        args = {
-          kms_secret_arns = with.kms_secrets.rows[*].secret_arn
-        }
-      }
 
       node {
         base = node.ecs_disk
@@ -100,6 +86,20 @@ dashboard "kms_key_detail" {
         base = node.ecs_snapshot
         args = {
           ecs_snapshot_arns = with.ecs_snapshots.rows[*].snapshot_arn
+        }
+      }
+
+      node {
+        base = node.kms_key
+        args = {
+          kms_key_arns = [self.input.key_arn.value]
+        }
+      }
+
+      node {
+        base = node.kms_secret
+        args = {
+          kms_secret_arns = with.kms_secrets.rows[*].secret_arn
         }
       }
 

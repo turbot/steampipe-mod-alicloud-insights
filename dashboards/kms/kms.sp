@@ -15,6 +15,6 @@ category "kms_key" {
 
 category "kms_secret" {
   title = "KMS Secret"
-  icon  = "heroicons_outline:key"
+  icon  = "key"
   color = local.security_color
 }
