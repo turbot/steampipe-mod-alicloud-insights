@@ -51,13 +51,18 @@ dashboard "vpc_detail" {
     args  = [self.input.vpc_id.value]
   }
 
+  with "ecs_security_groups" {
+    query = query.vpc_vpc_ecs_security_groups
+    args  = [self.input.vpc_id.value]
+  }
+
   with "rds_db_instances" {
     query = query.vpc_vpc_rds_db_instances
     args  = [self.input.vpc_id.value]
   }
 
-  with "vpc_route_tables" {
-    query = query.vpc_vpc_vpc_route_tables
+  with "vpc_dhcp_options_sets" {
+    query = query.vpc_vpc_vpc_dhcp_options_sets
     args  = [self.input.vpc_id.value]
   }
 
@@ -66,13 +71,13 @@ dashboard "vpc_detail" {
     args  = [self.input.vpc_id.value]
   }
 
-  with "ecs_security_groups" {
-    query = query.vpc_vpc_ecs_security_groups
+  with "vpc_route_tables" {
+    query = query.vpc_vpc_vpc_route_tables
     args  = [self.input.vpc_id.value]
   }
 
-  with "vpc_vswitch" {
-    query = query.vpc_vpc_vpc_vswitch
+  with "vpc_vswitches" {
+    query = query.vpc_vpc_vpc_vswitches
     args  = [self.input.vpc_id.value]
   }
 
@@ -90,18 +95,19 @@ dashboard "vpc_detail" {
       }
 
       node {
+        base = node.ecs_network_interface
+        args = {
+          ecs_network_interface_ids = with.ecs_network_interfaces.rows[*].eni_id
+        }
+      }
+
+      node {
         base = node.ecs_security_group
         args = {
           ecs_security_group_ids = with.ecs_security_groups.rows[*].security_group_id
         }
       }
 
-      node {
-        base = node.ecs_network_interface
-        args = {
-          ecs_network_interface_ids = with.ecs_network_interfaces.rows[*].eni_id
-        }
-      }
 
       node {
         base = node.rds_instance
@@ -118,16 +124,16 @@ dashboard "vpc_detail" {
       }
 
       node {
-        base = node.vpc_nat_gateway
+        base = node.vpc_dhcp_option_set
         args = {
-          vpc_nat_gateway_ids = with.vpc_nat_gateways.rows[*].gateway_id
+          vpc_dhcp_option_set_ids = with.vpc_dhcp_options_sets.rows[*].dhcp_options_set_id
         }
       }
 
       node {
-        base = node.vpc_vswitch
+        base = node.vpc_nat_gateway
         args = {
-          vpc_vswitch_ids = with.vpc_vswitch.rows[*].vswitch_id
+          vpc_nat_gateway_ids = with.vpc_nat_gateways.rows[*].gateway_id
         }
       }
 
@@ -152,45 +158,17 @@ dashboard "vpc_detail" {
         }
       }
 
+      node {
+        base = node.vpc_vswitch
+        args = {
+          vpc_vswitch_ids = with.vpc_vswitches.rows[*].vswitch_id
+        }
+      }
+
       edge {
         base = edge.vpc_availability_zone_to_vpc_vswitch
         args = {
           vpc_vpc_ids = [self.input.vpc_id.value]
-        }
-      }
-
-      edge {
-        base = edge.vpc_vswitch_to_ecs_instance
-        args = {
-          vpc_vswitch_ids = with.vpc_vswitch.rows[*].vswitch_id
-        }
-      }
-
-      edge {
-        base = edge.vpc_vswitch_to_ecs_network_interface
-        args = {
-          vpc_vswitch_ids = with.vpc_vswitch.rows[*].vswitch_id
-        }
-      }
-
-      edge {
-        base = edge.vpc_vswitch_to_rds_instance
-        args = {
-          vpc_vswitch_ids = with.vpc_vswitch.rows[*].vswitch_id
-        }
-      }
-
-      edge {
-        base = edge.vpc_vswitch_to_vpc_route_table
-        args = {
-          vpc_vswitch_ids = with.vpc_vswitch.rows[*].vswitch_id
-        }
-      }
-
-      edge {
-        base = edge.vpc_vswitch_to_nat_gateway
-        args = {
-          vpc_nat_gateway_ids = with.vpc_nat_gateways.rows[*].gateway_id
         }
       }
 
@@ -216,9 +194,51 @@ dashboard "vpc_detail" {
       }
 
       edge {
+        base = edge.vpc_vpc_to_vpc_dhcp_option_set
+        args = {
+          vpc_dhcp_option_set_ids = with.vpc_dhcp_options_sets.rows[*].dhcp_options_set_id
+        }
+      }
+
+      edge {
         base = edge.vpc_vpc_to_vpc_vpn_gateway
         args = {
           vpc_vpc_ids = [self.input.vpc_id.value]
+        }
+      }
+
+      edge {
+        base = edge.vpc_vswitch_to_ecs_instance
+        args = {
+          vpc_vswitch_ids = with.vpc_vswitches.rows[*].vswitch_id
+        }
+      }
+
+      edge {
+        base = edge.vpc_vswitch_to_ecs_network_interface
+        args = {
+          vpc_vswitch_ids = with.vpc_vswitches.rows[*].vswitch_id
+        }
+      }
+
+      edge {
+        base = edge.vpc_vswitch_to_nat_gateway
+        args = {
+          vpc_nat_gateway_ids = with.vpc_nat_gateways.rows[*].gateway_id
+        }
+      }
+
+      edge {
+        base = edge.vpc_vswitch_to_rds_instance
+        args = {
+          vpc_vswitch_ids = with.vpc_vswitches.rows[*].vswitch_id
+        }
+      }
+
+      edge {
+        base = edge.vpc_vswitch_to_vpc_route_table
+        args = {
+          vpc_vswitch_ids = with.vpc_vswitches.rows[*].vswitch_id
         }
       }
     }
@@ -283,6 +303,9 @@ dashboard "vpc_detail" {
     table {
       query = query.vpc_vswitches_detail
       width = 8
+      column "vSwitch ID" {
+          href = "${dashboard.vpc_vswitch_detail.url_path}?input.vswitch_id={{.properties.'VSWITCH ID' | @uri}}"
+        }
       args  = [self.input.vpc_id.value]
     }
 
@@ -309,7 +332,6 @@ dashboard "vpc_detail" {
   container {
 
     title = "NACLs"
-
 
     flow {
       base  = flow.nacl_flow
@@ -495,6 +517,24 @@ query "vpc_vpc_rds_db_instances" {
   EOQ
 }
 
+query "vpc_vpc_vpc_dhcp_options_sets" {
+  sql   = <<-EOQ
+    with vpcs as (
+      select
+        jsonb_array_elements(associate_vpcs)->> 'VpcId' as vpc_id
+      from
+        alicloud_vpc_dhcp_options_set
+    )
+    select
+      d.dhcp_options_set_id
+    from
+      alicloud_vpc_dhcp_options_set as d,
+      vpcs as v
+    where
+      v.vpc_id = $1;
+  EOQ
+}
+
 query "vpc_vpc_vpc_nat_gateways" {
     sql   = <<-EOQ
     select
@@ -517,7 +557,7 @@ query "vpc_vpc_ecs_security_groups" {
   EOQ
 }
 
-query "vpc_vpc_vpc_vswitch" {
+query "vpc_vpc_vpc_vswitches" {
   sql   = <<-EOQ
     select
       vswitch_id as vswitch_id

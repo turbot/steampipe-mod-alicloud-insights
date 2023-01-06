@@ -24,27 +24,6 @@
 //   param "ecs_instance_arns" {}
 // }
 
-node "ecs_autoscaling_group" {
-  category = category.ecs_autoscaling_group
-
-  sql = <<-EOQ
-    select
-      scaling_group_id as id,
-      title as title,
-      jsonb_build_object(
-        'Name', name,
-        'Creation Date', creation_time,
-        'Region', region
-      ) as properties
-    from
-      alicloud_ecs_autoscaling_group as asg
-    where
-      scaling_group_id = any($1);
-  EOQ
-
-  param "ecs_autoscaling_group_ids" {}
-}
-
 node "ecs_auto_provisioning_group" {
   category = category.ecs_auto_provisioning_group
 
@@ -68,6 +47,27 @@ node "ecs_auto_provisioning_group" {
   EOQ
 
   param "ecs_instance_arns" {}
+}
+
+node "ecs_autoscaling_group" {
+  category = category.ecs_autoscaling_group
+
+  sql = <<-EOQ
+    select
+      scaling_group_id as id,
+      title as title,
+      jsonb_build_object(
+        'Name', name,
+        'Creation Date', creation_time,
+        'Region', region
+      ) as properties
+    from
+      alicloud_ecs_autoscaling_group as asg
+    where
+      scaling_group_id = any($1);
+  EOQ
+
+  param "ecs_autoscaling_group_ids" {}
 }
 
 node "ecs_disk" {
@@ -212,28 +212,6 @@ node "ecs_network_interface" {
   param "ecs_network_interface_ids" {}
 }
 
-node "ecs_snapshot" {
-  category = category.ecs_snapshot
-
-  sql = <<-EOQ
-    select
-      arn as id,
-      title as title,
-      jsonb_build_object(
-        'ID', snapshot_id,
-        'ARN', arn,
-        'Account ID', account_id,
-        'Region', region
-      ) as properties
-    from
-      alicloud_ecs_snapshot
-    where
-      arn = any($1);
-  EOQ
-
-  param "ecs_snapshot_arns" {}
-}
-
 node "ecs_security_group" {
   category = category.ecs_security_group
 
@@ -255,4 +233,26 @@ node "ecs_security_group" {
   EOQ
 
   param "ecs_security_group_ids" {}
+}
+
+node "ecs_snapshot" {
+  category = category.ecs_snapshot
+
+  sql = <<-EOQ
+    select
+      arn as id,
+      title as title,
+      jsonb_build_object(
+        'ID', snapshot_id,
+        'ARN', arn,
+        'Account ID', account_id,
+        'Region', region
+      ) as properties
+    from
+      alicloud_ecs_snapshot
+    where
+      arn = any($1);
+  EOQ
+
+  param "ecs_snapshot_arns" {}
 }

@@ -34,7 +34,7 @@ dashboard "ecs_security_group_detail" {
     }
 
   }
-  
+
   with "ecs_instances" {
     query = query.ecs_security_group_ecs_instances
     args  = [self.input.security_group_id.value]
@@ -54,11 +54,6 @@ dashboard "ecs_security_group_detail" {
     query = query.ecs_security_group_rds_instances
     args  = [self.input.security_group_id.value]
   }
-
-  // with "vpc_vswitches" {
-  //   query = query.ecs_security_group_vpc_vswitches
-  //   args  = [self.input.security_group_id.value]
-  // }
 
   with "vpc_vpcs" {
     query = query.ecs_security_group_vpc_vpcs
@@ -106,13 +101,6 @@ dashboard "ecs_security_group_detail" {
           rds_db_instance_arns = with.rds_instances.rows[*].rds_instance_arn
         }
       }
-
-      // node {
-      //   base = node.vpc_vswitch
-      //   args = {
-      //     vpc_vswitch_ids = with.vpc_vswitches.rows[*].vpc_vswitch_id
-      //   }
-      // }
 
       node {
         base = node.vpc_vpc
@@ -252,6 +240,8 @@ flow "security_group_rules_sankey" {
 
 }
 
+# Input queries
+
 query "ecs_security_group_input" {
   sql = <<-EOQ
     select
@@ -269,84 +259,7 @@ query "ecs_security_group_input" {
   EOQ
 }
 
-query "ecs_security_group_unassociated" {
-  sql = <<-EOQ
-    with associated_sg as (
-      select
-        distinct group_id
-      from
-        alicloud_ecs_network_interface,
-        jsonb_array_elements_text(security_group_ids) as group_id
-      where
-        group_id = $1
-    )
-    select
-      case when a.group_id is null then 'Unassociated' else 'Associated' end as value,
-      'Network Interface' as label,
-      case when a.group_id is null then 'alert' else 'ok' end as type
-    from
-      alicloud_ecs_security_group s
-      left join associated_sg a on s.security_group_id = a.group_id
-    where
-      s.security_group_id = $1;
-  EOQ
-
-}
-
-query "ecs_security_unrestricted_ingress" {
-  sql = <<-EOQ
-    with ingress_sg as (
-      select
-        distinct arn
-      from
-        alicloud_ecs_security_group,
-        jsonb_array_elements(permissions) as p
-      where
-        p ->> 'Policy' = 'Accept' and p ->> 'IpProtocol' <> 'ICMP'
-        and p ->> 'Direction' = 'ingress'
-        and p ->> 'SourceCidrIp' = '0.0.0.0/0'
-        and (
-          p ->> 'PortRange' in ('-1/-1', '1/65535')
-        )
-        and security_group_id = $1
-    )
-    select
-      'Ingress (Excludes ICMP)' as label,
-      case when count(*) = 0 then 'Restricted' else 'Unrestricted' end as value,
-      case when count(*) = 0 then 'ok' else 'alert' end as type
-    from
-      ingress_sg
-  EOQ
-
-
-}
-
-query "ecs_security_unrestricted_egress" {
-  sql = <<-EOQ
-    with egress_sg as (
-      select
-        distinct arn
-      from
-        alicloud_ecs_security_group,
-        jsonb_array_elements(permissions) as p
-      where
-        p ->> 'Policy' = 'Accept' and p ->> 'IpProtocol' <> 'ICMP'
-        and p ->> 'Direction' = 'egress'
-        and p ->> 'SourceCidrIp' = '0.0.0.0/0'
-        and (
-          p ->> 'PortRange' in ('-1/-1', '1/65535')
-        )
-        and security_group_id = $1
-    )
-    select
-      'Egress (Excludes ICMP)' as label,
-      case when count(*) = 0 then 'Restricted' else 'Unrestricted' end as value,
-      case when count(*) = 0 then 'ok' else 'alert' end as type
-    from
-      egress_sg
-  EOQ
-
-}
+# With queries
 
 query "ecs_security_group_ecs_instances" {
   sql = <<-EOQ
@@ -383,18 +296,6 @@ query "ecs_security_group_ecs_launch_templates" {
   EOQ
 }
 
-// query "ecs_security_group_vpc_vswitches" {
-//   sql = <<-EOQ
-//     select
-//       s.vswitch_id as vpc_vswitch_id
-//     from
-//       alicloud_ecs_security_group as sg
-//       join alicloud_vpc_vswitch as s on s.vpc_id = sg.vpc_id
-//     where
-//       security_group_id = $1
-//   EOQ
-// }
-
 query "ecs_security_group_rds_instances" {
   sql = <<-EOQ
     select
@@ -418,6 +319,85 @@ query "ecs_security_group_vpc_vpcs" {
   EOQ
 }
 
+# Card queries
+
+query "ecs_security_group_unassociated" {
+  sql = <<-EOQ
+    with associated_sg as (
+      select
+        distinct group_id
+      from
+        alicloud_ecs_network_interface,
+        jsonb_array_elements_text(security_group_ids) as group_id
+      where
+        group_id = $1
+    )
+    select
+      case when a.group_id is null then 'Unassociated' else 'Associated' end as value,
+      'Network Interface' as label,
+      case when a.group_id is null then 'alert' else 'ok' end as type
+    from
+      alicloud_ecs_security_group s
+      left join associated_sg a on s.security_group_id = a.group_id
+    where
+      s.security_group_id = $1;
+  EOQ
+}
+
+query "ecs_security_unrestricted_ingress" {
+  sql = <<-EOQ
+    with ingress_sg as (
+      select
+        distinct arn
+      from
+        alicloud_ecs_security_group,
+        jsonb_array_elements(permissions) as p
+      where
+        p ->> 'Policy' = 'Accept' and p ->> 'IpProtocol' <> 'ICMP'
+        and p ->> 'Direction' = 'ingress'
+        and p ->> 'SourceCidrIp' = '0.0.0.0/0'
+        and (
+          p ->> 'PortRange' in ('-1/-1', '1/65535')
+        )
+        and security_group_id = $1
+    )
+    select
+      'Ingress (Excludes ICMP)' as label,
+      case when count(*) = 0 then 'Restricted' else 'Unrestricted' end as value,
+      case when count(*) = 0 then 'ok' else 'alert' end as type
+    from
+      ingress_sg
+  EOQ
+}
+
+query "ecs_security_unrestricted_egress" {
+  sql = <<-EOQ
+    with egress_sg as (
+      select
+        distinct arn
+      from
+        alicloud_ecs_security_group,
+        jsonb_array_elements(permissions) as p
+      where
+        p ->> 'Policy' = 'Accept' and p ->> 'IpProtocol' <> 'ICMP'
+        and p ->> 'Direction' = 'egress'
+        and p ->> 'SourceCidrIp' = '0.0.0.0/0'
+        and (
+          p ->> 'PortRange' in ('-1/-1', '1/65535')
+        )
+        and security_group_id = $1
+    )
+    select
+      'Egress (Excludes ICMP)' as label,
+      case when count(*) = 0 then 'Restricted' else 'Unrestricted' end as value,
+      case when count(*) = 0 then 'ok' else 'alert' end as type
+    from
+      egress_sg
+  EOQ
+}
+
+# Other detail page queries
+
 query "ecs_security_group_overview" {
   sql = <<-EOQ
     select
@@ -433,7 +413,6 @@ query "ecs_security_group_overview" {
     where
       security_group_id = $1;
   EOQ
-
 }
 
 query "ecs_security_group_tags" {
@@ -448,8 +427,7 @@ query "ecs_security_group_tags" {
       security_group_id = $1
     order by
       tag ->> 'TagKey';
-    EOQ
-
+  EOQ
 }
 
 query "ecs_security_group_associated" {
@@ -466,7 +444,6 @@ query "ecs_security_group_associated" {
     where
       sg = $1;
   EOQ
-
 }
 
 query "ecs_security_group_ingress_rules" {
@@ -491,7 +468,6 @@ query "ecs_security_group_ingress_rules" {
       p ->> 'Direction' = 'ingress'
       and security_group_id = $1;
   EOQ
-
 }
 
 query "ecs_security_group_egress_rules" {
@@ -516,7 +492,6 @@ query "ecs_security_group_egress_rules" {
       p ->> 'Direction' = 'egress'
       and security_group_id = $1;
   EOQ
-
 }
 
 query "ecs_security_group_ingress_rule_sankey" {
@@ -628,7 +603,6 @@ query "ecs_security_group_ingress_rule_sankey" {
       from
         rules
   EOQ
-
 }
 
 query "ecs_security_group_egress_rule_sankey" {
@@ -740,5 +714,4 @@ query "ecs_security_group_egress_rule_sankey" {
       from
         rules
   EOQ
-
 }

@@ -1,8 +1,6 @@
-
 edge "vpc_availability_zone_to_vpc_vswitch" {
   title = "vswitch"
-
-  sql = <<-EOQ
+  sql   = <<-EOQ
     select
       zone_id as from_id,
       vswitch_id as to_id
@@ -17,8 +15,7 @@ edge "vpc_availability_zone_to_vpc_vswitch" {
 
 edge "vpc_vpc_to_ecs_security_group" {
   title = "security group"
-
-  sql = <<-EOQ
+  sql   = <<-EOQ
     select
       sg.vpc_id as from_id,
       sg.security_group_id as to_id
@@ -33,8 +30,7 @@ edge "vpc_vpc_to_ecs_security_group" {
 
 edge "vpc_vpc_to_vpc_availability_zone" {
   title = "az"
-
-  sql = <<-EOQ
+  sql   = <<-EOQ
     select
       distinct on (zone_id)
       vpc_id as from_id,
@@ -48,8 +44,30 @@ edge "vpc_vpc_to_vpc_availability_zone" {
   param "vpc_vpc_ids" {}
 }
 
+edge "vpc_vpc_to_vpc_dhcp_option_set" {
+  title = "vpc"
+  sql   = <<-EOQ
+    with vpcs as (
+      select
+        jsonb_array_elements(associate_vpcs)->> 'VpcId' as vpc_id
+      from
+        alicloud_vpc_dhcp_options_set
+    )
+    select
+      v.vpc_id as from_id,
+      d.dhcp_options_set_id as to_id
+    from
+      alicloud_vpc_dhcp_options_set as d,
+      vpcs as v
+    where
+      d.dhcp_options_set_id = any($1);
+  EOQ
+
+  param "vpc_dhcp_option_set_ids" {}
+}
+
 edge "vpc_vpc_to_vpc_route_table" {
-    title = "route to"
+  title = "route to"
   sql   = <<-EOQ
     select
       vpc_id as from_id,
@@ -65,9 +83,8 @@ edge "vpc_vpc_to_vpc_route_table" {
 }
 
 edge "vpc_vpc_to_vpc_vpn_gateway" {
-    title = "vpc"
-
-  sql = <<-EOQ
+  title = "vpc"
+  sql   = <<-EOQ
     select
       vpc_id as to_id,
       vpn_gateway_id as from_id
@@ -82,8 +99,7 @@ edge "vpc_vpc_to_vpc_vpn_gateway" {
 
 edge "vpc_vpc_to_vpc_vswitch" {
   title = "vswitch"
-
-  sql = <<-EOQ
+  sql   = <<-EOQ
     select
       vpc_id as from_id,
       vswitch_id as to_id
@@ -98,16 +114,17 @@ edge "vpc_vpc_to_vpc_vswitch" {
 
 edge "vpc_vswitch_to_ecs_autoscaling_group" {
   title = "autoscaling group"
-    sql = <<-EOQ
-    select
-      v as from_id,
-      scaling_group_id as to_id
-    from
-      alicloud_ecs_autoscaling_group,
-      jsonb_array_elements_text(vswitch_ids) as v
-    where
-      v = any($1)
+  sql   = <<-EOQ
+  select
+    v as from_id,
+    scaling_group_id as to_id
+  from
+    alicloud_ecs_autoscaling_group,
+    jsonb_array_elements_text(vswitch_ids) as v
+  where
+    v = any($1)
   EOQ
+
   param "vpc_vswitch_ids" {}
 }
 
@@ -119,7 +136,7 @@ edge "vpc_vswitch_to_ecs_instance" {
       i.arn as to_id
     from
       alicloud_ecs_instance as i,
-      alicloud_vpc_vswitch as s 
+      alicloud_vpc_vswitch as s
     where
       s.vswitch_id = any($1)
       and s.vswitch_id = i.vpc_attributes ->> 'VSwitchId';
@@ -129,9 +146,8 @@ edge "vpc_vswitch_to_ecs_instance" {
 }
 
 edge "vpc_vswitch_to_ecs_network_interface" {
-    title = "eni"
-
-  sql = <<-EOQ
+  title = "eni"
+  sql   = <<-EOQ
     select
       vswitch_id as from_id,
       network_interface_id as to_id
@@ -145,7 +161,7 @@ edge "vpc_vswitch_to_ecs_network_interface" {
 }
 
 edge "vpc_vswitch_to_nat_gateway" {
-    title = "nat gateway"
+  title = "nat gateway"
   sql   = <<-EOQ
     select
       nat_gateway_private_info ->> 'VswitchId' as from_id,
@@ -155,12 +171,13 @@ edge "vpc_vswitch_to_nat_gateway" {
     where
       nat_gateway_id = any($1);
   EOQ
+
   param "vpc_nat_gateway_ids" {}
 }
 
 edge "vpc_vswitch_to_rds_instance" {
-    title = "rds instance"
-      sql   = <<-EOQ
+  title = "rds instance"
+  sql   = <<-EOQ
     select
       vswitch_id as from_id,
       arn as to_id
@@ -169,6 +186,7 @@ edge "vpc_vswitch_to_rds_instance" {
     where
       vswitch_id = any($1);
   EOQ
+
   param "vpc_vswitch_ids" {}
 }
 
@@ -183,11 +201,12 @@ edge "vpc_vswitch_to_vpc_network_acl" {
     where
       vswitch_id = any($1);
   EOQ
+
   param "vpc_vswitch_ids" {}
 }
 
 edge "vpc_vswitch_to_vpc_route_table" {
-    title = "route to"
+  title = "route to"
   sql   = <<-EOQ
     select
       b as from_id,
@@ -198,13 +217,13 @@ edge "vpc_vswitch_to_vpc_route_table" {
     where
       b = any($1);
   EOQ
+
   param "vpc_vswitch_ids" {}
 }
 
 edge "vpc_vswitch_to_vpc_vpc" {
   title = "vpc"
-
-  sql = <<-EOQ
+  sql   = <<-EOQ
     select
       vswitch_id as from_id,
       vpc_id as to_id

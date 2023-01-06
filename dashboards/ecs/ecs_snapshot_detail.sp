@@ -39,15 +39,21 @@ dashboard "ecs_snapshot_detail" {
       args  = [self.input.snapshot_arn.value]
     }
 
-  }
+    card {
+      width = 2
+      query = query.ecs_snapshot_instant_access
+      args  = [self.input.snapshot_arn.value]
+    }
 
-  with "ecs_instances" {
-    query = query.ecs_snapshot_ecs_instances
-    args  = [self.input.snapshot_arn.value]
   }
 
   with "ecs_images" {
     query = query.ecs_snapshot_ecs_images
+    args  = [self.input.snapshot_arn.value]
+  }
+
+  with "ecs_instances" {
+    query = query.ecs_snapshot_ecs_instances
     args  = [self.input.snapshot_arn.value]
   }
 
@@ -140,7 +146,7 @@ dashboard "ecs_snapshot_detail" {
           ecs_instance_arns = with.ecs_instances.rows[*].instance_arn
         }
       }
-      
+
       edge {
         base = edge.ecs_launch_template_to_ecs_snapshot
         args = {
@@ -204,12 +210,12 @@ dashboard "ecs_snapshot_detail" {
         query = query.ecs_snapshot_source_disk
         args  = [self.input.snapshot_arn.value]
 
-        column "Instance ARN" {
+        column "Disk ARN" {
           display = "none"
         }
 
-        column "Instance ID" {
-          href = "${dashboard.ecs_disk_detail.url_path}?input.instance_arn={{.'Instance ARN' | @uri}}"
+        column "Disk ID" {
+          href = "${dashboard.ecs_disk_detail.url_path}?input.disk_arn={{.'Instance ARN' | @uri}}"
         }
       }
 
@@ -226,6 +232,8 @@ dashboard "ecs_snapshot_detail" {
 
 }
 
+# Input queries
+
 query "ecs_snapshot_input" {
   sql = <<-EOQ
     select
@@ -241,80 +249,6 @@ query "ecs_snapshot_input" {
     order by
       title;
   EOQ
-}
-
-# card queries
-
-query "ecs_snapshot_age" {
-  sql = <<-EOQ
-      with data as (
-      select
-        (EXTRACT(epoch FROM (SELECT (NOW() - creation_time)))/86400)::int as age
-      from
-        alicloud_ecs_snapshot
-      where
-        arn = $1
-    )
-    select
-      'Age (in Days)' as label,
-      age as value,
-      case when age<35 then 'ok' else 'alert' end as type
-    from
-      data;
-  EOQ
-
-}
-
-query "ecs_snapshot_usage_source_disk_size" {
-  sql = <<-EOQ
-    select
-      'Source Disk Size (in Gib)' as label,
-      source_disk_size as value
-    from
-      alicloud_ecs_snapshot
-    where
-      arn = $1;
-  EOQ
-}
-
-query "ecs_snapshot_encryption" {
-  sql = <<-EOQ
-    select
-      'Encrypted' as label,
-      case when encrypted then 'Enabled' else 'Disabled' end as value,
-      case when encrypted then 'ok' else 'alert' end as type
-    from
-      alicloud_ecs_snapshot
-    where
-      arn = $1;
-  EOQ
-
-}
-
-query "ecs_snapshot_state" {
-  sql = <<-EOQ
-    select
-      'Status' as label,
-      initcap(status) as value
-    from
-      alicloud_ecs_snapshot
-    where
-      arn = $1;
-  EOQ
-
-}
-
-query "ecs_snapshot_usage" {
-  sql = <<-EOQ
-    select
-      'Usage' as label,
-      usage as value
-    from
-      alicloud_ecs_snapshot
-    where
-      arn = $1;
-  EOQ
-
 }
 
 # with queries
@@ -401,7 +335,90 @@ query "ecs_snapshot_kms_keys" {
   EOQ
 }
 
-# table queries
+# card queries
+
+query "ecs_snapshot_age" {
+  sql = <<-EOQ
+      with data as (
+      select
+        (EXTRACT(epoch FROM (SELECT (NOW() - creation_time)))/86400)::int as age
+      from
+        alicloud_ecs_snapshot
+      where
+        arn = $1
+    )
+    select
+      'Age (in Days)' as label,
+      age as value,
+      case when age<35 then 'ok' else 'alert' end as type
+    from
+      data;
+  EOQ
+}
+
+query "ecs_snapshot_usage_source_disk_size" {
+  sql = <<-EOQ
+    select
+      'Source Disk Size (in Gib)' as label,
+      source_disk_size as value
+    from
+      alicloud_ecs_snapshot
+    where
+      arn = $1;
+  EOQ
+}
+
+query "ecs_snapshot_encryption" {
+  sql = <<-EOQ
+    select
+      'Encrypted' as label,
+      case when encrypted then 'Enabled' else 'Disabled' end as value,
+      case when encrypted then 'ok' else 'alert' end as type
+    from
+      alicloud_ecs_snapshot
+    where
+      arn = $1;
+  EOQ
+}
+
+query "ecs_snapshot_state" {
+  sql = <<-EOQ
+    select
+      'Status' as label,
+      initcap(status) as value
+    from
+      alicloud_ecs_snapshot
+    where
+      arn = $1;
+  EOQ
+}
+
+query "ecs_snapshot_usage" {
+  sql = <<-EOQ
+    select
+      'Usage' as label,
+      usage as value
+    from
+      alicloud_ecs_snapshot
+    where
+      arn = $1;
+  EOQ
+}
+
+query "ecs_snapshot_instant_access" {
+  sql = <<-EOQ
+    select
+      'Instant Access' as label,
+      case when instant_access then 'Enabled' else 'Disabled' end as value,
+      case when instant_access then 'ok' else 'alert' end as type
+    from
+      alicloud_ecs_snapshot
+    where
+      arn = $1;
+  EOQ
+}
+
+# Other detail page queries
 
 query "ecs_snapshot_source_disk" {
   sql = <<-EOQ
@@ -420,20 +437,21 @@ query "ecs_snapshot_source_disk" {
     order by
       s.source_disk_id;
   EOQ
-
 }
 
 query "ecs_snapshot_encryption_status" {
   sql = <<-EOQ
     select
-      case when encrypted then 'Enabled' else 'Disabled' end as "Encryption",
-      kms_key_id as "KMS Key ID"
+      s.kms_key_id as "KMS Key ID",
+      k.protection_level as "Protection Level",
+      k.primary_key_version as "Key Version"
     from
-      alicloud_ecs_snapshot
+      alicloud_ecs_snapshot as s,
+      alicloud_kms_key as k
     where
-      arn = $1;
+      s.kms_key_id = k.key_id
+      and s.arn = $1;
   EOQ
-
 }
 
 query "ecs_snapshot_overview" {
@@ -453,7 +471,6 @@ query "ecs_snapshot_overview" {
     where
       arn = $1
   EOQ
-
 }
 
 query "ecs_snapshot_tags" {
@@ -469,5 +486,4 @@ query "ecs_snapshot_tags" {
     order by
       tag ->> 'Key';
   EOQ
-
 }

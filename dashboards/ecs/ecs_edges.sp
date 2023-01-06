@@ -1,3 +1,22 @@
+edge "ecs_auto_provisioning_group_to_ecs_instance" {
+  title = "deploys"
+
+  sql = <<-EOQ
+    select
+      apg.auto_provisioning_group_id as from_id,
+      i.arn as to_id
+    from
+      alicloud_ecs_auto_provisioning_group as apg,
+      jsonb_array_elements(apg.instances) as group_instance,
+      alicloud_ecs_instance as i
+    where
+      i.arn = any($1)
+      and group_instance ->> 'InstanceId' = i.instance_id;
+  EOQ
+
+  param "ecs_instance_arns" {}
+}
+
 edge "ecs_autoscaling_group_to_ecs_instance" {
   title = "launches"
 
@@ -34,25 +53,6 @@ edge "ecs_autoscaling_group_to_rds_instance" {
   EOQ
 
   param "ecs_autoscaling_group_ids" {}
-}
-
-edge "ecs_auto_provisioning_group_to_ecs_instance" {
-  title = "deploys"
-
-  sql = <<-EOQ
-    select
-      apg.auto_provisioning_group_id as from_id,
-      i.arn as to_id
-    from
-      alicloud_ecs_auto_provisioning_group as apg,
-      jsonb_array_elements(apg.instances) as group_instance,
-      alicloud_ecs_instance as i
-    where
-      i.arn = any($1)
-      and group_instance ->> 'InstanceId' = i.instance_id;
-  EOQ
-
-  param "ecs_instance_arns" {}
 }
 
 edge "ecs_disk_to_ecs_image" {
@@ -143,13 +143,32 @@ edge "ecs_instance_to_ecs_key_pair" {
 
   sql = <<-EOQ
     select
-      arn as from_id,
-      key_pair_name as to_id
+      i.arn as from_id,
+      k.akas::text as to_id
     from
-      alicloud_ecs_instance as i
+      alicloud_ecs_instance as i,
+      alicloud_ecs_key_pair as k
     where
-      key_pair_name is not null
+      i.key_pair_name is not null
       and i.arn = any($1);
+  EOQ
+
+  param "ecs_instance_arns" {}
+}
+
+edge "ecs_instance_to_ecs_network_interface" {
+  title = "eni"
+
+  sql = <<-EOQ
+    select
+      arn as from_id,
+      i ->> 'NetworkInterfaceId' as to_id
+    from
+      alicloud_ecs_instance,
+      jsonb_array_elements(network_interfaces) as i
+    where
+      arn = any($1)
+      and  i ->> 'NetworkInterfaceId' is not null;
   EOQ
 
   param "ecs_instance_arns" {}
@@ -171,24 +190,6 @@ edge "ecs_instance_to_ecs_security_group" {
       join jsonb_array_elements(security_group_ids) as group_id on true
     where
       i.arn = any($1);
-  EOQ
-
-  param "ecs_instance_arns" {}
-}
-
-edge "ecs_instance_to_ecs_network_interface" {
-  title = "eni"
-
-  sql = <<-EOQ
-    select
-      arn as from_id,
-      i ->> 'NetworkInterfaceId' as to_id
-    from
-      alicloud_ecs_instance,
-      jsonb_array_elements(network_interfaces) as i
-    where
-      arn = any($1)
-      and  i ->> 'NetworkInterfaceId' is not null;
   EOQ
 
   param "ecs_instance_arns" {}
@@ -229,59 +230,6 @@ edge "ecs_network_interface_to_vpc_eip" {
   param "ecs_network_interface_ids" {}
 }
 
-edge "ecs_launch_template_to_ecs_snapshot" {
-  title = "snapshot"
-  sql = <<-EOQ
-    select
-      launch_template_id as from_id,
-      s.arn as to_id
-    from
-      alicloud_ecs_snapshot as s,
-      alicloud_ecs_launch_template as t,
-      jsonb_array_elements(t.latest_version_details -> 'LaunchTemplateData' -> 'DataDisks' -> 'DataDisk') as disk_config
-    where
-      t.launch_template_id = any($1)
-      and disk_config ->> 'SnapshotId' is not null
-      and disk_config ->> 'SnapshotId' = s.snapshot_id;
-  EOQ
-
-  param "launch_template_ids" {}
-}
-
-edge "ecs_security_group_to_ecs_network_interface" {
-    title = "eni"
-  
-  sql = <<-EOQ
-    select
-      group_id as from_id,
-      network_interface_id  as to_id
-    from
-      alicloud_ecs_network_interface,
-      jsonb_array_elements_text(security_group_ids) as group_id
-    where
-      group_id = any($1);
-  EOQ
-
-  param "ecs_security_group_ids" {}
-}
-
-edge "ecs_security_group_to_rds_instance" {
-  title = "rds instance"
-
-  sql = <<-EOQ
-    select
-      isg->>'SecurityGroupId' as from_id,
-      arn as to_id
-    from
-      alicloud_rds_instance as i,
-      jsonb_array_elements(i.security_group_configuration) as isg
-    where
-      isg->>'SecurityGroupId' = any($1);
-  EOQ
-
-  param "ecs_security_group_ids" {}
-}
-
 edge "ecs_security_group_to_ecs_instance" {
     title = "instance"
 
@@ -310,6 +258,59 @@ edge "ecs_security_group_to_ecs_launch_template" {
     where
       latest_version_details -> 'LaunchTemplateData' ->> 'SecurityGroupId' = any($1);
   EOQ
+  param "ecs_security_group_ids" {}
+}
+
+edge "ecs_launch_template_to_ecs_snapshot" {
+  title = "snapshot"
+  sql = <<-EOQ
+    select
+      launch_template_id as from_id,
+      s.arn as to_id
+    from
+      alicloud_ecs_snapshot as s,
+      alicloud_ecs_launch_template as t,
+      jsonb_array_elements(t.latest_version_details -> 'LaunchTemplateData' -> 'DataDisks' -> 'DataDisk') as disk_config
+    where
+      t.launch_template_id = any($1)
+      and disk_config ->> 'SnapshotId' is not null
+      and disk_config ->> 'SnapshotId' = s.snapshot_id;
+  EOQ
+
+  param "launch_template_ids" {}
+}
+
+edge "ecs_security_group_to_ecs_network_interface" {
+    title = "eni"
+
+  sql = <<-EOQ
+    select
+      group_id as from_id,
+      network_interface_id  as to_id
+    from
+      alicloud_ecs_network_interface,
+      jsonb_array_elements_text(security_group_ids) as group_id
+    where
+      group_id = any($1);
+  EOQ
+
+  param "ecs_security_group_ids" {}
+}
+
+edge "ecs_security_group_to_rds_instance" {
+  title = "rds instance"
+
+  sql = <<-EOQ
+    select
+      isg->>'SecurityGroupId' as from_id,
+      arn as to_id
+    from
+      alicloud_rds_instance as i,
+      jsonb_array_elements(i.security_group_configuration) as isg
+    where
+      isg->>'SecurityGroupId' = any($1);
+  EOQ
+
   param "ecs_security_group_ids" {}
 }
 

@@ -45,6 +45,12 @@ dashboard "ecs_disk_detail" {
       args  = [self.input.disk_arn.value]
     }
 
+    card {
+      width = 2
+      query = query.ecs_disk_auto_snapshot
+      args  = [self.input.disk_arn.value]
+    }
+
   }
 
   with "ecs_images" {
@@ -129,16 +135,16 @@ dashboard "ecs_disk_detail" {
       }
 
       edge {
-        base = edge.ecs_disk_to_kms_key
+        base = edge.ecs_disk_to_ecs_snapshot
         args = {
-          ecs_disk_arns = [self.input.disk_arn.value]
+          ecs_snapshot_arns = with.to_ecs_snapshots.rows[*].snapshot_arn
         }
       }
 
       edge {
-        base = edge.ecs_disk_to_ecs_snapshot
+        base = edge.ecs_disk_to_kms_key
         args = {
-          ecs_snapshot_arns = with.to_ecs_snapshots.rows[*].snapshot_arn
+          ecs_disk_arns = [self.input.disk_arn.value]
         }
       }
 
@@ -213,6 +219,8 @@ dashboard "ecs_disk_detail" {
 
 }
 
+# Input queries
+
 query "ecs_disk_input" {
   sql = <<-EOQ
     select
@@ -228,81 +236,6 @@ query "ecs_disk_input" {
     order by
       title;
   EOQ
-}
-
-# card queries
-
-query "ecs_disk_storage" {
-  sql = <<-EOQ
-    select
-      'Storage (GB)' as label,
-      sum(size) as value
-    from
-      alicloud_ecs_disk
-    where
-      arn = $1;
-  EOQ
-
-}
-
-query "ecs_disk_iops" {
-  sql = <<-EOQ
-    select
-      'IOPS' as label,
-      iops as value
-    from
-      alicloud_ecs_disk
-    where
-      arn = $1;
-  EOQ
-
-}
-
-query "ecs_disk_category" {
-  sql = <<-EOQ
-    select
-      'Category' as label,
-      category as value
-    from
-      alicloud_ecs_disk
-    where
-      arn = $1;
-  EOQ
-
-}
-
-query "ecs_disk_attached_instances_count" {
-  sql = <<-EOQ
-    select
-      'Attached Instances' as label,
-      case
-        when attachments is null then 0
-        else jsonb_array_length(attachments)
-      end as value,
-      case
-        when jsonb_array_length(attachments) > 0 then 'ok'
-        else 'alert'
-      end as "type"
-    from
-      alicloud_ecs_disk
-    where
-      arn = $1;
-  EOQ
-
-}
-
-query "ecs_disk_encryption" {
-  sql = <<-EOQ
-    select
-      'Encryption' as label,
-      case when encrypted then 'Enabled' else 'Disabled' end as value,
-      case when encrypted then 'ok' else 'alert' end as type
-    from
-      alicloud_ecs_disk
-    where
-      arn = $1;
-  EOQ
-
 }
 
 # with queries
@@ -371,7 +304,90 @@ query "ecs_disk_kms_keys" {
   EOQ
 }
 
-# table queries
+# card queries
+
+query "ecs_disk_storage" {
+  sql = <<-EOQ
+    select
+      'Storage (GB)' as label,
+      sum(size) as value
+    from
+      alicloud_ecs_disk
+    where
+      arn = $1;
+  EOQ
+}
+
+query "ecs_disk_iops" {
+  sql = <<-EOQ
+    select
+      'IOPS' as label,
+      iops as value
+    from
+      alicloud_ecs_disk
+    where
+      arn = $1;
+  EOQ
+}
+
+query "ecs_disk_category" {
+  sql = <<-EOQ
+    select
+      'Category' as label,
+      category as value
+    from
+      alicloud_ecs_disk
+    where
+      arn = $1;
+  EOQ
+}
+
+query "ecs_disk_attached_instances_count" {
+  sql = <<-EOQ
+    select
+      'Attached Instances' as label,
+      case
+        when attachments is null then 0
+        else jsonb_array_length(attachments)
+      end as value,
+      case
+        when jsonb_array_length(attachments) > 0 then 'ok'
+        else 'alert'
+      end as "type"
+    from
+      alicloud_ecs_disk
+    where
+      arn = $1;
+  EOQ
+}
+
+query "ecs_disk_encryption" {
+  sql = <<-EOQ
+    select
+      'Encryption' as label,
+      case when encrypted then 'Enabled' else 'Disabled' end as value,
+      case when encrypted then 'ok' else 'alert' end as type
+    from
+      alicloud_ecs_disk
+    where
+      arn = $1;
+  EOQ
+}
+
+query "ecs_disk_auto_snapshot" {
+  sql = <<-EOQ
+    select
+      'Auto Snapshot' as label,
+      case when enable_auto_snapshot then 'Enabled' else 'Disabled' end as value,
+      case when enable_auto_snapshot then 'ok' else 'alert' end as type
+    from
+      alicloud_ecs_disk
+    where
+      arn = $1;
+  EOQ
+}
+
+# Other detail page queries
 
 query "ecs_disk_attached_instances" {
   sql = <<-EOQ
@@ -391,7 +407,6 @@ query "ecs_disk_attached_instances" {
     order by
       i.instance_id;
   EOQ
-
 }
 
 query "ecs_disk_encryption_status" {
@@ -404,7 +419,6 @@ query "ecs_disk_encryption_status" {
     where
       arn = $1;
   EOQ
-
 }
 
 query "ecs_disk_overview" {
@@ -423,7 +437,6 @@ query "ecs_disk_overview" {
     where
       arn = $1
   EOQ
-
 }
 
 query "ecs_disk_tags" {
@@ -439,5 +452,4 @@ query "ecs_disk_tags" {
     order by
       tag ->> 'Key';
   EOQ
-
 }

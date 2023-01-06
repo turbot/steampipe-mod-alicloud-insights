@@ -1,4 +1,3 @@
-
 node "vpc_availability_zone" {
   category = category.availability_zone
 
@@ -18,6 +17,26 @@ node "vpc_availability_zone" {
   EOQ
 
   param "vpc_vpc_ids" {}
+}
+
+node "vpc_dhcp_option_set" {
+  category = category.vpc_dhcp_option_set
+
+  sql = <<-EOQ
+    select
+      dhcp_options_set_id as id,
+      jsonb_build_object(
+        'Owner ID', owner_id,
+        'Region', region,
+        'Account ID', account_id
+      ) as properties
+    from
+      alicloud_vpc_dhcp_options_set
+    where
+      dhcp_options_set_id = any($1)
+  EOQ
+
+  param "vpc_dhcp_option_set_ids" {}
 }
 
 node "vpc_eip" {

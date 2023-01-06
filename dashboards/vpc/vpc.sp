@@ -4,6 +4,12 @@ locals {
   }
 }
 
+category "vpc_dhcp_option_set" {
+  title = "VPC DHCP Option Set"
+  color = local.networking_color
+  icon  = "text:DHCP"
+}
+
 category "vpc_eip" {
   title = "VPC EIP"
   color = local.networking_color

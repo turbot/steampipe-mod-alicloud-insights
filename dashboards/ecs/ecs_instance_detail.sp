@@ -113,24 +113,17 @@ dashboard "ecs_instance_detail" {
         }
       }
 
-      // node {
-      //   base = node.cs_kubernetes_cluster_node
-      //   args = {
-      //     ecs_instance_arns = [self.input.instance_arn.value]
-      //   }
-      // }
+      node {
+        base = node.ecs_auto_provisioning_group
+        args = {
+          ecs_instance_arns = [self.input.instance_arn.value]
+        }
+      }
 
       node {
         base = node.ecs_autoscaling_group
         args = {
           ecs_autoscaling_group_ids = with.ecs_autoscaling_groups.rows[*].autoscaling_group_id
-        }
-      }
-
-      node {
-        base = node.ecs_auto_provisioning_group
-        args = {
-          ecs_instance_arns = [self.input.instance_arn.value]
         }
       }
 
@@ -170,16 +163,16 @@ dashboard "ecs_instance_detail" {
       }
 
       node {
-        base = node.ecs_snapshot
+        base = node.ecs_security_group
         args = {
-          ecs_snapshot_arns = with.ecs_snapshots.rows[*].snapshot_arn
+          ecs_security_group_ids = with.ecs_security_groups.rows[*].security_group_id
         }
       }
 
       node {
-        base = node.ecs_security_group
+        base = node.ecs_snapshot
         args = {
-          ecs_security_group_ids = with.ecs_security_groups.rows[*].security_group_id
+          ecs_snapshot_arns = with.ecs_snapshots.rows[*].snapshot_arn
         }
       }
 
@@ -212,6 +205,13 @@ dashboard "ecs_instance_detail" {
       }
 
       edge {
+        base = edge.ecs_auto_provisioning_group_to_ecs_instance
+        args = {
+          ecs_instance_arns = [self.input.instance_arn.value]
+        }
+      }
+
+      edge {
         base = edge.ecs_autoscaling_group_to_ecs_instance
         args = {
           ecs_instance_arns = [self.input.instance_arn.value]
@@ -219,9 +219,9 @@ dashboard "ecs_instance_detail" {
       }
 
       edge {
-        base = edge.ecs_auto_provisioning_group_to_ecs_instance
+        base = edge.ecs_disk_to_ecs_snapshot
         args = {
-          ecs_instance_arns = [self.input.instance_arn.value]
+          ecs_snapshot_arns = with.ecs_snapshots.rows[*].snapshot_arn
         }
       }
 
@@ -247,23 +247,9 @@ dashboard "ecs_instance_detail" {
       }
 
       edge {
-        base = edge.ecs_disk_to_ecs_snapshot
-        args = {
-          ecs_snapshot_arns = with.ecs_snapshots.rows[*].snapshot_arn
-        }
-      }
-
-      edge {
         base = edge.ecs_instance_to_ecs_network_interface
         args = {
           ecs_instance_arns = [self.input.instance_arn.value]
-        }
-      }
-
-      edge {
-        base = edge.ecs_network_interface_to_vpc_eip
-        args = {
-          ecs_network_interface_ids = with.ecs_network_interfaces.rows[*].network_interface_id
         }
       }
 
@@ -282,13 +268,20 @@ dashboard "ecs_instance_detail" {
       }
 
       edge {
+        base = edge.ecs_network_interface_to_vpc_eip
+        args = {
+          ecs_network_interface_ids = with.ecs_network_interfaces.rows[*].network_interface_id
+        }
+      }
+
+      edge {
         base = edge.vpc_vswitch_to_vpc_vpc
         args = {
           vpc_vswitch_ids = with.vpc_vswitches.rows[*].vpc_vswitch_id
         }
       }
+    }
   }
-}
 
   container {
 
@@ -369,6 +362,8 @@ dashboard "ecs_instance_detail" {
 
 }
 
+# Inpur queries
+
 query "ecs_instance_input" {
   sql = <<-EOQ
     select
@@ -386,92 +381,9 @@ query "ecs_instance_input" {
   EOQ
 }
 
-query "ecs_instance_status" {
-  sql = <<-EOQ
-    select
-      'Status' as label,
-      status as value
-    from
-      alicloud_ecs_instance
-    where
-      arn = $1;
-  EOQ
-
-
-}
-
-query "ecs_instance_os_type" {
-  sql = <<-EOQ
-    select
-      'OS Type' as label,
-      os_type as value
-    from
-      alicloud_ecs_instance
-    where
-      arn = $1;
-  EOQ
-
-
-}
-
-query "ecs_instance_type" {
-  sql = <<-EOQ
-    select
-      'Type' as label,
-      instance_type as value
-    from
-      alicloud_ecs_instance
-    where
-      arn = $1;
-  EOQ
-
-}
-
-query "ecs_instance_total_cores" {
-  sql = <<-EOQ
-    select
-      'Total Cores' as label,
-      sum(cpu_options_core_count) as value
-    from
-      alicloud_ecs_instance
-    where
-      arn = $1;
-  EOQ
-
-}
-
-query "ecs_instance_public_access" {
-  sql = <<-EOQ
-    select
-      'Public Access' as label,
-      case when public_ip_address is null then 'Disabled' else 'Enabled' end as value,
-      case when public_ip_address is null then 'ok' else 'alert' end as type
-    from
-      alicloud_ecs_instance
-    where
-      arn = $1;
-  EOQ
-
-}
-
-query "ecs_instance_io_optimized" {
-  sql = <<-EOQ
-    select
-      'I/O Optimized' as label,
-      case when io_optimized then 'Enabled' else 'Disabled' end as value,
-      case when io_optimized then 'ok' else 'alert' end as type
-    from
-      alicloud_ecs_instance
-    where
-      arn = $1;
-  EOQ
-
-}
-
 # with queries
 
 query "ecs_instance_ecs_disks" {
-
   sql = <<-EOQ
     select
       d.arn as disk_arn
@@ -481,7 +393,6 @@ query "ecs_instance_ecs_disks" {
     where
       i.arn = $1;
   EOQ
-
 }
 
 query "ecs_instance_ecs_images" {
@@ -497,7 +408,7 @@ query "ecs_instance_ecs_images" {
 }
 
 query "ecs_instance_ecs_autoscaling_groups" {
-sql = <<-EOQ
+  sql = <<-EOQ
     select
       asg.scaling_group_id as autoscaling_group_id
     from
@@ -584,6 +495,84 @@ query "ecs_instance_vpc_vpcs" {
   EOQ
 }
 
+# Card queries
+
+query "ecs_instance_status" {
+  sql = <<-EOQ
+    select
+      'Status' as label,
+      status as value
+    from
+      alicloud_ecs_instance
+    where
+      arn = $1;
+  EOQ
+}
+
+query "ecs_instance_os_type" {
+  sql = <<-EOQ
+    select
+      'OS Type' as label,
+      os_type as value
+    from
+      alicloud_ecs_instance
+    where
+      arn = $1;
+  EOQ
+}
+
+query "ecs_instance_type" {
+  sql = <<-EOQ
+    select
+      'Type' as label,
+      instance_type as value
+    from
+      alicloud_ecs_instance
+    where
+      arn = $1;
+  EOQ
+}
+
+query "ecs_instance_total_cores" {
+  sql = <<-EOQ
+    select
+      'Total Cores' as label,
+      sum(cpu_options_core_count) as value
+    from
+      alicloud_ecs_instance
+    where
+      arn = $1;
+  EOQ
+}
+
+query "ecs_instance_public_access" {
+  sql = <<-EOQ
+    select
+      'Public Access' as label,
+      case when public_ip_address is null then 'Disabled' else 'Enabled' end as value,
+      case when public_ip_address is null then 'ok' else 'alert' end as type
+    from
+      alicloud_ecs_instance
+    where
+      arn = $1;
+  EOQ
+}
+
+query "ecs_instance_io_optimized" {
+  sql = <<-EOQ
+    select
+      'I/O Optimized' as label,
+      case when io_optimized then 'Enabled' else 'Disabled' end as value,
+      case when io_optimized then 'ok' else 'alert' end as type
+    from
+      alicloud_ecs_instance
+    where
+      arn = $1;
+  EOQ
+}
+
+# Other detail page queries
+
 query "ecs_instance_overview" {
   sql = <<-EOQ
     select
@@ -603,7 +592,6 @@ query "ecs_instance_overview" {
     where
       arn = $1;
   EOQ
-
 }
 
 query "ecs_instance_tags" {
@@ -619,7 +607,6 @@ query "ecs_instance_tags" {
     order by
       tag ->> 'TagKey';
     EOQ
-
 }
 
 query "ecs_instance_cpu_cores" {
@@ -632,7 +619,6 @@ query "ecs_instance_cpu_cores" {
     where
       arn = $1;
   EOQ
-
 }
 
 query "ecs_instance_network_interfaces" {
@@ -651,7 +637,6 @@ query "ecs_instance_network_interfaces" {
     where
       arn = $1;
   EOQ
-
 }
 
 query "ecs_instance_dedicated_host" {
@@ -667,7 +652,6 @@ query "ecs_instance_dedicated_host" {
     where
       arn = $1;
   EOQ
-
 }
 
 query "ecs_instance_security_groups" {
@@ -682,7 +666,6 @@ query "ecs_instance_security_groups" {
     where
       i.arn = $1;
   EOQ
-
 }
 
 query "ecs_instance_vpc" {
@@ -697,5 +680,4 @@ query "ecs_instance_vpc" {
     where
       arn = $1;
   EOQ
-
 }
