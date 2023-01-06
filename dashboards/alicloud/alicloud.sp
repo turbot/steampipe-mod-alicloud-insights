@@ -6,6 +6,6 @@ locals {
 
 category "availability_zone" {
   title = "Availability Zone"
-  icon  = "apartment"
   color = local.networking_color
+  icon  = "apartment"
 }

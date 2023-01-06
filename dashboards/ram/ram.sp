@@ -25,9 +25,9 @@ category "ram_policy" {
 
 category "ram_role" {
   title = "RAM Role"
+  color = local.ram_color
   href  = "/alicloud_insights.dashboard.ram_role_detail?input.role_arn={{.properties.'ARN' | @uri}}"
   icon  = "engineering"
-  color = local.ram_color
 }
 
 category "ram_user" {
