@@ -55,6 +55,11 @@ dashboard "vpc_vswitch_detail" {
     args  = [self.input.vswitch_id.value]
   }
 
+  with "vpc_nat_gateways" {
+    query = query.vpc_vswitch_vpc_nat_gateways
+    args  = [self.input.vswitch_id.value]
+  }
+
   with "vpc_network_acls" {
     query = query.vpc_vswitch_vpc_network_acls
     args  = [self.input.vswitch_id.value]
@@ -62,11 +67,6 @@ dashboard "vpc_vswitch_detail" {
 
   with "vpc_route_tables" {
     query = query.vpc_vswitch_vpc_route_tables
-    args  = [self.input.vswitch_id.value]
-  }
-
-  with "vpc_nat_gateways" {
-    query = query.vpc_vswitch_vpc_nat_gateways
     args  = [self.input.vswitch_id.value]
   }
 
@@ -111,6 +111,13 @@ dashboard "vpc_vswitch_detail" {
       }
 
       node {
+        base = node.vpc_nat_gateway
+        args = {
+          vpc_nat_gateway_ids = with.vpc_nat_gateways.rows[*].gateway_id
+        }
+      }
+
+      node {
         base = node.vpc_network_acl
         args = {
           vpc_network_acl_ids = with.vpc_network_acls.rows[*].network_acl_id
@@ -125,21 +132,21 @@ dashboard "vpc_vswitch_detail" {
       }
 
       node {
+        base = node.vpc_vpc
+        args = {
+          vpc_vpc_ids = with.vpc_vpcs.rows[*].vpc_id
+        }
+      }
+
+      node {
         base = node.vpc_vswitch
         args = {
           vpc_vswitch_ids = [self.input.vswitch_id.value]
         }
       }
 
-      node {
-        base = node.vpc_nat_gateway
-        args = {
-          vpc_nat_gateway_ids = with.vpc_nat_gateways.rows[*].gateway_id
-        }
-      }
-
-      node {
-        base = node.vpc_vpc
+      edge {
+        base = edge.vpc_vpc_to_vpc_vswitch
         args = {
           vpc_vpc_ids = with.vpc_vpcs.rows[*].vpc_id
         }
@@ -167,16 +174,16 @@ dashboard "vpc_vswitch_detail" {
       }
 
       edge {
-        base = edge.vpc_vswitch_to_rds_instance
+        base = edge.vpc_vswitch_to_nat_gateway
         args = {
-          vpc_vswitch_ids = [self.input.vswitch_id.value]
+          vpc_nat_gateway_ids = with.vpc_nat_gateways.rows[*].gateway_id
         }
       }
 
       edge {
-        base = edge.vpc_vswitch_to_nat_gateway
+        base = edge.vpc_vswitch_to_rds_instance
         args = {
-          vpc_nat_gateway_ids = with.vpc_nat_gateways.rows[*].gateway_id
+          vpc_vswitch_ids = [self.input.vswitch_id.value]
         }
       }
 
@@ -191,13 +198,6 @@ dashboard "vpc_vswitch_detail" {
         base = edge.vpc_vswitch_to_vpc_route_table
         args = {
           vpc_vswitch_ids = [self.input.vswitch_id.value]
-        }
-      }
-
-      edge {
-        base = edge.vpc_vpc_to_vpc_vswitch
-        args = {
-          vpc_vpc_ids = with.vpc_vpcs.rows[*].vpc_id
         }
       }
     }
@@ -249,6 +249,8 @@ dashboard "vpc_vswitch_detail" {
 
 }
 
+# Input queries
+
 query "vpc_vswitch_input" {
   sql = <<-EOQ
     select
@@ -264,48 +266,6 @@ query "vpc_vswitch_input" {
     order by
       title;
   EOQ
-
-}
-
-# card queries
-
-query "vpc_vswitch_available_ip_address_count" {
-  sql = <<-EOQ
-    select
-      'IP Address Count' as label,
-      available_ip_address_count as value
-    from
-      alicloud_vpc_vswitch
-    where
-      vswitch_id = $1
-  EOQ
-
-}
-
-query "vpc_vswitch_cidr_block" {
-  sql = <<-EOQ
-    select
-      'CIDR Block' as label,
-      cidr_block as value
-    from
-      alicloud_vpc_vswitch
-    where
-      vswitch_id = $1
-  EOQ
-
-}
-
-query "vpc_vswitch_status" {
-  sql = <<-EOQ
-    select
-      'Status' as label,
-      status as value
-    from
-      alicloud_vpc_vswitch
-    where
-      vswitch_id = $1
-  EOQ
-
 }
 
 # with queries
@@ -401,6 +361,44 @@ query "vpc_vswitch_vpc_vpcs" {
   EOQ
 }
 
+# card queries
+
+query "vpc_vswitch_available_ip_address_count" {
+  sql = <<-EOQ
+    select
+      'IP Address Count' as label,
+      available_ip_address_count as value
+    from
+      alicloud_vpc_vswitch
+    where
+      vswitch_id = $1
+  EOQ
+}
+
+query "vpc_vswitch_cidr_block" {
+  sql = <<-EOQ
+    select
+      'CIDR Block' as label,
+      cidr_block as value
+    from
+      alicloud_vpc_vswitch
+    where
+      vswitch_id = $1
+  EOQ
+}
+
+query "vpc_vswitch_status" {
+  sql = <<-EOQ
+    select
+      'Status' as label,
+      status as value
+    from
+      alicloud_vpc_vswitch
+    where
+      vswitch_id = $1
+  EOQ
+}
+
 # table queries
 
 query "vpc_vswitch_overview" {
@@ -412,13 +410,13 @@ query "vpc_vswitch_overview" {
       zone_id as "Zone ID",
       title as "Title",
       region as "Region",
+      zone_id as "Zone ID",
       account_id as "Account ID"
     from
       alicloud_vpc_vswitch
     where
       vswitch_id = $1
   EOQ
-
 }
 
 query "vpc_vswitch_tags" {
@@ -434,7 +432,6 @@ query "vpc_vswitch_tags" {
     order by
       tag ->> 'Key';
   EOQ
-
 }
 
 query "vpc_vswitch_association" {
@@ -467,15 +464,17 @@ query "vpc_vswitch_association" {
     -- Network ACLs
     union all
     select
-      title as "Title",
+      a.title as "Title",
       'alicloud_vpc_network_acl' as "Type",
-      network_acl_id as "ID",
+      v.network_acl_id as "ID",
       null as link
     from
-      alicloud_vpc_vswitch
+      alicloud_vpc_vswitch as v,
+      alicloud_vpc_network_acl as a
     where
       vswitch_id = $1
-      and network_acl_id is not null
+      and v.network_acl_id is not null
+      and v.network_acl_id = a.network_acl_id
 
     -- Route Tables
     union all
@@ -491,6 +490,4 @@ query "vpc_vswitch_association" {
       b = $1
       and route_table_id is not null;
   EOQ
-
 }
-
