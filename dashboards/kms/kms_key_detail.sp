@@ -23,7 +23,7 @@ dashboard "kms_key_detail" {
     }
 
     card {
-      width = 3
+      width = 2
       query = query.kms_key_state
       args  = [self.input.key_arn.value]
     }
@@ -41,7 +41,7 @@ dashboard "kms_key_detail" {
     }
 
     card {
-      width = 3
+      width = 2
       query = query.kms_protection_level
       args  = [self.input.key_arn.value]
     }
@@ -186,6 +186,8 @@ dashboard "kms_key_detail" {
 
 }
 
+# input queries
+
 query "kms_key_input" {
   sql = <<-EOQ
     select
@@ -200,76 +202,6 @@ query "kms_key_input" {
     order by
       title;
   EOQ
-}
-
-# card queries
-
-query "kms_key_origin" {
-  sql = <<-EOQ
-    select
-      'Origin' as label,
-      origin as value
-    from
-      alicloud_kms_key
-    where
-      arn = $1;
-  EOQ
-
-}
-
-query "kms_key_state" {
-  sql = <<-EOQ
-    select
-      'State' as label,
-      key_state as value
-    from
-      alicloud_kms_key
-    where
-      arn = $1;
-  EOQ
-
-}
-
-query "kms_key_rotation_enabled" {
-  sql = <<-EOQ
-    select
-      'Key Rotation' as label,
-      automatic_rotation as value,
-      case when automatic_rotation='Enabled' then 'ok' else 'alert' end as type
-    from
-      alicloud_kms_key
-    where
-      arn = $1;
-  EOQ
-
-}
-
-query "kms_deletion_protection" {
-  sql = <<-EOQ
-    select
-      'Deletion Protection' as label,
-      deletion_protection as value,
-      case when deletion_protection='Enabled' then 'ok' else 'alert' end as type
-    from
-      alicloud_kms_key
-    where
-      arn = $1;
-  EOQ
-
-}
-
-query "kms_protection_level" {
-  sql = <<-EOQ
-    select
-      'Protection Level' as label,
-      initcap(protection_level) as value,
-      case when protection_level='SOFTWARE' then 'ok' else 'alert' end as type
-    from
-      alicloud_kms_key
-    where
-      arn = $1;
-  EOQ
-
 }
 
 # with queries
@@ -326,7 +258,85 @@ query "kms_key_ecs_snapshots" {
   EOQ
 }
 
-# table queries
+query "kms_key_rds_instances" {
+  sql = <<-EOQ
+    select
+      s.arn as snapshot_arn
+    from
+      alicloud_ecs_snapshot as s
+      left join alicloud_kms_key k on s.kms_key_id = k.key_id
+    where
+      k.arn = $1
+      and s.arn is not null;
+  EOQ
+}
+
+# card queries
+
+query "kms_key_origin" {
+  sql = <<-EOQ
+    select
+      'Origin' as label,
+      origin as value
+    from
+      alicloud_kms_key
+    where
+      arn = $1;
+  EOQ
+}
+
+query "kms_key_state" {
+  sql = <<-EOQ
+    select
+      'State' as label,
+      key_state as value
+    from
+      alicloud_kms_key
+    where
+      arn = $1;
+  EOQ
+}
+
+query "kms_key_rotation_enabled" {
+  sql = <<-EOQ
+    select
+      'Key Rotation' as label,
+      automatic_rotation as value,
+      case when automatic_rotation='Enabled' then 'ok' else 'alert' end as type
+    from
+      alicloud_kms_key
+    where
+      arn = $1;
+  EOQ
+}
+
+query "kms_deletion_protection" {
+  sql = <<-EOQ
+    select
+      'Deletion Protection' as label,
+      deletion_protection as value,
+      case when deletion_protection='Enabled' then 'ok' else 'alert' end as type
+    from
+      alicloud_kms_key
+    where
+      arn = $1;
+  EOQ
+}
+
+query "kms_protection_level" {
+  sql = <<-EOQ
+    select
+      'Protection Level' as label,
+      initcap(protection_level) as value,
+      case when protection_level='SOFTWARE' then 'ok' else 'alert' end as type
+    from
+      alicloud_kms_key
+    where
+      arn = $1;
+  EOQ
+}
+
+# Other detail page queries
 
 query "kms_key_overview" {
   sql = <<-EOQ
@@ -342,7 +352,6 @@ query "kms_key_overview" {
     where
       arn = $1
     EOQ
-
 }
 
 query "kms_key_tags" {
@@ -358,7 +367,6 @@ query "kms_key_tags" {
     order by
       tag ->> 'TagKey';
     EOQ
-
 }
 
 query "kms_key_age" {
@@ -372,7 +380,6 @@ query "kms_key_age" {
     where
       arn = $1;
   EOQ
-
 }
 
 query "kms_key_aliases" {
@@ -387,5 +394,4 @@ query "kms_key_aliases" {
     where
       arn = $1;
   EOQ
-
 }
