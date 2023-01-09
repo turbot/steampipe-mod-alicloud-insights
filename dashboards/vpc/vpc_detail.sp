@@ -304,7 +304,7 @@ dashboard "vpc_detail" {
       query = query.vpc_vswitches_detail
       width = 8
       column "vSwitch ID" {
-          href = "${dashboard.vpc_vswitch_detail.url_path}?input.vswitch_id={{.properties.'VSWITCH ID' | @uri}}"
+          href = "${dashboard.vpc_vswitch_detail.url_path}?input.vswitch_id={{.properties.'vSwitch ID' | @uri}}"
         }
       args  = [self.input.vpc_id.value]
     }
