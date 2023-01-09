@@ -11,7 +11,7 @@ dashboard "ram_group_detail" {
   input "group_arn" {
     title = "Select a group:"
     query = query.ram_group_input
-    width = 2
+    width = 4
   }
 
   container {
@@ -69,14 +69,14 @@ dashboard "ram_group_detail" {
       }
 
       edge {
-        base = edge.ram_group_to_ram_user
+        base = edge.ram_group_to_ram_policy
         args = {
           ram_group_arns = [self.input.group_arn.value]
         }
       }
 
       edge {
-        base = edge.ram_group_to_ram_policy
+        base = edge.ram_group_to_ram_user
         args = {
           ram_group_arns = [self.input.group_arn.value]
         }
@@ -133,6 +133,8 @@ dashboard "ram_group_detail" {
 
 }
 
+# Input queries
+
 query "ram_group_input" {
   sql = <<-EOQ
     select
@@ -148,33 +150,7 @@ query "ram_group_input" {
   EOQ
 }
 
-query "ram_groups_users_count" {
-  sql = <<-EOQ
-    select
-      jsonb_array_length(users) as value,
-      'Users' as label,
-      case when jsonb_array_length(users) > 0 then 'ok' else 'alert' end as type
-    from
-      alicloud_ram_group
-    where
-      arn = $1
-  EOQ
-
-}
-
-query "ram_groups_policies_count" {
-  sql = <<-EOQ
-    select
-      jsonb_array_length(attached_policy) as value,
-      'Policies' as label,
-      case when jsonb_array_length(attached_policy) > 0 then 'ok' else 'alert' end as type
-    from
-      alicloud_ram_group
-    where
-      arn = $1
-  EOQ
-
-}
+# With queries
 
 query "ram_group_ram_policies" {
   sql = <<-EOQ
@@ -204,6 +180,36 @@ query "ram_group_ram_users" {
   EOQ
 }
 
+# Card queries
+
+query "ram_groups_users_count" {
+  sql = <<-EOQ
+    select
+      jsonb_array_length(users) as value,
+      'Users' as label,
+      case when jsonb_array_length(users) > 0 then 'ok' else 'alert' end as type
+    from
+      alicloud_ram_group
+    where
+      arn = $1
+  EOQ
+}
+
+query "ram_groups_policies_count" {
+  sql = <<-EOQ
+    select
+      jsonb_array_length(attached_policy) as value,
+      'Policies' as label,
+      case when jsonb_array_length(attached_policy) > 0 then 'ok' else 'alert' end as type
+    from
+      alicloud_ram_group
+    where
+      arn = $1
+  EOQ
+}
+
+# Other detail page queries
+
 query "ram_group_overview" {
   sql = <<-EOQ
     select
@@ -216,7 +222,6 @@ query "ram_group_overview" {
     where
       arn = $1
   EOQ
-
 }
 
 query "ram_users_for_group" {
@@ -232,7 +237,6 @@ query "ram_users_for_group" {
     where
       arn = $1
   EOQ
-
 }
 
 query "ram_all_policies_for_group" {
@@ -248,5 +252,4 @@ query "ram_all_policies_for_group" {
     where
       arn = $1
   EOQ
-
 }
