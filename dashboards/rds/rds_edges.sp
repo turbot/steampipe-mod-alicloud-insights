@@ -15,12 +15,12 @@ edge "rds_instance_to_vpc_vswitch" {
       i.arn = any($1);
   EOQ
 
-  param "rds_db_instance_arns" {}
+  param "rds_instance_arns" {}
 }
 
-edge "rds_db_instance_to_read_only_db_instances" {
+edge "rds_instance_to_read_only_db_instances" {
   title = "read only db instance"
-    sql = <<-EOQ
+  sql   = <<-EOQ
     select
       original_instance.arn as from_id,
       read_instance.arn as to_id
@@ -33,12 +33,12 @@ edge "rds_db_instance_to_read_only_db_instances" {
       and read_instance.db_instance_id = rd ->> 'DBInstanceId';
   EOQ
 
-  param "rds_db_instance_arns" {}
+  param "rds_instance_arns" {}
 }
 
-edge "rds_db_instance_to_ecs_security_group" {
+edge "rds_instance_to_ecs_security_group" {
   title = "security group"
-  sql = <<-EOQ
+  sql   = <<-EOQ
     select
       i.arn as from_id,
       isg->>'SecurityGroupId' as to_id
@@ -51,12 +51,12 @@ edge "rds_db_instance_to_ecs_security_group" {
       and isg->>'SecurityGroupId' = sg.security_group_id;
   EOQ
 
-  param "rds_db_instance_arns" {}
+  param "rds_instance_arns" {}
 }
 
-edge "rds_db_instance_to_rds_database" {
+edge "rds_instance_to_rds_database" {
   title = "database"
-    sql = <<-EOQ
+  sql   = <<-EOQ
     select
       arn as from_id,
       d.db_name as to_id
@@ -67,12 +67,12 @@ edge "rds_db_instance_to_rds_database" {
       i.arn = any($1)
       and d.db_instance_id = i.db_instance_id;
   EOQ
-  param "rds_db_instance_arns" {}
+  param "rds_instance_arns" {}
 }
 
-edge "rds_db_instance_to_rds_backup" {
+edge "rds_instance_to_rds_backup" {
   title = "backup"
-    sql = <<-EOQ
+  sql   = <<-EOQ
     select
       i.arn as from_id,
       b.backup_id as to_id
@@ -83,5 +83,5 @@ edge "rds_db_instance_to_rds_backup" {
       i.arn = any($1)
       and b.db_instance_id = i.db_instance_id;
   EOQ
-  param "rds_db_instance_arns" {}
+  param "rds_instance_arns" {}
 }

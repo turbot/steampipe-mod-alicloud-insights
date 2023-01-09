@@ -55,7 +55,7 @@ dashboard "rds_instance_detail" {
 
   with "ecs_autoscaling_groups" {
     query = query.rds_instance_ecs_autoscaling_groups
-    args = [self.input.db_instance_arn.value]
+    args  = [self.input.db_instance_arn.value]
   }
 
   with "ecs_security_groups" {
@@ -63,19 +63,19 @@ dashboard "rds_instance_detail" {
     args  = [self.input.db_instance_arn.value]
   }
 
-  with "rds_backups"{
+  with "rds_backups" {
     query = query.rds_instance_rds_backups
-    args = [self.input.db_instance_arn.value]
+    args  = [self.input.db_instance_arn.value]
   }
 
-  with "rds_databases"{
+  with "rds_databases" {
     query = query.rds_instance_rds_databases
-    args = [self.input.db_instance_arn.value]
+    args  = [self.input.db_instance_arn.value]
   }
 
   with "rds_read_only_db_instances" {
     query = query.rds_instance_rds_read_only_db_instances
-    args = [self.input.db_instance_arn.value]
+    args  = [self.input.db_instance_arn.value]
   }
 
   with "vpc_vpcs" {
@@ -126,14 +126,14 @@ dashboard "rds_instance_detail" {
       node {
         base = node.rds_instance
         args = {
-          rds_db_instance_arns = [self.input.db_instance_arn.value]
+          rds_instance_arns = [self.input.db_instance_arn.value]
         }
       }
 
       node {
         base = node.rds_instance
         args = {
-          rds_db_instance_arns = with.rds_read_only_db_instances.rows[*].db_instance_arn
+          rds_instance_arns = with.rds_read_only_db_instances.rows[*].db_instance_arn
         }
       }
 
@@ -159,44 +159,44 @@ dashboard "rds_instance_detail" {
       }
 
       edge {
-        base = edge.rds_db_instance_to_ecs_security_group
+        base = edge.rds_instance_to_ecs_security_group
         args = {
-          rds_db_instance_arns = [self.input.db_instance_arn.value]
+          rds_instance_arns = [self.input.db_instance_arn.value]
         }
       }
 
       edge {
-        base = edge.rds_db_instance_to_rds_backup
+        base = edge.rds_instance_to_rds_backup
         args = {
-          rds_db_instance_arns = [self.input.db_instance_arn.value]
+          rds_instance_arns = [self.input.db_instance_arn.value]
         }
       }
 
       edge {
-        base = edge.rds_db_instance_to_rds_database
+        base = edge.rds_instance_to_rds_database
         args = {
-          rds_db_instance_arns = [self.input.db_instance_arn.value]
+          rds_instance_arns = [self.input.db_instance_arn.value]
         }
       }
 
       edge {
-        base = edge.rds_db_instance_to_read_only_db_instances
+        base = edge.rds_instance_to_read_only_db_instances
         args = {
-          rds_db_instance_arns = [self.input.db_instance_arn.value]
+          rds_instance_arns = [self.input.db_instance_arn.value]
         }
       }
 
       edge {
-        base = edge.rds_db_instance_to_read_only_db_instances
+        base = edge.rds_instance_to_read_only_db_instances
         args = {
-          rds_db_instance_arns = with.rds_read_only_db_instances.rows[*].db_instance_arn
+          rds_instance_arns = with.rds_read_only_db_instances.rows[*].db_instance_arn
         }
       }
 
       edge {
         base = edge.rds_instance_to_vpc_vswitch
         args = {
-          rds_db_instance_arns = [self.input.db_instance_arn.value]
+          rds_instance_arns = [self.input.db_instance_arn.value]
         }
       }
 

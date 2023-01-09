@@ -21,7 +21,7 @@ node "rds_instance" {
       arn = any($1);
   EOQ
 
-  param "rds_db_instance_arns" {}
+  param "rds_instance_arns" {}
 }
 
 node "rds_database" {

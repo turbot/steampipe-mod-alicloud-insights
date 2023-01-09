@@ -56,8 +56,8 @@ dashboard "vpc_detail" {
     args  = [self.input.vpc_id.value]
   }
 
-  with "rds_db_instances" {
-    query = query.vpc_vpc_rds_db_instances
+  with "rds_instances" {
+    query = query.vpc_vpc_rds_instances
     args  = [self.input.vpc_id.value]
   }
 
@@ -112,7 +112,7 @@ dashboard "vpc_detail" {
       node {
         base = node.rds_instance
         args = {
-          rds_db_instance_arns = with.rds_db_instances.rows[*].rds_instance_arn
+          rds_instance_arns = with.rds_instances.rows[*].rds_instance_arn
         }
       }
 
@@ -303,9 +303,9 @@ dashboard "vpc_detail" {
       query = query.vpc_vswitches_detail
       width = 8
       column "vSwitch ID" {
-          href = "${dashboard.vpc_vswitch_detail.url_path}?input.vswitch_id={{.properties.'vSwitch ID' | @uri}}"
-        }
-      args  = [self.input.vpc_id.value]
+        href = "${dashboard.vpc_vswitch_detail.url_path}?input.vswitch_id={{.properties.'vSwitch ID' | @uri}}"
+      }
+      args = [self.input.vpc_id.value]
     }
 
   }
@@ -484,7 +484,7 @@ query "vpc_is_default" {
 # with queries
 
 query "vpc_vpc_ecs_instances" {
-  sql   = <<-EOQ
+  sql = <<-EOQ
     select
       arn as instance_arn
     from
@@ -495,7 +495,7 @@ query "vpc_vpc_ecs_instances" {
 }
 
 query "vpc_vpc_ecs_network_interfaces" {
-  sql   = <<-EOQ
+  sql = <<-EOQ
     select
       network_interface_id as eni_id
     from
@@ -505,8 +505,8 @@ query "vpc_vpc_ecs_network_interfaces" {
   EOQ
 }
 
-query "vpc_vpc_rds_db_instances" {
-  sql   = <<-EOQ
+query "vpc_vpc_rds_instances" {
+  sql = <<-EOQ
     select
       arn as rds_instance_arn
     from
@@ -517,7 +517,7 @@ query "vpc_vpc_rds_db_instances" {
 }
 
 query "vpc_vpc_vpc_dhcp_options_sets" {
-  sql   = <<-EOQ
+  sql = <<-EOQ
     with vpcs as (
       select
         jsonb_array_elements(associate_vpcs)->> 'VpcId' as vpc_id
@@ -535,7 +535,7 @@ query "vpc_vpc_vpc_dhcp_options_sets" {
 }
 
 query "vpc_vpc_vpc_nat_gateways" {
-    sql   = <<-EOQ
+  sql = <<-EOQ
     select
       nat_gateway_id as gateway_id
     from
@@ -546,7 +546,7 @@ query "vpc_vpc_vpc_nat_gateways" {
 }
 
 query "vpc_vpc_ecs_security_groups" {
-  sql   = <<-EOQ
+  sql = <<-EOQ
     select
       security_group_id as security_group_id
     from
@@ -557,7 +557,7 @@ query "vpc_vpc_ecs_security_groups" {
 }
 
 query "vpc_vpc_vpc_vswitches" {
-  sql   = <<-EOQ
+  sql = <<-EOQ
     select
       vswitch_id as vswitch_id
     from
@@ -568,7 +568,7 @@ query "vpc_vpc_vpc_vswitches" {
 }
 
 query "vpc_vpc_vpc_route_tables" {
-  sql   = <<-EOQ
+  sql = <<-EOQ
     select
       route_table_id as route_table_id
     from

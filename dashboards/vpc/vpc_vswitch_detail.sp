@@ -37,7 +37,7 @@ dashboard "vpc_vswitch_detail" {
 
   with "ecs_autoscaling_groups" {
     query = query.vpc_vswitch_ecs_autoscaling_groups
-    args = [self.input.vswitch_id.value]
+    args  = [self.input.vswitch_id.value]
   }
 
   with "ecs_instances" {
@@ -50,7 +50,7 @@ dashboard "vpc_vswitch_detail" {
     args  = [self.input.vswitch_id.value]
   }
 
-  with "rds_db_instances" {
+  with "rds_instances" {
     query = query.vpc_vswitch_rds_instances
     args  = [self.input.vswitch_id.value]
   }
@@ -106,7 +106,7 @@ dashboard "vpc_vswitch_detail" {
       node {
         base = node.rds_instance
         args = {
-          rds_db_instance_arns = with.rds_db_instances.rows[*].rds_instance_arn
+          rds_instance_arns = with.rds_instances.rows[*].rds_instance_arn
         }
       }
 
@@ -225,7 +225,7 @@ dashboard "vpc_vswitch_detail" {
       }
 
     }
-        container {
+    container {
 
       width = 6
 
@@ -271,7 +271,7 @@ query "vpc_vswitch_input" {
 # with queries
 
 query "vpc_vswitch_vpc_network_acls" {
-  sql   = <<-EOQ
+  sql = <<-EOQ
     select
       network_acl_id as network_acl_id
     from
@@ -283,7 +283,7 @@ query "vpc_vswitch_vpc_network_acls" {
 }
 
 query "vpc_vswitch_vpc_nat_gateways" {
-  sql   = <<-EOQ
+  sql = <<-EOQ
     select
       nat_gateway_id as gateway_id
     from
@@ -294,7 +294,7 @@ query "vpc_vswitch_vpc_nat_gateways" {
 }
 
 query "vpc_vswitch_ecs_autoscaling_groups" {
-  sql   = <<-EOQ
+  sql = <<-EOQ
     select
       scaling_group_id as autoscaling_group_id
     from
@@ -306,7 +306,7 @@ query "vpc_vswitch_ecs_autoscaling_groups" {
 }
 
 query "vpc_vswitch_vpc_route_tables" {
-  sql   = <<-EOQ
+  sql = <<-EOQ
     select
       route_table_id as route_table_id
     from
@@ -318,7 +318,7 @@ query "vpc_vswitch_vpc_route_tables" {
 }
 
 query "vpc_vswitch_ecs_instances" {
-  sql   = <<-EOQ
+  sql = <<-EOQ
     select
       i.arn as instance_arn
     from
@@ -329,7 +329,7 @@ query "vpc_vswitch_ecs_instances" {
 }
 
 query "vpc_vswitch_ecs_network_interfaces" {
-  sql   = <<-EOQ
+  sql = <<-EOQ
     select
       network_interface_id as eni_id
     from
@@ -340,7 +340,7 @@ query "vpc_vswitch_ecs_network_interfaces" {
 }
 
 query "vpc_vswitch_rds_instances" {
-  sql   = <<-EOQ
+  sql = <<-EOQ
     select
       arn as rds_instance_arn
     from
@@ -351,7 +351,7 @@ query "vpc_vswitch_rds_instances" {
 }
 
 query "vpc_vswitch_vpc_vpcs" {
-  sql   = <<-EOQ
+  sql = <<-EOQ
     select
       vpc_id as vpc_id
     from

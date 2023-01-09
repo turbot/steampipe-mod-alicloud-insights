@@ -129,50 +129,6 @@ node "vpc_route_table" {
   param "vpc_route_table_ids" {}
 }
 
-node "vpc_vswitch" {
-    category = category.vpc_vswitch
-
-  sql = <<-EOQ
-    select
-      vswitch_id as id,
-      title as title,
-      jsonb_build_object(
-        'VSwitch ID', vswitch_id,
-        'VPC ID', vpc_id,
-        'Account ID', account_id,
-        'Region', region
-      ) as properties
-    from
-      alicloud_vpc_vswitch
-    where
-      vswitch_id = any($1 ::text[]);
-  EOQ
-
-  param "vpc_vswitch_ids" {}
-}
-
-node "vpc_vpn_gateway" {
-  category = category.vpc_vpn_gateway
-
-  sql = <<-EOQ
-    select
-      vpn_gateway_id as id,
-      title as title,
-      jsonb_build_object(
-        'ID', vpn_gateway_id,
-        'Status',status,
-        'Region', region,
-        'Account ID', account_id
-      ) as properties
-    from
-      alicloud_vpc_vpn_gateway
-    where
-      vpc_id = any($1);
-  EOQ
-
-  param "vpc_vpc_ids" {}
-}
-
 node "vpc_vpc" {
   category = category.vpc_vpc
 
@@ -200,3 +156,46 @@ node "vpc_vpc" {
   param "vpc_vpc_ids" {}
 }
 
+node "vpc_vpn_gateway" {
+  category = category.vpc_vpn_gateway
+
+  sql = <<-EOQ
+    select
+      vpn_gateway_id as id,
+      title as title,
+      jsonb_build_object(
+        'ID', vpn_gateway_id,
+        'Status',status,
+        'Region', region,
+        'Account ID', account_id
+      ) as properties
+    from
+      alicloud_vpc_vpn_gateway
+    where
+      vpc_id = any($1);
+  EOQ
+
+  param "vpc_vpc_ids" {}
+}
+
+node "vpc_vswitch" {
+    category = category.vpc_vswitch
+
+  sql = <<-EOQ
+    select
+      vswitch_id as id,
+      title as title,
+      jsonb_build_object(
+        'VSwitch ID', vswitch_id,
+        'VPC ID', vpc_id,
+        'Account ID', account_id,
+        'Region', region
+      ) as properties
+    from
+      alicloud_vpc_vswitch
+    where
+      vswitch_id = any($1 ::text[]);
+  EOQ
+
+  param "vpc_vswitch_ids" {}
+}

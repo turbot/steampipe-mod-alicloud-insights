@@ -16,18 +16,6 @@ category "ecs_autoscaling_group" {
   icon  = "library_add"
 }
 
-category "ecs_launch_template" {
-  title = "ECS Launch Template"
-  color = local.compute_color
-  icon  = "text:LT"
-}
-
-category "ecs_security_group" {
-  title = "ECS Security Group"
-  color = local.compute_color
-  icon  = "enhanced_encryption"
-}
-
 category "ecs_disk" {
   title = "ECS Disk"
   color = local.storage_color
@@ -48,10 +36,16 @@ category "ecs_instance" {
   icon  = "memory"
 }
 
-category "cs_kubernetes_cluster_node" {
-  title = "Kubernetes Cluster Node"
-  color = local.containers_color
-  icon  = "device_hub"
+category "ecs_launch_template" {
+  title = "ECS Launch Template"
+  color = local.compute_color
+  icon  = "rocket-launch"
+}
+
+category "ecs_security_group" {
+  title = "ECS Security Group"
+  color = local.compute_color
+  icon  = "enhanced_encryption"
 }
 
 category "ecs_key_pair" {
@@ -59,6 +53,12 @@ category "ecs_key_pair" {
   color = local.compute_color
   icon  = "vpn_key"
 }
+
+# category "ecs_kubernetes_cluster_node" {
+#   title = "Kubernetes Cluster Node"
+#   color = local.containers_color
+#   icon  = "device_hub"
+# }
 
 category "ecs_network_interface" {
   title = "ECS Network Interface"

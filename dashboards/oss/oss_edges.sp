@@ -1,4 +1,3 @@
-
 edge "oss_bucket_to_kms_key" {
   title = "encrypted with"
 

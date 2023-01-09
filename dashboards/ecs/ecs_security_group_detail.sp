@@ -98,7 +98,7 @@ dashboard "ecs_security_group_detail" {
       node {
         base = node.rds_instance
         args = {
-          rds_db_instance_arns = with.rds_instances.rows[*].rds_instance_arn
+          rds_instance_arns = with.rds_instances.rows[*].rds_instance_arn
         }
       }
 
