@@ -297,7 +297,6 @@ dashboard "vpc_detail" {
       width = 4
       query = query.vpc_vswitch_by_az
       args  = [self.input.vpc_id.value]
-
     }
 
     table {

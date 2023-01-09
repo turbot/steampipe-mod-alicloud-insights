@@ -137,7 +137,7 @@ node "vpc_vswitch" {
       vswitch_id as id,
       title as title,
       jsonb_build_object(
-        'Subnet ID', vswitch_id,
+        'VSwitch ID', vswitch_id,
         'VPC ID', vpc_id,
         'Account ID', account_id,
         'Region', region
