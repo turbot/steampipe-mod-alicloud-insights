@@ -10,7 +10,7 @@ dashboard "ram_role_detail" {
   input "role_arn" {
     title = "Select a role:"
     query = query.ram_role_input
-    width = 2
+    width = 4
   }
 
   container {
@@ -35,13 +35,13 @@ dashboard "ram_role_detail" {
 
   }
 
-  with "ram_policies" {
-    query = query.ram_role_ram_policies
+  with "action_trails" {
+    query = query.ram_role_action_trails
     args  = [self.input.role_arn.value]
   }
 
-  with "action_trails" {
-    query = query.ram_role_action_trails
+  with "ram_policies" {
+    query = query.ram_role_ram_policies
     args  = [self.input.role_arn.value]
   }
 
@@ -53,16 +53,16 @@ dashboard "ram_role_detail" {
       direction = "TD"
 
       node {
-        base = node.ram_policy
+        base = node.actiontrail_trail
         args = {
-          ram_policy_akas = with.ram_policies.rows[*].policy_akas
+          action_trail_names = with.action_trails.rows[*].trail_name
         }
       }
 
       node {
-        base = node.actiontrail_trail
+        base = node.ram_policy
         args = {
-          action_trail_names = with.action_trails.rows[*].trail_name
+          ram_policy_akas = with.ram_policies.rows[*].policy_akas
         }
       }
 
@@ -134,6 +134,8 @@ dashboard "ram_role_detail" {
 
 }
 
+# Input queries
+
 query "ram_role_input" {
   sql = <<-EOQ
     select
@@ -149,67 +151,7 @@ query "ram_role_input" {
   EOQ
 }
 
-query "ram_role_policy_count_for_role" {
-  sql = <<-EOQ
-    select
-      case when attached_policy = '[]' then 0 else jsonb_array_length(attached_policy) end as value,
-      'Policies' as label
-    from
-      alicloud_ram_role
-    where
-      arn = $1;
-  EOQ
-
-}
-
-query "ram_role_with_admin_access" {
-  sql = <<-EOQ
-    with admin_roles as (
-      select
-        distinct name
-    from
-      alicloud_ram_role,
-      jsonb_array_elements(attached_policy) as policies
-    where
-      policies ->> 'PolicyName' = 'AdministratorAccess'
-    )
-    select
-       case when a.name is not null then 'Enabled' else 'Disabled' end as value,
-      'Admin Access' as label,
-      case when a.name is not null then 'alert' else 'ok' end as type
-    from
-      alicloud_ram_role as r
-      left join admin_roles as a on r.name = a.name
-    where
-      r.arn = $1;
-  EOQ
-
-}
-
-query "ram_role_with_cross_account_access" {
-  sql = <<-EOQ
-    with roles_with_cross_account_access as (
-      select
-        distinct name as name
-      from
-        alicloud_ram_role,
-        jsonb_array_elements(assume_role_policy_document -> 'Statement') as stmt,
-        jsonb_array_elements_text(stmt -> 'Principal' -> 'RAM') as principal
-      where
-        split_part(principal, ':',4) <> account_id
-    )
-    select
-       case when a.name is not null then 'Enabled' else 'Disabled' end as value,
-      'Cross-Account Access' as label,
-      case when a.name is not null then 'alert' else 'ok' end as type
-    from
-      alicloud_ram_role as r
-      left join roles_with_cross_account_access as a on r.name = a.name
-    where
-      r.arn = $1;
-  EOQ
-
-}
+# With queries
 
 query "ram_role_ram_policies" {
   sql = <<-EOQ
@@ -238,6 +180,69 @@ query "ram_role_action_trails" {
   EOQ
 }
 
+# Card queries
+
+query "ram_role_policy_count_for_role" {
+  sql = <<-EOQ
+    select
+      case when attached_policy = '[]' then 0 else jsonb_array_length(attached_policy) end as value,
+      'Policies' as label
+    from
+      alicloud_ram_role
+    where
+      arn = $1;
+  EOQ
+}
+
+query "ram_role_with_admin_access" {
+  sql = <<-EOQ
+    with admin_roles as (
+      select
+        distinct name
+    from
+      alicloud_ram_role,
+      jsonb_array_elements(attached_policy) as policies
+    where
+      policies ->> 'PolicyName' = 'AdministratorAccess'
+    )
+    select
+       case when a.name is not null then 'Enabled' else 'Disabled' end as value,
+      'Admin Access' as label,
+      case when a.name is not null then 'alert' else 'ok' end as type
+    from
+      alicloud_ram_role as r
+      left join admin_roles as a on r.name = a.name
+    where
+      r.arn = $1;
+  EOQ
+}
+
+query "ram_role_with_cross_account_access" {
+  sql = <<-EOQ
+    with roles_with_cross_account_access as (
+      select
+        distinct name as name
+      from
+        alicloud_ram_role,
+        jsonb_array_elements(assume_role_policy_document -> 'Statement') as stmt,
+        jsonb_array_elements_text(stmt -> 'Principal' -> 'RAM') as principal
+      where
+        split_part(principal, ':',4) <> account_id
+    )
+    select
+       case when a.name is not null then 'Enabled' else 'Disabled' end as value,
+      'Cross-Account Access' as label,
+      case when a.name is not null then 'alert' else 'ok' end as type
+    from
+      alicloud_ram_role as r
+      left join roles_with_cross_account_access as a on r.name = a.name
+    where
+      r.arn = $1;
+  EOQ
+}
+
+# Other detail page queries
+
 query "ram_role_overview" {
   sql = <<-EOQ
     select
@@ -254,7 +259,6 @@ query "ram_role_overview" {
     where
       arn = $1;
   EOQ
-
 }
 
 query "ram_policies_for_role" {
@@ -270,7 +274,6 @@ query "ram_policies_for_role" {
     where
       arn = $1;
   EOQ
-
 }
 
 query "ram_user_manage_policies_hierarchy" {
@@ -297,5 +300,4 @@ query "ram_user_manage_policies_hierarchy" {
     where
       r.arn = $1;
   EOQ
-
 }
