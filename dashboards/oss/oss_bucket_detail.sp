@@ -18,43 +18,125 @@ dashboard "oss_bucket_detail" {
     card {
       width = 2
       query = query.oss_bucket_versioning
-      args = {
-        arn = self.input.bucket_arn.value
-      }
+      args  = [self.input.bucket_arn.value]
     }
 
     card {
       width = 2
       query = query.oss_bucket_access_type
-      args = {
-        arn = self.input.bucket_arn.value
-      }
+      args  = [self.input.bucket_arn.value]
     }
 
     card {
       query = query.oss_bucket_logging_enabled
       width = 2
-      args = {
-        arn = self.input.bucket_arn.value
-      }
+      args  = [self.input.bucket_arn.value]
     }
 
     card {
       width = 2
       query = query.oss_bucket_encryption
-      args = {
-        arn = self.input.bucket_arn.value
-      }
+      args  = [self.input.bucket_arn.value]
     }
 
     card {
       width = 2
       query = query.oss_bucket_https_enforce
-      args = {
-        arn = self.input.bucket_arn.value
-      }
+      args  = [self.input.bucket_arn.value]
     }
 
+  }
+
+  with "action_trails" {
+    query = query.oss_bucket_action_trails
+    args  = [self.input.bucket_arn.value]
+  }
+
+  with "from_oss_buckets" {
+    query = query.oss_bucket_from_oss_buckets
+    args = [self.input.bucket_arn.value]
+  }
+
+  with "kms_keys" {
+    query = query.oss_bucket_kms_keys
+    args  = [self.input.bucket_arn.value]
+  }
+
+  with "to_oss_buckets" {
+    query = query.oss_bucket_to_oss_buckets
+    args = [self.input.bucket_arn.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.actiontrail_trail
+        args = {
+          action_trail_names = with.action_trails.rows[*].trail_name
+        }
+      }
+
+      node {
+        base = node.kms_key
+        args = {
+          kms_key_arns = with.kms_keys.rows[*].key_arn
+        }
+      }
+
+      node {
+        base = node.oss_bucket
+        args = {
+          oss_bucket_arns = [self.input.bucket_arn.value]
+        }
+      }
+
+      node {
+        base = node.oss_bucket
+        args = {
+          oss_bucket_arns = with.from_oss_buckets.rows[*].bucket_arn
+        }
+      }
+
+      node {
+        base = node.oss_bucket
+        args = {
+          oss_bucket_arns = with.to_oss_buckets.rows[*].bucket_arn
+        }
+      }
+
+      edge {
+        base = edge.actiontrail_trail_to_oss_bucket
+        args = {
+          action_trail_names = with.action_trails.rows[*].trail_name
+        }
+      }
+
+      edge {
+        base = edge.oss_bucket_to_kms_key
+        args = {
+          oss_bucket_arns = [self.input.bucket_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.oss_bucket_to_oss_bucket
+        args = {
+          oss_bucket_arns = [self.input.bucket_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.oss_bucket_to_oss_bucket
+        args = {
+          oss_bucket_arns = with.from_oss_buckets.rows[*].bucket_arn
+        }
+      }
+    }
   }
 
   container {
@@ -67,19 +149,14 @@ dashboard "oss_bucket_detail" {
         type  = "line"
         width = 6
         query = query.oss_bucket_overview
-        args = {
-          arn = self.input.bucket_arn.value
-        }
-
+        args  = [self.input.bucket_arn.value]
       }
 
       table {
         title = "Tags"
         width = 6
         query = query.oss_bucket_tags_detail
-        args = {
-          arn = self.input.bucket_arn.value
-        }
+        args  = [self.input.bucket_arn.value]
       }
     }
 
@@ -89,9 +166,7 @@ dashboard "oss_bucket_detail" {
       table {
         title = "Logging"
         query = query.oss_bucket_logging
-        args = {
-          arn = self.input.bucket_arn.value
-        }
+        args  = [self.input.bucket_arn.value]
       }
 
     }
@@ -101,9 +176,7 @@ dashboard "oss_bucket_detail" {
       table {
         title = "Policy"
         query = query.oss_bucket_policy
-        args = {
-          arn = self.input.bucket_arn.value
-        }
+        args  = [self.input.bucket_arn.value]
       }
     }
 
@@ -112,9 +185,7 @@ dashboard "oss_bucket_detail" {
       table {
         title = "Lifecycle Rules"
         query = query.oss_bucket_lifecycle_policy
-        args = {
-          arn = self.input.bucket_arn.value
-        }
+        args  = [self.input.bucket_arn.value]
       }
     }
 
@@ -123,9 +194,7 @@ dashboard "oss_bucket_detail" {
       table {
         title = "Server Side Encryption"
         query = query.oss_bucket_server_side_encryption
-        args = {
-          arn = self.input.bucket_arn.value
-        }
+        args  = [self.input.bucket_arn.value]
       }
     }
 
@@ -149,6 +218,8 @@ query "oss_bucket_input" {
   EOQ
 }
 
+# card queries
+
 query "oss_bucket_versioning" {
   sql = <<-EOQ
     select
@@ -161,7 +232,6 @@ query "oss_bucket_versioning" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "oss_bucket_access_type" {
@@ -176,7 +246,6 @@ query "oss_bucket_access_type" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "oss_bucket_logging_enabled" {
@@ -191,7 +260,6 @@ query "oss_bucket_logging_enabled" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "oss_bucket_encryption" {
@@ -206,7 +274,6 @@ query "oss_bucket_encryption" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "oss_bucket_https_enforce" {
@@ -238,9 +305,62 @@ query "oss_bucket_https_enforce" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
+# with queries
+
+query "oss_bucket_kms_keys" {
+  sql = <<-EOQ
+    select
+      k.arn as key_arn
+    from
+      alicloud_oss_bucket as b
+      left join alicloud_kms_key k on b.server_side_encryption ->> 'KMSMasterKeyID' = k.key_id
+    where
+      b.arn = $1
+      and k.arn is not null;
+  EOQ
+}
+
+query "oss_bucket_action_trails" {
+  sql = <<-EOQ
+    select
+      t.name as trail_name
+    from
+      alicloud_oss_bucket as b
+      left join alicloud_action_trail t on b.name = t.oss_bucket_name
+    where
+      b.arn = $1
+      and t.name is not null;
+  EOQ
+}
+
+query "oss_bucket_from_oss_buckets" {
+  sql = <<-EOQ
+    select
+      lb.arn as bucket_arn
+    from
+      alicloud_oss_bucket as lb,
+      alicloud_oss_bucket as b
+    where
+      b.arn = $1
+      and lb.logging ->> 'TargetBucket' = b.name;
+  EOQ
+}
+
+query "oss_bucket_to_oss_buckets" {
+  sql = <<-EOQ
+    select
+      lb.arn as bucket_arn
+    from
+      alicloud_oss_bucket as lb,
+      alicloud_oss_bucket as b
+    where
+      b.arn = $1
+      and lb.name = b.logging ->> 'TargetBucket';
+  EOQ
+}
+# table queries
 query "oss_bucket_overview" {
   sql = <<-EOQ
     select
@@ -256,7 +376,6 @@ query "oss_bucket_overview" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "oss_bucket_tags_detail" {
@@ -273,7 +392,6 @@ query "oss_bucket_tags_detail" {
       tag ->> 'Key';
   EOQ
 
-  param "arn" {}
 }
 
 query "oss_bucket_logging" {
@@ -289,7 +407,6 @@ query "oss_bucket_logging" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "oss_bucket_policy" {
@@ -307,7 +424,6 @@ query "oss_bucket_policy" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }
 
 query "oss_bucket_lifecycle_policy" {
@@ -333,7 +449,6 @@ query "oss_bucket_lifecycle_policy" {
       r ->> 'ID';
   EOQ
 
-  param "arn" {}
 }
 
 query "oss_bucket_server_side_encryption" {
@@ -348,5 +463,4 @@ query "oss_bucket_server_side_encryption" {
       arn = $1;
   EOQ
 
-  param "arn" {}
 }

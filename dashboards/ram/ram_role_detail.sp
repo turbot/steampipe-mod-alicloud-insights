@@ -10,7 +10,7 @@ dashboard "ram_role_detail" {
   input "role_arn" {
     title = "Select a role:"
     query = query.ram_role_input
-    width = 2
+    width = 4
   }
 
   container {
@@ -18,29 +18,76 @@ dashboard "ram_role_detail" {
     card {
       width = 2
       query = query.ram_role_policy_count_for_role
-      args = {
-        arn = self.input.role_arn.value
-      }
+      args  = [self.input.role_arn.value]
     }
 
     card {
       width = 2
       query = query.ram_role_with_admin_access
-      args = {
-        arn = self.input.role_arn.value
-      }
+      args  = [self.input.role_arn.value]
     }
 
     card {
       width = 2
       query = query.ram_role_with_cross_account_access
-      args = {
-        arn = self.input.role_arn.value
-      }
+      args  = [self.input.role_arn.value]
     }
 
   }
 
+  with "action_trails" {
+    query = query.ram_role_action_trails
+    args  = [self.input.role_arn.value]
+  }
+
+  with "ram_policies" {
+    query = query.ram_role_ram_policies
+    args  = [self.input.role_arn.value]
+  }
+
+  container {
+
+    graph {
+      title     = "Relationships"
+      type      = "graph"
+      direction = "TD"
+
+      node {
+        base = node.actiontrail_trail
+        args = {
+          action_trail_names = with.action_trails.rows[*].trail_name
+        }
+      }
+
+      node {
+        base = node.ram_policy
+        args = {
+          ram_policy_akas = with.ram_policies.rows[*].policy_akas
+        }
+      }
+
+      node {
+        base = node.ram_role
+        args = {
+          ram_role_arns = [self.input.role_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.actiontrail_trail_to_ram_role
+        args = {
+          action_trail_names = with.action_trails.rows[*].trail_name
+        }
+      }
+
+      edge {
+        base = edge.ram_role_to_ram_policy
+        args = {
+          ram_role_arns = [self.input.role_arn.value]
+        }
+      }
+    }
+  }
   container {
 
     container {
@@ -52,9 +99,7 @@ dashboard "ram_role_detail" {
         type  = "line"
         width = 6
         query = query.ram_role_overview
-        args = {
-          arn = self.input.role_arn.value
-        }
+        args  = [self.input.role_arn.value]
       }
 
     }
@@ -68,9 +113,7 @@ dashboard "ram_role_detail" {
         width = 6
         title = "Attached Policies"
         query = query.ram_user_manage_policies_hierarchy
-        args = {
-          arn = self.input.role_arn.value
-        }
+        args  = [self.input.role_arn.value]
 
         category "managed_policy" {
           color = "ok"
@@ -83,15 +126,15 @@ dashboard "ram_role_detail" {
         title = "Policies"
         width = 6
         query = query.ram_policies_for_role
-        args = {
-          arn = self.input.role_arn.value
-        }
+        args  = [self.input.role_arn.value]
       }
 
     }
   }
 
 }
+
+# Input queries
 
 query "ram_role_input" {
   sql = <<-EOQ
@@ -108,6 +151,37 @@ query "ram_role_input" {
   EOQ
 }
 
+# With queries
+
+query "ram_role_ram_policies" {
+  sql = <<-EOQ
+    select
+      p.akas::text as policy_akas
+    from
+      alicloud_ram_role as r,
+      alicloud_ram_policy as p,
+      jsonb_array_elements(r.attached_policy) as policy
+    where
+      r.arn = $1
+      and policy ->> 'PolicyName' = p.policy_name;
+  EOQ
+}
+
+query "ram_role_action_trails" {
+  sql = <<-EOQ
+    select
+      t.name as trail_name
+    from
+      alicloud_action_trail as t,
+      alicloud_ram_role as r
+    where
+      r.arn = $1
+      and t.sls_write_role_arn = r.arn;
+  EOQ
+}
+
+# Card queries
+
 query "ram_role_policy_count_for_role" {
   sql = <<-EOQ
     select
@@ -118,8 +192,6 @@ query "ram_role_policy_count_for_role" {
     where
       arn = $1;
   EOQ
-
-  param "arn" {}
 }
 
 query "ram_role_with_admin_access" {
@@ -143,8 +215,6 @@ query "ram_role_with_admin_access" {
     where
       r.arn = $1;
   EOQ
-
-  param "arn" {}
 }
 
 query "ram_role_with_cross_account_access" {
@@ -169,9 +239,9 @@ query "ram_role_with_cross_account_access" {
     where
       r.arn = $1;
   EOQ
-
-  param "arn" {}
 }
+
+# Other detail page queries
 
 query "ram_role_overview" {
   sql = <<-EOQ
@@ -189,8 +259,6 @@ query "ram_role_overview" {
     where
       arn = $1;
   EOQ
-
-  param "arn" {}
 }
 
 query "ram_policies_for_role" {
@@ -206,8 +274,6 @@ query "ram_policies_for_role" {
     where
       arn = $1;
   EOQ
-
-  param "arn" {}
 }
 
 query "ram_user_manage_policies_hierarchy" {
@@ -234,6 +300,4 @@ query "ram_user_manage_policies_hierarchy" {
     where
       r.arn = $1;
   EOQ
-
-  param "arn" {}
 }
