@@ -77,7 +77,6 @@ dashboard "alicloud_oss_bucket_detail" {
         title = "Tags"
         width = 6
         query = query.alicloud_oss_bucket_tags_detail
-        param "arn" {}
         args = {
           arn = self.input.bucket_arn.value
         }
