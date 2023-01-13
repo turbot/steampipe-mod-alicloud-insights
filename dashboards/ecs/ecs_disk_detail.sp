@@ -53,28 +53,28 @@ dashboard "ecs_disk_detail" {
 
   }
 
-  with "ecs_images" {
-    query = query.ecs_disk_ecs_images
+  with "ecs_images_for_ecs_disk" {
+    query = query.ecs_images_for_ecs_disk
     args  = [self.input.disk_arn.value]
   }
 
-  with "ecs_instances" {
-    query = query.ecs_disk_ecs_instances
+  with "ecs_instances_for_ecs_disk" {
+    query = query.ecs_instances_for_ecs_disk
     args  = [self.input.disk_arn.value]
   }
 
-  with "from_ecs_snapshots" {
-    query = query.ecs_disk_from_ecs_snapshots
+  with "source_ecs_snapshots_for_ecs_disk" {
+    query = query.source_ecs_snapshots_for_ecs_disk
     args  = [self.input.disk_arn.value]
   }
 
-  with "kms_keys" {
-    query = query.ecs_disk_kms_keys
+  with "kms_keys_for_ecs_disk" {
+    query = query.kms_keys_for_ecs_disk
     args  = [self.input.disk_arn.value]
   }
 
-  with "to_ecs_snapshots" {
-    query = query.ecs_disk_to_ecs_snapshots
+  with "target_ecs_snapshots_for_ecs_disk" {
+    query = query.target_ecs_snapshots_for_ecs_disk
     args  = [self.input.disk_arn.value]
   }
 
@@ -95,35 +95,35 @@ dashboard "ecs_disk_detail" {
       node {
         base = node.ecs_image
         args = {
-          ecs_image_ids = with.ecs_images.rows[*].image_id
+          ecs_image_ids = with.ecs_images_for_ecs_disk.rows[*].image_id
         }
       }
 
       node {
         base = node.ecs_instance
         args = {
-          ecs_instance_arns = with.ecs_instances.rows[*].instance_arn
+          ecs_instance_arns = with.ecs_instances_for_ecs_disk.rows[*].instance_arn
         }
       }
 
       node {
         base = node.ecs_snapshot
         args = {
-          ecs_snapshot_arns = with.from_ecs_snapshots.rows[*].snapshot_arn
+          ecs_snapshot_arns = with.source_ecs_snapshots_for_ecs_disk.rows[*].snapshot_arn
         }
       }
 
       node {
         base = node.ecs_snapshot
         args = {
-          ecs_snapshot_arns = with.to_ecs_snapshots.rows[*].snapshot_arn
+          ecs_snapshot_arns = with.target_ecs_snapshots_for_ecs_disk.rows[*].snapshot_arn
         }
       }
 
       node {
         base = node.kms_key
         args = {
-          kms_key_arns = with.kms_keys.rows[*].key_arn
+          kms_key_arns = with.kms_keys_for_ecs_disk.rows[*].key_arn
         }
       }
 
@@ -137,7 +137,7 @@ dashboard "ecs_disk_detail" {
       edge {
         base = edge.ecs_disk_to_ecs_snapshot
         args = {
-          ecs_snapshot_arns = with.to_ecs_snapshots.rows[*].snapshot_arn
+          ecs_snapshot_arns = with.target_ecs_snapshots_for_ecs_disk.rows[*].snapshot_arn
         }
       }
 
@@ -151,14 +151,14 @@ dashboard "ecs_disk_detail" {
       edge {
         base = edge.ecs_instance_to_ecs_disk
         args = {
-          ecs_instance_arns = with.ecs_instances.rows[*].instance_arn
+          ecs_instance_arns = with.ecs_instances_for_ecs_disk.rows[*].instance_arn
         }
       }
 
       edge {
         base = edge.ecs_snapshot_to_ecs_disk
         args = {
-          ecs_snapshot_arns = with.from_ecs_snapshots.rows[*].snapshot_arn
+          ecs_snapshot_arns = with.source_ecs_snapshots_for_ecs_disk.rows[*].snapshot_arn
         }
       }
 
@@ -240,7 +240,7 @@ query "ecs_disk_input" {
 
 # with queries
 
-query "ecs_disk_from_ecs_snapshots" {
+query "source_ecs_snapshots_for_ecs_disk" {
   sql = <<-EOQ
     select
       s.arn as snapshot_arn
@@ -253,7 +253,7 @@ query "ecs_disk_from_ecs_snapshots" {
   EOQ
 }
 
-query "ecs_disk_to_ecs_snapshots" {
+query "target_ecs_snapshots_for_ecs_disk" {
   sql = <<-EOQ
     select
       s.arn as snapshot_arn
@@ -266,7 +266,7 @@ query "ecs_disk_to_ecs_snapshots" {
   EOQ
 }
 
-query "ecs_disk_ecs_images" {
+query "ecs_images_for_ecs_disk" {
   sql = <<-EOQ
     select
       image_id as image_id
@@ -278,7 +278,7 @@ query "ecs_disk_ecs_images" {
   EOQ
 }
 
-query "ecs_disk_ecs_instances" {
+query "ecs_instances_for_ecs_disk" {
   sql = <<-EOQ
     select
       i.arn as instance_arn
@@ -291,7 +291,7 @@ query "ecs_disk_ecs_instances" {
   EOQ
 }
 
-query "ecs_disk_kms_keys" {
+query "kms_keys_for_ecs_disk" {
   sql = <<-EOQ
     select
       k.arn as key_arn

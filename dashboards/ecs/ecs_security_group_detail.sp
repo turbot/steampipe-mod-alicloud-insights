@@ -35,28 +35,28 @@ dashboard "ecs_security_group_detail" {
 
   }
 
-  with "ecs_instances" {
-    query = query.ecs_security_group_ecs_instances
+  with "ecs_instances_for_ecs_security_group" {
+    query = query.ecs_instances_for_ecs_security_group
     args  = [self.input.security_group_id.value]
   }
 
-  with "ecs_network_interfaces" {
-    query = query.ecs_security_group_ecs_network_interfaces
+  with "ecs_network_interfaces_for_ecs_security_group" {
+    query = query.ecs_network_interfaces_for_ecs_security_group
     args  = [self.input.security_group_id.value]
   }
 
-  with "ecs_launch_templates" {
-    query = query.ecs_security_group_ecs_launch_templates
+  with "ecs_launch_templates_for_ecs_security_group" {
+    query = query.ecs_launch_templates_for_ecs_security_group
     args  = [self.input.security_group_id.value]
   }
 
-  with "rds_instances" {
-    query = query.ecs_security_group_rds_instances
+  with "rds_instances_for_ecs_security_group" {
+    query = query.rds_instances_for_ecs_security_group
     args  = [self.input.security_group_id.value]
   }
 
-  with "vpc_vpcs" {
-    query = query.ecs_security_group_vpc_vpcs
+  with "vpc_vpcs_for_ecs_security_group" {
+    query = query.vpc_vpcs_for_ecs_security_group
     args  = [self.input.security_group_id.value]
   }
 
@@ -70,21 +70,21 @@ dashboard "ecs_security_group_detail" {
       node {
         base = node.ecs_instance
         args = {
-          ecs_instance_arns = with.ecs_instances.rows[*].instance_arn
+          ecs_instance_arns = with.ecs_instances_for_ecs_security_group.rows[*].instance_arn
         }
       }
 
       node {
         base = node.ecs_launch_template
         args = {
-          launch_template_ids = with.ecs_launch_templates.rows[*].launch_template_id
+          launch_template_ids = with.ecs_launch_templates_for_ecs_security_group.rows[*].launch_template_id
         }
       }
 
       node {
         base = node.ecs_network_interface
         args = {
-          ecs_network_interface_ids = with.ecs_network_interfaces.rows[*].network_interface_id
+          ecs_network_interface_ids = with.ecs_network_interfaces_for_ecs_security_group.rows[*].network_interface_id
         }
       }
 
@@ -98,14 +98,14 @@ dashboard "ecs_security_group_detail" {
       node {
         base = node.rds_instance
         args = {
-          rds_instance_arns = with.rds_instances.rows[*].rds_instance_arn
+          rds_instance_arns = with.rds_instances_for_ecs_security_group.rows[*].rds_instance_arn
         }
       }
 
       node {
         base = node.vpc_vpc
         args = {
-          vpc_vpc_ids = with.vpc_vpcs.rows[*].vpc_id
+          vpc_vpc_ids = with.vpc_vpcs_for_ecs_security_group.rows[*].vpc_id
         }
       }
 
@@ -140,7 +140,7 @@ dashboard "ecs_security_group_detail" {
       edge {
         base = edge.vpc_vpc_to_ecs_security_group
         args = {
-          vpc_vpc_ids = with.vpc_vpcs.rows[*].vpc_id
+          vpc_vpc_ids = with.vpc_vpcs_for_ecs_security_group.rows[*].vpc_id
         }
       }
 
@@ -261,7 +261,7 @@ query "ecs_security_group_input" {
 
 # With queries
 
-query "ecs_security_group_ecs_instances" {
+query "ecs_instances_for_ecs_security_group" {
   sql = <<-EOQ
     select
       i.arn  as instance_arn
@@ -273,7 +273,7 @@ query "ecs_security_group_ecs_instances" {
   EOQ
 }
 
-query "ecs_security_group_ecs_network_interfaces" {
+query "ecs_network_interfaces_for_ecs_security_group" {
   sql = <<-EOQ
     select
       network_interface_id as network_interface_id
@@ -285,7 +285,7 @@ query "ecs_security_group_ecs_network_interfaces" {
   EOQ
 }
 
-query "ecs_security_group_ecs_launch_templates" {
+query "ecs_launch_templates_for_ecs_security_group" {
   sql = <<-EOQ
     select
       launch_template_id as launch_template_id
@@ -296,7 +296,7 @@ query "ecs_security_group_ecs_launch_templates" {
   EOQ
 }
 
-query "ecs_security_group_rds_instances" {
+query "rds_instances_for_ecs_security_group" {
   sql = <<-EOQ
     select
       arn as rds_instance_arn
@@ -308,7 +308,7 @@ query "ecs_security_group_rds_instances" {
   EOQ
 }
 
-query "ecs_security_group_vpc_vpcs" {
+query "vpc_vpcs_for_ecs_security_group" {
   sql = <<-EOQ
     select
       vpc_id as vpc_id

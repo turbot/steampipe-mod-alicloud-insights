@@ -53,48 +53,48 @@ dashboard "ecs_instance_detail" {
 
   }
 
-  with "ecs_disks" {
-    query = query.ecs_instance_ecs_disks
+  with "ecs_disks_for_ecs_instance" {
+    query = query.ecs_disks_for_ecs_instance
     args  = [self.input.instance_arn.value]
   }
 
-  with "ecs_images" {
-    query = query.ecs_instance_ecs_images
+  with "ecs_images_for_ecs_instance" {
+    query = query.ecs_images_for_ecs_instance
     args  = [self.input.instance_arn.value]
   }
 
-  with "ecs_autoscaling_groups" {
-    query = query.ecs_instance_ecs_autoscaling_groups
-    args = [self.input.instance_arn.value]
-  }
-
-  with "ecs_network_interfaces" {
-    query = query.ecs_instance_ecs_network_interfaces
+  with "ecs_autoscaling_groups_for_ecs_instance" {
+    query = query.ecs_autoscaling_groups_for_ecs_instance
     args  = [self.input.instance_arn.value]
   }
 
-  with "ecs_snapshots" {
-    query = query.ecs_instance_ecs_snapshots
+  with "ecs_network_interfaces_for_ecs_instance" {
+    query = query.ecs_network_interfaces_for_ecs_instance
     args  = [self.input.instance_arn.value]
   }
 
-  with "ecs_security_groups" {
-    query = query.ecs_instance_ecs_security_groups
+  with "ecs_snapshots_for_ecs_instance" {
+    query = query.ecs_snapshots_for_ecs_instance
     args  = [self.input.instance_arn.value]
   }
 
-  with "vpc_eips" {
-    query = query.ecs_instance_vpc_eips
+  with "ecs_security_groups_for_ecs_instance" {
+    query = query.ecs_security_groups_for_ecs_instance
     args  = [self.input.instance_arn.value]
   }
 
-  with "vpc_vswitches" {
-    query = query.ecs_instance_vpc_vswitches
+  with "vpc_eips_for_ecs_instance" {
+    query = query.vpc_eips_for_ecs_instance
     args  = [self.input.instance_arn.value]
   }
 
-  with "vpc_vpcs" {
-    query = query.ecs_instance_vpc_vpcs
+  with "vpc_vswitches_for_ecs_instance" {
+    query = query.vpc_vswitches_for_ecs_instance
+    args  = [self.input.instance_arn.value]
+  }
+
+  with "vpc_vpcs_for_ecs_instance" {
+    query = query.vpc_vpcs_for_ecs_instance
     args  = [self.input.instance_arn.value]
   }
 
@@ -123,21 +123,21 @@ dashboard "ecs_instance_detail" {
       node {
         base = node.ecs_autoscaling_group
         args = {
-          ecs_autoscaling_group_ids = with.ecs_autoscaling_groups.rows[*].autoscaling_group_id
+          ecs_autoscaling_group_ids = with.ecs_autoscaling_groups_for_ecs_instance.rows[*].autoscaling_group_id
         }
       }
 
       node {
         base = node.ecs_disk
         args = {
-          ecs_disk_arns = with.ecs_disks.rows[*].disk_arn
+          ecs_disk_arns = with.ecs_disks_for_ecs_instance.rows[*].disk_arn
         }
       }
 
       node {
         base = node.ecs_image
         args = {
-          ecs_image_ids = with.ecs_images.rows[*].image_id
+          ecs_image_ids = with.ecs_images_for_ecs_instance.rows[*].image_id
         }
       }
 
@@ -158,42 +158,42 @@ dashboard "ecs_instance_detail" {
       node {
         base = node.ecs_network_interface
         args = {
-          ecs_network_interface_ids = with.ecs_network_interfaces.rows[*].network_interface_id
+          ecs_network_interface_ids = with.ecs_network_interfaces_for_ecs_instance.rows[*].network_interface_id
         }
       }
 
       node {
         base = node.ecs_security_group
         args = {
-          ecs_security_group_ids = with.ecs_security_groups.rows[*].security_group_id
+          ecs_security_group_ids = with.ecs_security_groups_for_ecs_instance.rows[*].security_group_id
         }
       }
 
       node {
         base = node.ecs_snapshot
         args = {
-          ecs_snapshot_arns = with.ecs_snapshots.rows[*].snapshot_arn
+          ecs_snapshot_arns = with.ecs_snapshots_for_ecs_instance.rows[*].snapshot_arn
         }
       }
 
       node {
         base = node.vpc_eip
         args = {
-          vpc_eip_arns = with.vpc_eips.rows[*].eip_arn
+          vpc_eip_arns = with.vpc_eips_for_ecs_instance.rows[*].eip_arn
         }
       }
 
       node {
         base = node.vpc_vswitch
         args = {
-          vpc_vswitch_ids = with.vpc_vswitches.rows[*].vpc_vswitch_id
+          vpc_vswitch_ids = with.vpc_vswitches_for_ecs_instance.rows[*].vpc_vswitch_id
         }
       }
 
       node {
         base = node.vpc_vpc
         args = {
-          vpc_vpc_ids = with.vpc_vpcs.rows[*].vpc_id
+          vpc_vpc_ids = with.vpc_vpcs_for_ecs_instance.rows[*].vpc_id
         }
       }
 
@@ -221,7 +221,7 @@ dashboard "ecs_instance_detail" {
       edge {
         base = edge.ecs_disk_to_ecs_snapshot
         args = {
-          ecs_snapshot_arns = with.ecs_snapshots.rows[*].snapshot_arn
+          ecs_snapshot_arns = with.ecs_snapshots_for_ecs_instance.rows[*].snapshot_arn
         }
       }
 
@@ -270,14 +270,14 @@ dashboard "ecs_instance_detail" {
       edge {
         base = edge.ecs_network_interface_to_vpc_eip
         args = {
-          ecs_network_interface_ids = with.ecs_network_interfaces.rows[*].network_interface_id
+          ecs_network_interface_ids = with.ecs_network_interfaces_for_ecs_instance.rows[*].network_interface_id
         }
       }
 
       edge {
         base = edge.vpc_vswitch_to_vpc_vpc
         args = {
-          vpc_vswitch_ids = with.vpc_vswitches.rows[*].vpc_vswitch_id
+          vpc_vswitch_ids = with.vpc_vswitches_for_ecs_instance.rows[*].vpc_vswitch_id
         }
       }
     }
@@ -383,7 +383,7 @@ query "ecs_instance_input" {
 
 # with queries
 
-query "ecs_instance_ecs_disks" {
+query "ecs_disks_for_ecs_instance" {
   sql = <<-EOQ
     select
       d.arn as disk_arn
@@ -395,8 +395,8 @@ query "ecs_instance_ecs_disks" {
   EOQ
 }
 
-query "ecs_instance_ecs_images" {
-    sql = <<-EOQ
+query "ecs_images_for_ecs_instance" {
+  sql = <<-EOQ
     select
       image_id as image_id
     from
@@ -407,7 +407,7 @@ query "ecs_instance_ecs_images" {
   EOQ
 }
 
-query "ecs_instance_ecs_autoscaling_groups" {
+query "ecs_autoscaling_groups_for_ecs_instance" {
   sql = <<-EOQ
     select
       asg.scaling_group_id as autoscaling_group_id
@@ -421,8 +421,8 @@ query "ecs_instance_ecs_autoscaling_groups" {
   EOQ
 }
 
-query "ecs_instance_ecs_network_interfaces" {
-    sql = <<-EOQ
+query "ecs_network_interfaces_for_ecs_instance" {
+  sql = <<-EOQ
     select
       p ->> 'NetworkInterfaceId' as network_interface_id
     from
@@ -434,7 +434,7 @@ query "ecs_instance_ecs_network_interfaces" {
   EOQ
 }
 
-query "ecs_instance_ecs_snapshots" {
+query "ecs_snapshots_for_ecs_instance" {
   sql = <<-EOQ
     select
       s.arn as snapshot_arn
@@ -447,19 +447,18 @@ query "ecs_instance_ecs_snapshots" {
   EOQ
 }
 
-query "ecs_instance_vpc_vswitches" {
+query "vpc_vswitches_for_ecs_instance" {
   sql = <<-EOQ
     select
-      vswitch_id as vpc_vswitch_id
+      vpc_attributes ->> 'VSwitchId' as vpc_vswitch_id
     from
       alicloud_ecs_instance i
-      join alicloud_vpc_vswitch as s on s.vpc_id = i.vpc_id
     where
       i.arn = $1;
   EOQ
 }
 
-query "ecs_instance_ecs_security_groups" {
+query "ecs_security_groups_for_ecs_instance" {
   sql = <<-EOQ
     select
       group_id  as security_group_id
@@ -471,7 +470,7 @@ query "ecs_instance_ecs_security_groups" {
   EOQ
 }
 
-query "ecs_instance_vpc_eips" {
+query "vpc_eips_for_ecs_instance" {
   sql = <<-EOQ
     select
       e.arn as eip_arn
@@ -484,7 +483,7 @@ query "ecs_instance_vpc_eips" {
   EOQ
 }
 
-query "ecs_instance_vpc_vpcs" {
+query "vpc_vpcs_for_ecs_instance" {
   sql = <<-EOQ
     select
       vpc_attributes ->> 'VpcId' as vpc_id

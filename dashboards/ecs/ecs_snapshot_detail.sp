@@ -47,33 +47,33 @@ dashboard "ecs_snapshot_detail" {
 
   }
 
-  with "ecs_images" {
-    query = query.ecs_snapshot_ecs_images
+  with "ecs_images_for_ecs_snapshot" {
+    query = query.ecs_images_for_ecs_snapshot
     args  = [self.input.snapshot_arn.value]
   }
 
-  with "ecs_instances" {
-    query = query.ecs_snapshot_ecs_instances
+  with "ecs_instances_for_ecs_snapshot" {
+    query = query.ecs_instances_for_ecs_snapshot
     args  = [self.input.snapshot_arn.value]
   }
 
-  with "ecs_launch_templates" {
-    query = query.ecs_snapshot_ecs_launch_templates
+  with "ecs_launch_templates_for_ecs_snapshot" {
+    query = query.ecs_launch_templates_for_ecs_snapshot
     args  = [self.input.snapshot_arn.value]
   }
 
-  with "from_ecs_disks" {
-    query = query.ecs_snapshot_from_ecs_disks
+  with "source_ecs_disks_for_ecs_snapshot" {
+    query = query.source_ecs_disks_for_ecs_snapshot
     args  = [self.input.snapshot_arn.value]
   }
 
-  with "kms_keys" {
-    query = query.ecs_snapshot_kms_keys
+  with "kms_keys_for_ecs_snapshot" {
+    query = query.kms_keys_for_ecs_snapshot
     args  = [self.input.snapshot_arn.value]
   }
 
-  with "to_ecs_disks" {
-    query = query.ecs_snapshot_to_ecs_disks
+  with "target_ecs_disks_for_ecs_snapshot" {
+    query = query.target_ecs_disks_for_ecs_snapshot
     args  = [self.input.snapshot_arn.value]
   }
 
@@ -87,35 +87,35 @@ dashboard "ecs_snapshot_detail" {
       node {
         base = node.ecs_disk
         args = {
-          ecs_disk_arns = with.from_ecs_disks.rows[*].disk_arn
+          ecs_disk_arns = with.source_ecs_disks_for_ecs_snapshot.rows[*].disk_arn
         }
       }
 
       node {
         base = node.ecs_disk
         args = {
-          ecs_disk_arns = with.to_ecs_disks.rows[*].disk_arn
+          ecs_disk_arns = with.target_ecs_disks_for_ecs_snapshot.rows[*].disk_arn
         }
       }
 
       node {
         base = node.ecs_image
         args = {
-          ecs_image_ids = with.ecs_images.rows[*].image_id
+          ecs_image_ids = with.ecs_images_for_ecs_snapshot.rows[*].image_id
         }
       }
 
       node {
         base = node.ecs_instance
         args = {
-          ecs_instance_arns = with.ecs_instances.rows[*].instance_arn
+          ecs_instance_arns = with.ecs_instances_for_ecs_snapshot.rows[*].instance_arn
         }
       }
 
       node {
         base = node.ecs_launch_template
         args = {
-          launch_template_ids = with.ecs_launch_templates.rows[*].launch_template_id
+          launch_template_ids = with.ecs_launch_templates_for_ecs_snapshot.rows[*].launch_template_id
         }
       }
 
@@ -129,7 +129,7 @@ dashboard "ecs_snapshot_detail" {
       node {
         base = node.kms_key
         args = {
-          kms_key_arns = with.kms_keys.rows[*].key_arn
+          kms_key_arns = with.kms_keys_for_ecs_snapshot.rows[*].key_arn
         }
       }
 
@@ -143,14 +143,14 @@ dashboard "ecs_snapshot_detail" {
       edge {
         base = edge.ecs_instance_to_ecs_disk
         args = {
-          ecs_instance_arns = with.ecs_instances.rows[*].instance_arn
+          ecs_instance_arns = with.ecs_instances_for_ecs_snapshot.rows[*].instance_arn
         }
       }
 
       edge {
         base = edge.ecs_launch_template_to_ecs_snapshot
         args = {
-          launch_template_ids = with.ecs_launch_templates.rows[*].launch_template_id
+          launch_template_ids = with.ecs_launch_templates_for_ecs_snapshot.rows[*].launch_template_id
         }
       }
 
@@ -253,7 +253,7 @@ query "ecs_snapshot_input" {
 
 # with queries
 
-query "ecs_snapshot_ecs_images" {
+query "ecs_images_for_ecs_snapshot" {
   sql = <<-EOQ
     select
       images.image_id as image_id
@@ -268,7 +268,7 @@ query "ecs_snapshot_ecs_images" {
   EOQ
 }
 
-query "ecs_snapshot_ecs_instances" {
+query "ecs_instances_for_ecs_snapshot" {
   sql = <<-EOQ
     select
       i.arn as instance_arn
@@ -281,7 +281,7 @@ query "ecs_snapshot_ecs_instances" {
   EOQ
 }
 
-query "ecs_snapshot_ecs_launch_templates" {
+query "ecs_launch_templates_for_ecs_snapshot" {
   sql = <<-EOQ
     select
       launch_template_id as launch_template_id
@@ -296,7 +296,7 @@ query "ecs_snapshot_ecs_launch_templates" {
   EOQ
 }
 
-query "ecs_snapshot_from_ecs_disks" {
+query "source_ecs_disks_for_ecs_snapshot" {
   sql = <<-EOQ
     select
       d.arn as disk_arn
@@ -309,7 +309,7 @@ query "ecs_snapshot_from_ecs_disks" {
   EOQ
 }
 
-query "ecs_snapshot_to_ecs_disks" {
+query "target_ecs_disks_for_ecs_snapshot" {
   sql = <<-EOQ
     select
       d.arn as disk_arn
@@ -322,7 +322,7 @@ query "ecs_snapshot_to_ecs_disks" {
   EOQ
 }
 
-query "ecs_snapshot_kms_keys" {
+query "kms_keys_for_ecs_snapshot" {
   sql = <<-EOQ
     select
       k.arn as key_arn
