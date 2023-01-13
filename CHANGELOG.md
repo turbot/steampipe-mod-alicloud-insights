@@ -1,3 +1,9 @@
+## v0.3 [2023-01-12]
+
+_Bug fixes_
+
+- Fixed invalid input `param` in `alicloud_oss_bucket_detail` dashboard. ([#62](https://github.com/turbot/steampipe-mod-alicloud-insights/pull/62))
+
 ## v0.2 [2022-05-09]
 
 _Enhancements_

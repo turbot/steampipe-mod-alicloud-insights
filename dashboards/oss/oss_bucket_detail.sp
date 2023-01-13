@@ -54,7 +54,7 @@ dashboard "oss_bucket_detail" {
 
   with "from_oss_buckets" {
     query = query.oss_bucket_from_oss_buckets
-    args = [self.input.bucket_arn.value]
+    args  = [self.input.bucket_arn.value]
   }
 
   with "kms_keys" {
@@ -64,7 +64,7 @@ dashboard "oss_bucket_detail" {
 
   with "to_oss_buckets" {
     query = query.oss_bucket_to_oss_buckets
-    args = [self.input.bucket_arn.value]
+    args  = [self.input.bucket_arn.value]
   }
 
   container {
