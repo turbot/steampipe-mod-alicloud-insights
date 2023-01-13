@@ -30,13 +30,13 @@ dashboard "ram_group_detail" {
 
   }
 
-  with "ram_policies" {
-    query = query.ram_group_ram_policies
-    args = [self.input.group_arn.value]
+  with "ram_policies_for_ram_group" {
+    query = query.ram_policies_for_ram_group
+    args  = [self.input.group_arn.value]
   }
 
-  with "ram_users" {
-    query = query.ram_group_ram_users
+  with "ram_users_for_ram_group" {
+    query = query.ram_users_for_ram_group
     args  = [self.input.group_arn.value]
   }
 
@@ -57,14 +57,14 @@ dashboard "ram_group_detail" {
       node {
         base = node.ram_policy
         args = {
-          ram_policy_akas = with.ram_policies.rows[*].policy_akas
+          ram_policy_akas = with.ram_policies_for_ram_group.rows[*].policy_akas
         }
       }
 
       node {
         base = node.ram_user
         args = {
-          ram_user_arns = with.ram_users.rows[*].user_arn
+          ram_user_arns = with.ram_users_for_ram_group.rows[*].user_arn
         }
       }
 
@@ -152,7 +152,7 @@ query "ram_group_input" {
 
 # With queries
 
-query "ram_group_ram_policies" {
+query "ram_policies_for_ram_group" {
   sql = <<-EOQ
     select
       p.akas::text as policy_akas
@@ -166,7 +166,7 @@ query "ram_group_ram_policies" {
   EOQ
 }
 
-query "ram_group_ram_users" {
+query "ram_users_for_ram_group" {
   sql = <<-EOQ
     select
       u.arn as user_arn

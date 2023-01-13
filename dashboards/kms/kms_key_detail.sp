@@ -48,24 +48,24 @@ dashboard "kms_key_detail" {
 
   }
 
-  with "ecs_disks" {
-    query = query.kms_key_ecs_disks
-    args = [self.input.key_arn.value]
+  with "ecs_disks_for_kms_key" {
+    query = query.ecs_disks_for_kms_key
+    args  = [self.input.key_arn.value]
   }
 
-  with "ecs_snapshots" {
-    query = query.kms_key_ecs_snapshots
-    args = [self.input.key_arn.value]
+  with "ecs_snapshots_for_kms_key" {
+    query = query.ecs_snapshots_for_kms_key
+    args  = [self.input.key_arn.value]
   }
 
-  with "kms_secrets" {
-    query = query.kms_key_kms_secrets
-    args = [self.input.key_arn.value]
+  with "kms_secrets_for_kms_key" {
+    query = query.kms_secrets_for_kms_key
+    args  = [self.input.key_arn.value]
   }
 
-  with "oss_buckets" {
-    query = query.kms_key_oss_buckets
-    args = [self.input.key_arn.value]
+  with "oss_buckets_for_kms_key" {
+    query = query.oss_buckets_for_kms_key
+    args  = [self.input.key_arn.value]
   }
 
   container {
@@ -78,14 +78,14 @@ dashboard "kms_key_detail" {
       node {
         base = node.ecs_disk
         args = {
-          ecs_disk_arns = with.ecs_disks.rows[*].disk_arn
+          ecs_disk_arns = with.ecs_disks_for_kms_key.rows[*].disk_arn
         }
       }
 
       node {
         base = node.ecs_snapshot
         args = {
-          ecs_snapshot_arns = with.ecs_snapshots.rows[*].snapshot_arn
+          ecs_snapshot_arns = with.ecs_snapshots_for_kms_key.rows[*].snapshot_arn
         }
       }
 
@@ -99,42 +99,42 @@ dashboard "kms_key_detail" {
       node {
         base = node.kms_secret
         args = {
-          kms_secret_arns = with.kms_secrets.rows[*].secret_arn
+          kms_secret_arns = with.kms_secrets_for_kms_key.rows[*].secret_arn
         }
       }
 
       node {
         base = node.oss_bucket
         args = {
-          oss_bucket_arns = with.oss_buckets.rows[*].bucket_arn
+          oss_bucket_arns = with.oss_buckets_for_kms_key.rows[*].bucket_arn
         }
       }
 
       edge {
         base = edge.ecs_disk_to_kms_key
         args = {
-          ecs_disk_arns = with.ecs_disks.rows[*].disk_arn
+          ecs_disk_arns = with.ecs_disks_for_kms_key.rows[*].disk_arn
         }
       }
 
       edge {
         base = edge.ecs_snapshot_to_kms_key
         args = {
-          ecs_snapshot_arns = with.ecs_snapshots.rows[*].snapshot_arn
+          ecs_snapshot_arns = with.ecs_snapshots_for_kms_key.rows[*].snapshot_arn
         }
       }
 
       edge {
         base = edge.kms_secret_to_kms_key
         args = {
-          kms_secret_arns = with.kms_secrets.rows[*].secret_arn
+          kms_secret_arns = with.kms_secrets_for_kms_key.rows[*].secret_arn
         }
       }
 
       edge {
         base = edge.oss_bucket_to_kms_key
         args = {
-          oss_bucket_arns = with.oss_buckets.rows[*].bucket_arn
+          oss_bucket_arns = with.oss_buckets_for_kms_key.rows[*].bucket_arn
         }
       }
     }
@@ -206,8 +206,8 @@ query "kms_key_input" {
 
 # with queries
 
-query "kms_key_kms_secrets" {
-    sql = <<-EOQ
+query "kms_secrets_for_kms_key" {
+  sql = <<-EOQ
     select
       s.arn as secret_arn
     from
@@ -219,8 +219,8 @@ query "kms_key_kms_secrets" {
   EOQ
 }
 
-query "kms_key_oss_buckets" {
-    sql = <<-EOQ
+query "oss_buckets_for_kms_key" {
+  sql = <<-EOQ
     select
       b.arn as bucket_arn
     from
@@ -232,7 +232,7 @@ query "kms_key_oss_buckets" {
   EOQ
 }
 
-query "kms_key_ecs_disks" {
+query "ecs_disks_for_kms_key" {
   sql = <<-EOQ
     select
       d.arn as disk_arn
@@ -245,7 +245,7 @@ query "kms_key_ecs_disks" {
   EOQ
 }
 
-query "kms_key_ecs_snapshots" {
+query "ecs_snapshots_for_kms_key" {
   sql = <<-EOQ
     select
       s.arn as snapshot_arn

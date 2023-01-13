@@ -29,14 +29,14 @@ dashboard "ram_user_detail" {
 
   }
 
-  with "ram_groups" {
-    query = query.ram_user_ram_groups
-    args = [self.input.user_arn.value]
+  with "ram_groups_for_ram_user" {
+    query = query.ram_groups_for_ram_user
+    args  = [self.input.user_arn.value]
   }
 
-  with "ram_policies" {
-    query = query.ram_user_ram_policies
-    args = [self.input.user_arn.value]
+  with "ram_policies_for_ram_user" {
+    query = query.ram_policies_for_ram_user
+    args  = [self.input.user_arn.value]
   }
 
   container {
@@ -49,14 +49,14 @@ dashboard "ram_user_detail" {
       node {
         base = node.ram_group
         args = {
-          ram_group_arns = with.ram_groups.rows[*].group_arn
+          ram_group_arns = with.ram_groups_for_ram_user.rows[*].group_arn
         }
       }
 
       node {
         base = node.ram_policy
         args = {
-          ram_policy_akas = with.ram_policies.rows[*].policy_akas
+          ram_policy_akas = with.ram_policies_for_ram_user.rows[*].policy_akas
         }
       }
 
@@ -77,7 +77,7 @@ dashboard "ram_user_detail" {
       edge {
         base = edge.ram_group_to_ram_user
         args = {
-          ram_group_arns = with.ram_groups.rows[*].group_arn
+          ram_group_arns = with.ram_groups_for_ram_user.rows[*].group_arn
         }
       }
 
@@ -216,7 +216,7 @@ query "ram_user_direct_attached_policy_count_for_user" {
 
 # With queries
 
-query "ram_user_ram_groups" {
+query "ram_groups_for_ram_user" {
   sql = <<-EOQ
     select
       g.arn as group_arn
@@ -230,7 +230,7 @@ query "ram_user_ram_groups" {
   EOQ
 }
 
-query "ram_user_ram_policies" {
+query "ram_policies_for_ram_user" {
   sql = <<-EOQ
     select
       p.akas::text as policy_akas

@@ -47,23 +47,23 @@ dashboard "oss_bucket_detail" {
 
   }
 
-  with "action_trails" {
-    query = query.oss_bucket_action_trails
+  with "action_trails_for_oss_bucket" {
+    query = query.action_trails_for_oss_bucket
     args  = [self.input.bucket_arn.value]
   }
 
-  with "from_oss_buckets" {
-    query = query.oss_bucket_from_oss_buckets
+  with "source_logging_oss_buckets_for_oss_bucket" {
+    query = query.source_logging_oss_buckets_for_oss_bucket
     args  = [self.input.bucket_arn.value]
   }
 
-  with "kms_keys" {
-    query = query.oss_bucket_kms_keys
+  with "kms_keys_for_oss_bucket" {
+    query = query.kms_keys_for_oss_bucket
     args  = [self.input.bucket_arn.value]
   }
 
-  with "to_oss_buckets" {
-    query = query.oss_bucket_to_oss_buckets
+  with "target_logging_oss_buckets_for_oss_bucket" {
+    query = query.target_logging_oss_buckets_for_oss_bucket
     args  = [self.input.bucket_arn.value]
   }
 
@@ -77,14 +77,14 @@ dashboard "oss_bucket_detail" {
       node {
         base = node.actiontrail_trail
         args = {
-          action_trail_names = with.action_trails.rows[*].trail_name
+          action_trail_names = with.action_trails_for_oss_bucket.rows[*].trail_name
         }
       }
 
       node {
         base = node.kms_key
         args = {
-          kms_key_arns = with.kms_keys.rows[*].key_arn
+          kms_key_arns = with.kms_keys_for_oss_bucket.rows[*].key_arn
         }
       }
 
@@ -98,21 +98,21 @@ dashboard "oss_bucket_detail" {
       node {
         base = node.oss_bucket
         args = {
-          oss_bucket_arns = with.from_oss_buckets.rows[*].bucket_arn
+          oss_bucket_arns = with.source_logging_oss_buckets_for_oss_bucket.rows[*].bucket_arn
         }
       }
 
       node {
         base = node.oss_bucket
         args = {
-          oss_bucket_arns = with.to_oss_buckets.rows[*].bucket_arn
+          oss_bucket_arns = with.target_logging_oss_buckets_for_oss_bucket.rows[*].bucket_arn
         }
       }
 
       edge {
         base = edge.actiontrail_trail_to_oss_bucket
         args = {
-          action_trail_names = with.action_trails.rows[*].trail_name
+          action_trail_names = with.action_trails_for_oss_bucket.rows[*].trail_name
         }
       }
 
@@ -133,7 +133,7 @@ dashboard "oss_bucket_detail" {
       edge {
         base = edge.oss_bucket_to_oss_bucket
         args = {
-          oss_bucket_arns = with.from_oss_buckets.rows[*].bucket_arn
+          oss_bucket_arns = with.source_logging_oss_buckets_for_oss_bucket.rows[*].bucket_arn
         }
       }
     }
@@ -309,7 +309,7 @@ query "oss_bucket_https_enforce" {
 
 # with queries
 
-query "oss_bucket_kms_keys" {
+query "kms_keys_for_oss_bucket" {
   sql = <<-EOQ
     select
       k.arn as key_arn
@@ -322,7 +322,7 @@ query "oss_bucket_kms_keys" {
   EOQ
 }
 
-query "oss_bucket_action_trails" {
+query "action_trails_for_oss_bucket" {
   sql = <<-EOQ
     select
       t.name as trail_name
@@ -335,7 +335,7 @@ query "oss_bucket_action_trails" {
   EOQ
 }
 
-query "oss_bucket_from_oss_buckets" {
+query "source_logging_oss_buckets_for_oss_bucket" {
   sql = <<-EOQ
     select
       lb.arn as bucket_arn
@@ -348,7 +348,7 @@ query "oss_bucket_from_oss_buckets" {
   EOQ
 }
 
-query "oss_bucket_to_oss_buckets" {
+query "target_logging_oss_buckets_for_oss_bucket" {
   sql = <<-EOQ
     select
       lb.arn as bucket_arn

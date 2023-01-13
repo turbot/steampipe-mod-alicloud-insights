@@ -35,43 +35,43 @@ dashboard "vpc_vswitch_detail" {
 
   }
 
-  with "ecs_autoscaling_groups" {
-    query = query.vpc_vswitch_ecs_autoscaling_groups
+  with "ecs_autoscaling_groups_for_vpc_vswitch" {
+    query = query.ecs_autoscaling_groups_for_vpc_vswitch
     args  = [self.input.vswitch_id.value]
   }
 
-  with "ecs_instances" {
-    query = query.vpc_vswitch_ecs_instances
+  with "ecs_instances_for_vpc_vswitch" {
+    query = query.ecs_instances_for_vpc_vswitch
     args  = [self.input.vswitch_id.value]
   }
 
-  with "ecs_network_interfaces" {
-    query = query.vpc_vswitch_ecs_network_interfaces
+  with "ecs_network_interfaces_for_vpc_vswitch" {
+    query = query.ecs_network_interfaces_for_vpc_vswitch
     args  = [self.input.vswitch_id.value]
   }
 
-  with "rds_instances" {
-    query = query.vpc_vswitch_rds_instances
+  with "rds_instances_for_vpc_vswitch" {
+    query = query.rds_instances_for_vpc_vswitch
     args  = [self.input.vswitch_id.value]
   }
 
-  with "vpc_nat_gateways" {
-    query = query.vpc_vswitch_vpc_nat_gateways
+  with "vpc_nat_gateways_for_vpc_vswitch" {
+    query = query.vpc_nat_gateways_for_vpc_vswitch
     args  = [self.input.vswitch_id.value]
   }
 
-  with "vpc_network_acls" {
-    query = query.vpc_vswitch_vpc_network_acls
+  with "vpc_network_acls_for_vpc_vswitch" {
+    query = query.vpc_network_acls_for_vpc_vswitch
     args  = [self.input.vswitch_id.value]
   }
 
-  with "vpc_route_tables" {
-    query = query.vpc_vswitch_vpc_route_tables
+  with "vpc_route_tables_for_vpc_vswitch" {
+    query = query.vpc_route_tables_for_vpc_vswitch
     args  = [self.input.vswitch_id.value]
   }
 
-  with "vpc_vpcs" {
-    query = query.vpc_vswitch_vpc_vpcs
+  with "vpc_vpcs_for_vpc_vswitch" {
+    query = query.vpc_vpcs_for_vpc_vswitch
     args  = [self.input.vswitch_id.value]
   }
 
@@ -85,56 +85,56 @@ dashboard "vpc_vswitch_detail" {
       node {
         base = node.ecs_autoscaling_group
         args = {
-          ecs_autoscaling_group_ids = with.ecs_autoscaling_groups.rows[*].autoscaling_group_id
+          ecs_autoscaling_group_ids = with.ecs_autoscaling_groups_for_vpc_vswitch.rows[*].autoscaling_group_id
         }
       }
 
       node {
         base = node.ecs_instance
         args = {
-          ecs_instance_arns = with.ecs_instances.rows[*].instance_arn
+          ecs_instance_arns = with.ecs_instances_for_vpc_vswitch.rows[*].instance_arn
         }
       }
 
       node {
         base = node.ecs_network_interface
         args = {
-          ecs_network_interface_ids = with.ecs_network_interfaces.rows[*].eni_id
+          ecs_network_interface_ids = with.ecs_network_interfaces_for_vpc_vswitch.rows[*].eni_id
         }
       }
 
       node {
         base = node.rds_instance
         args = {
-          rds_instance_arns = with.rds_instances.rows[*].rds_instance_arn
+          rds_instance_arns = with.rds_instances_for_vpc_vswitch.rows[*].rds_instance_arn
         }
       }
 
       node {
         base = node.vpc_nat_gateway
         args = {
-          vpc_nat_gateway_ids = with.vpc_nat_gateways.rows[*].gateway_id
+          vpc_nat_gateway_ids = with.vpc_nat_gateways_for_vpc_vswitch.rows[*].gateway_id
         }
       }
 
       node {
         base = node.vpc_network_acl
         args = {
-          vpc_network_acl_ids = with.vpc_network_acls.rows[*].network_acl_id
+          vpc_network_acl_ids = with.vpc_network_acls_for_vpc_vswitch.rows[*].network_acl_id
         }
       }
 
       node {
         base = node.vpc_route_table
         args = {
-          vpc_route_table_ids = with.vpc_route_tables.rows[*].route_table_id
+          vpc_route_table_ids = with.vpc_route_tables_for_vpc_vswitch.rows[*].route_table_id
         }
       }
 
       node {
         base = node.vpc_vpc
         args = {
-          vpc_vpc_ids = with.vpc_vpcs.rows[*].vpc_id
+          vpc_vpc_ids = with.vpc_vpcs_for_vpc_vswitch.rows[*].vpc_id
         }
       }
 
@@ -148,7 +148,7 @@ dashboard "vpc_vswitch_detail" {
       edge {
         base = edge.vpc_vpc_to_vpc_vswitch
         args = {
-          vpc_vpc_ids = with.vpc_vpcs.rows[*].vpc_id
+          vpc_vpc_ids = with.vpc_vpcs_for_vpc_vswitch.rows[*].vpc_id
         }
       }
 
@@ -176,7 +176,7 @@ dashboard "vpc_vswitch_detail" {
       edge {
         base = edge.vpc_vswitch_to_nat_gateway
         args = {
-          vpc_nat_gateway_ids = with.vpc_nat_gateways.rows[*].gateway_id
+          vpc_nat_gateway_ids = with.vpc_nat_gateways_for_vpc_vswitch.rows[*].gateway_id
         }
       }
 
@@ -270,7 +270,7 @@ query "vpc_vswitch_input" {
 
 # with queries
 
-query "vpc_vswitch_vpc_network_acls" {
+query "vpc_network_acls_for_vpc_vswitch" {
   sql = <<-EOQ
     select
       network_acl_id as network_acl_id
@@ -282,7 +282,7 @@ query "vpc_vswitch_vpc_network_acls" {
   EOQ
 }
 
-query "vpc_vswitch_vpc_nat_gateways" {
+query "vpc_nat_gateways_for_vpc_vswitch" {
   sql = <<-EOQ
     select
       nat_gateway_id as gateway_id
@@ -293,7 +293,7 @@ query "vpc_vswitch_vpc_nat_gateways" {
   EOQ
 }
 
-query "vpc_vswitch_ecs_autoscaling_groups" {
+query "ecs_autoscaling_groups_for_vpc_vswitch" {
   sql = <<-EOQ
     select
       scaling_group_id as autoscaling_group_id
@@ -305,7 +305,7 @@ query "vpc_vswitch_ecs_autoscaling_groups" {
   EOQ
 }
 
-query "vpc_vswitch_vpc_route_tables" {
+query "vpc_route_tables_for_vpc_vswitch" {
   sql = <<-EOQ
     select
       route_table_id as route_table_id
@@ -317,7 +317,7 @@ query "vpc_vswitch_vpc_route_tables" {
   EOQ
 }
 
-query "vpc_vswitch_ecs_instances" {
+query "ecs_instances_for_vpc_vswitch" {
   sql = <<-EOQ
     select
       i.arn as instance_arn
@@ -328,7 +328,7 @@ query "vpc_vswitch_ecs_instances" {
   EOQ
 }
 
-query "vpc_vswitch_ecs_network_interfaces" {
+query "ecs_network_interfaces_for_vpc_vswitch" {
   sql = <<-EOQ
     select
       network_interface_id as eni_id
@@ -339,7 +339,7 @@ query "vpc_vswitch_ecs_network_interfaces" {
   EOQ
 }
 
-query "vpc_vswitch_rds_instances" {
+query "rds_instances_for_vpc_vswitch" {
   sql = <<-EOQ
     select
       arn as rds_instance_arn
@@ -350,7 +350,7 @@ query "vpc_vswitch_rds_instances" {
   EOQ
 }
 
-query "vpc_vswitch_vpc_vpcs" {
+query "vpc_vpcs_for_vpc_vswitch" {
   sql = <<-EOQ
     select
       vpc_id as vpc_id

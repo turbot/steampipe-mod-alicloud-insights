@@ -35,13 +35,13 @@ dashboard "ram_role_detail" {
 
   }
 
-  with "action_trails" {
-    query = query.ram_role_action_trails
+  with "action_trails_for_ram_role" {
+    query = query.action_trails_for_ram_role
     args  = [self.input.role_arn.value]
   }
 
-  with "ram_policies" {
-    query = query.ram_role_ram_policies
+  with "ram_policies_for_ram_role" {
+    query = query.ram_policies_for_ram_role
     args  = [self.input.role_arn.value]
   }
 
@@ -55,14 +55,14 @@ dashboard "ram_role_detail" {
       node {
         base = node.actiontrail_trail
         args = {
-          action_trail_names = with.action_trails.rows[*].trail_name
+          action_trail_names = with.action_trails_for_ram_role.rows[*].trail_name
         }
       }
 
       node {
         base = node.ram_policy
         args = {
-          ram_policy_akas = with.ram_policies.rows[*].policy_akas
+          ram_policy_akas = with.ram_policies_for_ram_role.rows[*].policy_akas
         }
       }
 
@@ -76,7 +76,7 @@ dashboard "ram_role_detail" {
       edge {
         base = edge.actiontrail_trail_to_ram_role
         args = {
-          action_trail_names = with.action_trails.rows[*].trail_name
+          action_trail_names = with.action_trails_for_ram_role.rows[*].trail_name
         }
       }
 
@@ -153,7 +153,7 @@ query "ram_role_input" {
 
 # With queries
 
-query "ram_role_ram_policies" {
+query "ram_policies_for_ram_role" {
   sql = <<-EOQ
     select
       p.akas::text as policy_akas
@@ -167,7 +167,7 @@ query "ram_role_ram_policies" {
   EOQ
 }
 
-query "ram_role_action_trails" {
+query "action_trails_for_ram_role" {
   sql = <<-EOQ
     select
       t.name as trail_name

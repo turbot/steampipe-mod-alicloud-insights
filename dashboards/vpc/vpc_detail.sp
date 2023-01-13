@@ -41,43 +41,43 @@ dashboard "vpc_detail" {
 
   }
 
-  with "ecs_instances" {
-    query = query.vpc_vpc_ecs_instances
+  with "ecs_instances_for_vpc" {
+    query = query.ecs_instances_for_vpc
     args  = [self.input.vpc_id.value]
   }
 
-  with "ecs_network_interfaces" {
-    query = query.vpc_vpc_ecs_network_interfaces
+  with "ecs_network_interfaces_for_vpc" {
+    query = query.ecs_network_interfaces_for_vpc
     args  = [self.input.vpc_id.value]
   }
 
-  with "ecs_security_groups" {
-    query = query.vpc_vpc_ecs_security_groups
+  with "ecs_security_groups_for_vpc" {
+    query = query.ecs_security_groups_for_vpc
     args  = [self.input.vpc_id.value]
   }
 
-  with "rds_instances" {
-    query = query.vpc_vpc_rds_instances
+  with "rds_instances_for_vpc" {
+    query = query.rds_instances_for_vpc
     args  = [self.input.vpc_id.value]
   }
 
-  with "vpc_dhcp_options_sets" {
-    query = query.vpc_vpc_vpc_dhcp_options_sets
+  with "vpc_dhcp_options_sets_for_vpc" {
+    query = query.vpc_dhcp_options_sets_for_vpc
     args  = [self.input.vpc_id.value]
   }
 
-  with "vpc_nat_gateways" {
-    query = query.vpc_vpc_vpc_nat_gateways
+  with "vpc_nat_gateways_for_vpc" {
+    query = query.vpc_nat_gateways_for_vpc
     args  = [self.input.vpc_id.value]
   }
 
-  with "vpc_route_tables" {
-    query = query.vpc_vpc_vpc_route_tables
+  with "vpc_route_tables_for_vpc" {
+    query = query.vpc_route_tables_for_vpc
     args  = [self.input.vpc_id.value]
   }
 
-  with "vpc_vswitches" {
-    query = query.vpc_vpc_vpc_vswitches
+  with "vpc_vswitches_for_vpc" {
+    query = query.vpc_vswitches_for_vpc
     args  = [self.input.vpc_id.value]
   }
 
@@ -90,21 +90,21 @@ dashboard "vpc_detail" {
       node {
         base = node.ecs_instance
         args = {
-          ecs_instance_arns = with.ecs_instances.rows[*].instance_arn
+          ecs_instance_arns = with.ecs_instances_for_vpc.rows[*].instance_arn
         }
       }
 
       node {
         base = node.ecs_network_interface
         args = {
-          ecs_network_interface_ids = with.ecs_network_interfaces.rows[*].eni_id
+          ecs_network_interface_ids = with.ecs_network_interfaces_for_vpc.rows[*].eni_id
         }
       }
 
       node {
         base = node.ecs_security_group
         args = {
-          ecs_security_group_ids = with.ecs_security_groups.rows[*].security_group_id
+          ecs_security_group_ids = with.ecs_security_groups_for_vpc.rows[*].security_group_id
         }
       }
 
@@ -112,7 +112,7 @@ dashboard "vpc_detail" {
       node {
         base = node.rds_instance
         args = {
-          rds_instance_arns = with.rds_instances.rows[*].rds_instance_arn
+          rds_instance_arns = with.rds_instances_for_vpc.rows[*].rds_instance_arn
         }
       }
 
@@ -126,21 +126,21 @@ dashboard "vpc_detail" {
       node {
         base = node.vpc_dhcp_option_set
         args = {
-          vpc_dhcp_option_set_ids = with.vpc_dhcp_options_sets.rows[*].dhcp_options_set_id
+          vpc_dhcp_option_set_ids = with.vpc_dhcp_options_sets_for_vpc.rows[*].dhcp_options_set_id
         }
       }
 
       node {
         base = node.vpc_nat_gateway
         args = {
-          vpc_nat_gateway_ids = with.vpc_nat_gateways.rows[*].gateway_id
+          vpc_nat_gateway_ids = with.vpc_nat_gateways_for_vpc.rows[*].gateway_id
         }
       }
 
       node {
         base = node.vpc_route_table
         args = {
-          vpc_route_table_ids = with.vpc_route_tables.rows[*].route_table_id
+          vpc_route_table_ids = with.vpc_route_tables_for_vpc.rows[*].route_table_id
         }
       }
 
@@ -161,7 +161,7 @@ dashboard "vpc_detail" {
       node {
         base = node.vpc_vswitch
         args = {
-          vpc_vswitch_ids = with.vpc_vswitches.rows[*].vswitch_id
+          vpc_vswitch_ids = with.vpc_vswitches_for_vpc.rows[*].vswitch_id
         }
       }
 
@@ -196,7 +196,7 @@ dashboard "vpc_detail" {
       edge {
         base = edge.vpc_vpc_to_vpc_dhcp_option_set
         args = {
-          vpc_dhcp_option_set_ids = with.vpc_dhcp_options_sets.rows[*].dhcp_options_set_id
+          vpc_dhcp_option_set_ids = with.vpc_dhcp_options_sets_for_vpc.rows[*].dhcp_options_set_id
         }
       }
 
@@ -210,35 +210,35 @@ dashboard "vpc_detail" {
       edge {
         base = edge.vpc_vswitch_to_ecs_instance
         args = {
-          vpc_vswitch_ids = with.vpc_vswitches.rows[*].vswitch_id
+          vpc_vswitch_ids = with.vpc_vswitches_for_vpc.rows[*].vswitch_id
         }
       }
 
       edge {
         base = edge.vpc_vswitch_to_ecs_network_interface
         args = {
-          vpc_vswitch_ids = with.vpc_vswitches.rows[*].vswitch_id
+          vpc_vswitch_ids = with.vpc_vswitches_for_vpc.rows[*].vswitch_id
         }
       }
 
       edge {
         base = edge.vpc_vswitch_to_nat_gateway
         args = {
-          vpc_nat_gateway_ids = with.vpc_nat_gateways.rows[*].gateway_id
+          vpc_nat_gateway_ids = with.vpc_nat_gateways_for_vpc.rows[*].gateway_id
         }
       }
 
       edge {
         base = edge.vpc_vswitch_to_rds_instance
         args = {
-          vpc_vswitch_ids = with.vpc_vswitches.rows[*].vswitch_id
+          vpc_vswitch_ids = with.vpc_vswitches_for_vpc.rows[*].vswitch_id
         }
       }
 
       edge {
         base = edge.vpc_vswitch_to_vpc_route_table
         args = {
-          vpc_vswitch_ids = with.vpc_vswitches.rows[*].vswitch_id
+          vpc_vswitch_ids = with.vpc_vswitches_for_vpc.rows[*].vswitch_id
         }
       }
     }
@@ -483,7 +483,7 @@ query "vpc_is_default" {
 
 # with queries
 
-query "vpc_vpc_ecs_instances" {
+query "ecs_instances_for_vpc" {
   sql = <<-EOQ
     select
       arn as instance_arn
@@ -494,7 +494,7 @@ query "vpc_vpc_ecs_instances" {
   EOQ
 }
 
-query "vpc_vpc_ecs_network_interfaces" {
+query "ecs_network_interfaces_for_vpc" {
   sql = <<-EOQ
     select
       network_interface_id as eni_id
@@ -505,7 +505,7 @@ query "vpc_vpc_ecs_network_interfaces" {
   EOQ
 }
 
-query "vpc_vpc_rds_instances" {
+query "rds_instances_for_vpc" {
   sql = <<-EOQ
     select
       arn as rds_instance_arn
@@ -516,7 +516,7 @@ query "vpc_vpc_rds_instances" {
   EOQ
 }
 
-query "vpc_vpc_vpc_dhcp_options_sets" {
+query "vpc_dhcp_options_sets_for_vpc" {
   sql = <<-EOQ
     with vpcs as (
       select
@@ -534,7 +534,7 @@ query "vpc_vpc_vpc_dhcp_options_sets" {
   EOQ
 }
 
-query "vpc_vpc_vpc_nat_gateways" {
+query "vpc_nat_gateways_for_vpc" {
   sql = <<-EOQ
     select
       nat_gateway_id as gateway_id
@@ -545,7 +545,7 @@ query "vpc_vpc_vpc_nat_gateways" {
   EOQ
 }
 
-query "vpc_vpc_ecs_security_groups" {
+query "ecs_security_groups_for_vpc" {
   sql = <<-EOQ
     select
       security_group_id as security_group_id
@@ -556,7 +556,7 @@ query "vpc_vpc_ecs_security_groups" {
   EOQ
 }
 
-query "vpc_vpc_vpc_vswitches" {
+query "vpc_vswitches_for_vpc" {
   sql = <<-EOQ
     select
       vswitch_id as vswitch_id
@@ -567,7 +567,7 @@ query "vpc_vpc_vpc_vswitches" {
   EOQ
 }
 
-query "vpc_vpc_vpc_route_tables" {
+query "vpc_route_tables_for_vpc" {
   sql = <<-EOQ
     select
       route_table_id as route_table_id

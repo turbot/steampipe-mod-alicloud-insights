@@ -53,38 +53,38 @@ dashboard "rds_instance_detail" {
 
   }
 
-  with "ecs_autoscaling_groups" {
-    query = query.rds_instance_ecs_autoscaling_groups
+  with "ecs_autoscaling_groups_for_rds_instance" {
+    query = query.ecs_autoscaling_groups_for_rds_instance
     args  = [self.input.db_instance_arn.value]
   }
 
-  with "ecs_security_groups" {
-    query = query.rds_instance_ecs_security_groups
+  with "ecs_security_groups_for_rds_instance" {
+    query = query.ecs_security_groups_for_rds_instance
     args  = [self.input.db_instance_arn.value]
   }
 
-  with "rds_backups" {
-    query = query.rds_instance_rds_backups
+  with "rds_backups_for_rds_instance" {
+    query = query.rds_backups_for_rds_instance
     args  = [self.input.db_instance_arn.value]
   }
 
-  with "rds_databases" {
-    query = query.rds_instance_rds_databases
+  with "rds_databases_for_rds_instance" {
+    query = query.rds_databases_for_rds_instance
     args  = [self.input.db_instance_arn.value]
   }
 
-  with "rds_read_only_db_instances" {
-    query = query.rds_instance_rds_read_only_db_instances
+  with "target_ro_rds_db_instances_for_rds_instance" {
+    query = query.target_ro_rds_db_instances_for_rds_instance
     args  = [self.input.db_instance_arn.value]
   }
 
-  with "vpc_vpcs" {
-    query = query.rds_instance_vpc_vpcs
+  with "vpc_vpcs_for_rds_instance" {
+    query = query.vpc_vpcs_for_rds_instance
     args  = [self.input.db_instance_arn.value]
   }
 
-  with "vpc_vswitches" {
-    query = query.rds_instance_vpc_vswitches
+  with "vpc_vswitches_for_rds_instance" {
+    query = query.vpc_vswitches_for_rds_instance
     args  = [self.input.db_instance_arn.value]
   }
 
@@ -98,28 +98,28 @@ dashboard "rds_instance_detail" {
       node {
         base = node.ecs_autoscaling_group
         args = {
-          ecs_autoscaling_group_ids = with.ecs_autoscaling_groups.rows[*].autoscaling_group_id
+          ecs_autoscaling_group_ids = with.ecs_autoscaling_groups_for_rds_instance.rows[*].autoscaling_group_id
         }
       }
 
       node {
         base = node.ecs_security_group
         args = {
-          ecs_security_group_ids = with.ecs_security_groups.rows[*].security_group_id
+          ecs_security_group_ids = with.ecs_security_groups_for_rds_instance.rows[*].security_group_id
         }
       }
 
       node {
         base = node.rds_backup
         args = {
-          rds_database_backup_ids = with.rds_backups.rows[*].backup_id
+          rds_database_backup_ids = with.rds_backups_for_rds_instance.rows[*].backup_id
         }
       }
 
       node {
         base = node.rds_database
         args = {
-          rds_database_names = with.rds_databases.rows[*].database_name
+          rds_database_names = with.rds_databases_for_rds_instance.rows[*].database_name
         }
       }
 
@@ -133,28 +133,28 @@ dashboard "rds_instance_detail" {
       node {
         base = node.rds_instance
         args = {
-          rds_instance_arns = with.rds_read_only_db_instances.rows[*].db_instance_arn
+          rds_instance_arns = with.target_ro_rds_db_instances_for_rds_instance.rows[*].db_instance_arn
         }
       }
 
       node {
         base = node.vpc_vpc
         args = {
-          vpc_vpc_ids = with.vpc_vpcs.rows[*].vpc_id
+          vpc_vpc_ids = with.vpc_vpcs_for_rds_instance.rows[*].vpc_id
         }
       }
 
       node {
         base = node.vpc_vswitch
         args = {
-          vpc_vswitch_ids = with.vpc_vswitches.rows[*].vpc_vswitch_id
+          vpc_vswitch_ids = with.vpc_vswitches_for_rds_instance.rows[*].vpc_vswitch_id
         }
       }
 
       edge {
         base = edge.ecs_autoscaling_group_to_rds_instance
         args = {
-          ecs_autoscaling_group_ids = with.ecs_autoscaling_groups.rows[*].autoscaling_group_id
+          ecs_autoscaling_group_ids = with.ecs_autoscaling_groups_for_rds_instance.rows[*].autoscaling_group_id
         }
       }
 
@@ -189,7 +189,7 @@ dashboard "rds_instance_detail" {
       edge {
         base = edge.rds_instance_to_read_only_db_instances
         args = {
-          rds_instance_arns = with.rds_read_only_db_instances.rows[*].db_instance_arn
+          rds_instance_arns = with.target_ro_rds_db_instances_for_rds_instance.rows[*].db_instance_arn
         }
       }
 
@@ -203,7 +203,7 @@ dashboard "rds_instance_detail" {
       edge {
         base = edge.vpc_vswitch_to_vpc_vpc
         args = {
-          vpc_vswitch_ids = with.vpc_vswitches.rows[*].vpc_vswitch_id
+          vpc_vswitch_ids = with.vpc_vswitches_for_rds_instance.rows[*].vpc_vswitch_id
         }
       }
     }
@@ -278,7 +278,7 @@ query "rds_instance_input" {
 
 # With queries
 
-query "rds_instance_vpc_vswitches" {
+query "vpc_vswitches_for_rds_instance" {
   sql = <<-EOQ
     select
       vswitch_id as vpc_vswitch_id
@@ -289,7 +289,7 @@ query "rds_instance_vpc_vswitches" {
   EOQ
 }
 
-query "rds_instance_ecs_autoscaling_groups" {
+query "ecs_autoscaling_groups_for_rds_instance" {
   sql = <<-EOQ
     select
       asg.scaling_group_id as autoscaling_group_id
@@ -303,7 +303,7 @@ query "rds_instance_ecs_autoscaling_groups" {
   EOQ
 }
 
-query "rds_instance_vpc_vpcs" {
+query "vpc_vpcs_for_rds_instance" {
   sql = <<-EOQ
     select
       vpc_id
@@ -314,7 +314,7 @@ query "rds_instance_vpc_vpcs" {
   EOQ
 }
 
-query "rds_instance_rds_read_only_db_instances" {
+query "target_ro_rds_db_instances_for_rds_instance" {
   sql = <<-EOQ
     select
       related_instances.arn as db_instance_arn
@@ -327,7 +327,7 @@ query "rds_instance_rds_read_only_db_instances" {
   EOQ
 }
 
-query "rds_instance_rds_databases" {
+query "rds_databases_for_rds_instance" {
   sql = <<-EOQ
     select
       d.db_name as database_name
@@ -340,7 +340,7 @@ query "rds_instance_rds_databases" {
   EOQ
 }
 
-query "rds_instance_rds_backups" {
+query "rds_backups_for_rds_instance" {
   sql = <<-EOQ
     select
       b.backup_id as backup_id
@@ -353,7 +353,7 @@ query "rds_instance_rds_backups" {
   EOQ
 }
 
-query "rds_instance_ecs_security_groups" {
+query "ecs_security_groups_for_rds_instance" {
   sql = <<-EOQ
     select
       isg->>'SecurityGroupId' as security_group_id
