@@ -99,7 +99,7 @@ node "ecs_image" {
 
   sql = <<-EOQ
     select
-      image_id as id,
+      arn as id,
       title as title,
       jsonb_build_object(
         'Image ID', image_id,
@@ -111,10 +111,10 @@ node "ecs_image" {
     from
       alicloud_ecs_image
     where
-      image_id = any($1);
+      arn = any($1);
   EOQ
 
-  param "ecs_image_ids" {}
+  param "ecs_image_arns" {}
 }
 
 node "ecs_instance" {

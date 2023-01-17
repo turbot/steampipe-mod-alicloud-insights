@@ -101,7 +101,7 @@ dashboard "ecs_snapshot_detail" {
       node {
         base = node.ecs_image
         args = {
-          ecs_image_ids = with.ecs_images_for_ecs_snapshot.rows[*].image_id
+          ecs_image_arns = with.ecs_images_for_ecs_snapshot.rows[*].image_arn
         }
       }
 
@@ -256,7 +256,7 @@ query "ecs_snapshot_input" {
 query "ecs_images_for_ecs_snapshot" {
   sql = <<-EOQ
     select
-      images.image_id as image_id
+      images.arn as image_arn
     from
       alicloud_ecs_image as images,
       jsonb_array_elements(images.disk_device_mappings) as ddm,

@@ -95,7 +95,7 @@ dashboard "ecs_disk_detail" {
       node {
         base = node.ecs_image
         args = {
-          ecs_image_ids = with.ecs_images_for_ecs_disk.rows[*].image_id
+          ecs_image_arns = with.ecs_images_for_ecs_disk.rows[*].image_arn
         }
       }
 
@@ -269,12 +269,15 @@ query "target_ecs_snapshots_for_ecs_disk" {
 query "ecs_images_for_ecs_disk" {
   sql = <<-EOQ
     select
-      image_id as image_id
+      i.arn as image_arn
     from
-      alicloud_ecs_disk
+      alicloud_ecs_disk d,
+      alicloud_ecs_image i
     where
-      arn = $1
-      and image_id is not null;
+      d.image_id = i.image_id
+      and d.region = i.region
+      and d.account_id = i.account_id
+      and d.arn = $1
   EOQ
 }
 

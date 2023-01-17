@@ -61,11 +61,15 @@ edge "ecs_disk_to_ecs_image" {
   sql = <<-EOQ
     select
       d.arn as from_id,
-      d.image_id as to_id
+      i.arn as to_id
     from
-      alicloud_ecs_disk as d
+      alicloud_ecs_disk as d,
+      alicloud_ecs_image as i
     where
-      d.arn = any($1);
+      d.image_id = i.image_id
+      and d.region = i.region
+      and d.account_id = i.account_id
+      and d.arn = any($1);
   EOQ
 
   param "ecs_disk_arns" {}
@@ -110,19 +114,23 @@ edge "ecs_image_to_ecs_instance" {
 
   sql = <<-EOQ
     select
-      image_id as from_id,
-      arn as to_id
+      im.arn as from_id,
+      ins.arn as to_id
     from
-      alicloud_ecs_instance as i
+      alicloud_ecs_instance as ins
+      join alicloud_ecs_image as im
+        on ins.image_id = im.image_id
+        and ins.region = im.region
+        and ins.account_id = im.account_id
     where
-      arn = any($1);
+      ins.arn = any($1);
   EOQ
 
   param "ecs_instance_arns" {}
 }
 
 edge "ecs_instance_to_ecs_disk" {
-  title = "disk"
+  title = "mounts"
 
   sql = <<-EOQ
     select
@@ -231,7 +239,7 @@ edge "ecs_network_interface_to_vpc_eip" {
 }
 
 edge "ecs_security_group_to_ecs_instance" {
-    title = "instance"
+  title = "instance"
 
   sql = <<-EOQ
     select
@@ -249,7 +257,7 @@ edge "ecs_security_group_to_ecs_instance" {
 
 edge "ecs_security_group_to_ecs_launch_template" {
   title = "launch template"
-  sql = <<-EOQ
+  sql   = <<-EOQ
     select
       latest_version_details -> 'LaunchTemplateData' ->> 'SecurityGroupId' as from_id,
       launch_template_id as to_id
@@ -263,7 +271,7 @@ edge "ecs_security_group_to_ecs_launch_template" {
 
 edge "ecs_launch_template_to_ecs_snapshot" {
   title = "snapshot"
-  sql = <<-EOQ
+  sql   = <<-EOQ
     select
       launch_template_id as from_id,
       s.arn as to_id
@@ -281,7 +289,7 @@ edge "ecs_launch_template_to_ecs_snapshot" {
 }
 
 edge "ecs_security_group_to_ecs_network_interface" {
-    title = "eni"
+  title = "eni"
 
   sql = <<-EOQ
     select
@@ -336,7 +344,7 @@ edge "ecs_snapshot_to_ecs_image" {
 
   sql = <<-EOQ
     select
-      images.image_id as to_id,
+      images.arn as to_id,
       s.arn as from_id
     from
       alicloud_ecs_image as images,
