@@ -57,7 +57,7 @@ dashboard "ram_group_detail" {
       node {
         base = node.ram_policy
         args = {
-          ram_policy_akas = with.ram_policies_for_ram_group.rows[*].policy_akas
+          ram_policy_names = with.ram_policies_for_ram_group.rows[*].policy_name
         }
       }
 
@@ -155,7 +155,7 @@ query "ram_group_input" {
 query "ram_policies_for_ram_group" {
   sql = <<-EOQ
     select
-      p.akas::text as policy_akas
+      p.policy_name
     from
       alicloud_ram_group as g,
       alicloud_ram_policy as p,

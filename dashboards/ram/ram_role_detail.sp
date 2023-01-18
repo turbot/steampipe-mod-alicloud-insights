@@ -62,7 +62,7 @@ dashboard "ram_role_detail" {
       node {
         base = node.ram_policy
         args = {
-          ram_policy_akas = with.ram_policies_for_ram_role.rows[*].policy_akas
+          ram_policy_names = with.ram_policies_for_ram_role.rows[*].policy_name
         }
       }
 

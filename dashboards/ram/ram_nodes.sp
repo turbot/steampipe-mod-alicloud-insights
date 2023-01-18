@@ -51,7 +51,7 @@ node "ram_policy" {
 
   sql = <<-EOQ
     select
-      akas::text as id,
+      policy_name as id,
       title as title,
       jsonb_build_object(
         'Policy Name', policy_name,
@@ -63,10 +63,114 @@ node "ram_policy" {
     from
       alicloud_ram_policy
     where
-      akas = any($1);
+      policy_name = any($1);
   EOQ
 
-  param "ram_policy_akas" {}
+  param "ram_policy_names" {}
+}
+
+node "ram_policy_statement" {
+  category = category.ram_policy_statement
+
+  sql = <<-EOQ
+    select
+      concat('statement:', i) as id,
+      coalesce (
+        t.stmt ->> 'Sid',
+        concat('[', i::text, ']')
+        ) as title
+    from
+      jsonb_array_elements(($1 :: jsonb) ->  'Statement') with ordinality as t(stmt,i)
+  EOQ
+
+  param "ram_policy_stds" {}
+}
+
+node "ram_policy_statement_action_notaction" {
+  category = category.ram_policy_action
+
+  sql = <<-EOQ
+    select
+      concat('action:', action) as id,
+      case when action = '*' then action || ' [All Actions]' else action end as title
+    from
+      jsonb_array_elements(($1 :: jsonb) ->  'Statement') with ordinality as t(stmt,i),
+      jsonb_array_elements_text(coalesce(t.stmt -> 'Action','[]'::jsonb) || coalesce(t.stmt -> 'NotAction','[]'::jsonb)) as action
+  EOQ
+
+  param "ram_policy_stds" {}
+}
+
+node "ram_policy_statement_condition" {
+  category = category.ram_policy_condition
+
+  sql = <<-EOQ
+    select
+      condition.key as title,
+      concat('statement:', i, ':condition:', condition.key  ) as id,
+      condition.value as properties
+    from
+      jsonb_array_elements(($1 :: jsonb) ->  'Statement') with ordinality as t(stmt,i),
+      jsonb_each(t.stmt -> 'Condition') as condition
+    where
+      stmt -> 'Condition' <> 'null'
+  EOQ
+
+  param "ram_policy_stds" {}
+}
+
+node "ram_policy_statement_condition_key" {
+  category = category.ram_policy_condition_key
+
+  sql = <<-EOQ
+    select
+      condition_key.key as title,
+      concat('statement:', i, ':condition:', condition.key, ':', condition_key.key  ) as id,
+      condition_key.value as properties
+    from
+      jsonb_array_elements(($1 :: jsonb) ->  'Statement') with ordinality as t(stmt,i),
+      jsonb_each(t.stmt -> 'Condition') as condition,
+      jsonb_each(condition.value) as condition_key
+    where
+      stmt -> 'Condition' <> 'null'
+  EOQ
+
+  param "ram_policy_stds" {}
+}
+
+node "ram_policy_statement_condition_key_value" {
+  category = category.ram_policy_condition_value
+
+  sql = <<-EOQ
+    select
+      condition_value as title,
+      concat('statement:', i, ':condition:', condition.key, ':', condition_key.key, ':', condition_value  ) as id
+    from
+      jsonb_array_elements(($1 :: jsonb) ->  'Statement') with ordinality as t(stmt,i),
+      jsonb_each(t.stmt -> 'Condition') as condition,
+      jsonb_each(condition.value) as condition_key,
+      jsonb_array_elements_text(condition_key.value) as condition_value
+    where
+      stmt -> 'Condition' <> 'null'
+  EOQ
+
+  param "ram_policy_stds" {}
+}
+
+node "ram_policy_statement_resource_notresource" {
+  category = category.ram_policy_resource
+
+  sql = <<-EOQ
+    select
+      resource as id,
+      case when resource = '*' then resource || ' [All Resources]' else resource end as title
+    from
+      jsonb_array_elements(($1 :: jsonb) ->  'Statement') with ordinality as t(stmt,i),
+      jsonb_array_elements_text(coalesce(t.stmt -> 'Action','[]'::jsonb) || coalesce(t.stmt -> 'NotAction','[]'::jsonb)) as action,
+      jsonb_array_elements_text(coalesce(t.stmt -> 'Resource','[]'::jsonb) || coalesce(t.stmt -> 'NotResource','[]'::jsonb)) as resource
+  EOQ
+
+  param "ram_policy_stds" {}
 }
 
 node "ram_role" {
@@ -92,7 +196,6 @@ node "ram_role" {
 
   param "ram_role_arns" {}
 }
-
 
 node "ram_user" {
   category = category.ram_user
