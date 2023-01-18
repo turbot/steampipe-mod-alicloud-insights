@@ -1,6 +1,6 @@
 dashboard "vpc_vswitch_detail" {
 
-  title         = "Alicloud VPC Vswitch Detail"
+  title         = "Alicloud VPC vSwitch Detail"
   documentation = file("./dashboards/vpc/docs/vpc_vswitch_detail.md")
 
   tags = merge(local.vpc_common_tags, {
