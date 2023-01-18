@@ -286,8 +286,8 @@ query "ram_policy_std_for_ram_policy" {
     from
       alicloud_ram_policy
     where
-      policy_name = $1
-    --limit 1;  -- alicloud managed policies will appear once for each connection in the aggregator, but we only need one...
+      title = $1
+    limit 1;  -- alicloud managed policies will appear once for each connection in the aggregator, but we only need one...
   EOQ
 }
 
@@ -360,8 +360,8 @@ query "ram_policy_overview" {
     from
       alicloud_ram_policy
     where
-      policy_name = $1
-    --limit 1
+      title = $1
+    limit 1
   EOQ
 }
 
