@@ -278,7 +278,7 @@ query "ram_user_access_keys" {
 query "ram_user_mfa_devices" {
   sql = <<-EOQ
     select
-      mfa -> 'User' ->> 'UserId' as "User Id",
+      mfa -> 'User' ->> 'UserId' as "User ID",
       mfa ->> 'SerialNumber' as "MFA Serial Number",
       mfa ->> 'ActivateDate' as "Activate Date"
     from
