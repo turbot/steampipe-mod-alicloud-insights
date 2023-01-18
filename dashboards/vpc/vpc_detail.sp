@@ -84,7 +84,6 @@ dashboard "vpc_detail" {
   container {
     graph {
       title = "Relationships"
-      width = 12
       type  = "graph"
 
       node {

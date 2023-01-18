@@ -48,9 +48,8 @@ dashboard "ram_role_detail" {
   container {
 
     graph {
-      title     = "Relationships"
-      type      = "graph"
-      direction = "TD"
+      title = "Relationships"
+      type  = "graph"
 
       node {
         base = node.actiontrail_trail
@@ -163,6 +162,7 @@ query "ram_policies_for_ram_role" {
       jsonb_array_elements(r.attached_policy) as policy
     where
       r.arn = $1
+      and r.account_id = p.account_id
       and policy ->> 'PolicyName' = p.policy_name;
   EOQ
 }
@@ -176,6 +176,7 @@ query "action_trails_for_ram_role" {
       alicloud_ram_role as r
     where
       r.arn = $1
+      and t.account_id = r.account_id
       and t.sls_write_role_arn = r.arn;
   EOQ
 }

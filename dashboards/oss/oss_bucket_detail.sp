@@ -70,9 +70,8 @@ dashboard "oss_bucket_detail" {
   container {
 
     graph {
-      title     = "Relationships"
-      type      = "graph"
-      direction = "TD"
+      title = "Relationships"
+      type  = "graph"
 
       node {
         base = node.actiontrail_trail
@@ -173,6 +172,7 @@ dashboard "oss_bucket_detail" {
 
     container {
       width = 12
+
       table {
         title = "Policy"
         query = query.oss_bucket_policy
@@ -182,6 +182,7 @@ dashboard "oss_bucket_detail" {
 
     container {
       width = 12
+
       table {
         title = "Lifecycle Rules"
         query = query.oss_bucket_lifecycle_policy
@@ -191,6 +192,7 @@ dashboard "oss_bucket_detail" {
 
     container {
       width = 12
+
       table {
         title = "Server Side Encryption"
         query = query.oss_bucket_server_side_encryption
@@ -315,7 +317,8 @@ query "kms_keys_for_oss_bucket" {
       k.arn as key_arn
     from
       alicloud_oss_bucket as b
-      left join alicloud_kms_key k on b.server_side_encryption ->> 'KMSMasterKeyID' = k.key_id
+      left join alicloud_kms_key k 
+        on b.server_side_encryption ->> 'KMSMasterKeyID' = k.key_id
     where
       b.arn = $1
       and k.arn is not null;
@@ -328,7 +331,8 @@ query "action_trails_for_oss_bucket" {
       t.name as trail_name
     from
       alicloud_oss_bucket as b
-      left join alicloud_action_trail t on b.name = t.oss_bucket_name
+      left join alicloud_action_trail t 
+        on b.name = t.oss_bucket_name
     where
       b.arn = $1
       and t.name is not null;
@@ -360,6 +364,7 @@ query "target_logging_oss_buckets_for_oss_bucket" {
       and lb.name = b.logging ->> 'TargetBucket';
   EOQ
 }
+
 # table queries
 query "oss_bucket_overview" {
   sql = <<-EOQ

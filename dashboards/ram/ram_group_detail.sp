@@ -43,9 +43,8 @@ dashboard "ram_group_detail" {
   container {
 
     graph {
-      title     = "Relationships"
-      type      = "graph"
-      direction = "TD"
+      title = "Relationships"
+      type  = "graph"
 
       node {
         base = node.ram_group
@@ -162,6 +161,7 @@ query "ram_policies_for_ram_group" {
       jsonb_array_elements(g.attached_policy) as policy
     where
       g.arn = $1
+      and p.account_id = g.account_id
       and policy ->> 'PolicyName' = p.policy_name;
   EOQ
 }
@@ -176,7 +176,8 @@ query "ram_users_for_ram_group" {
       jsonb_array_elements(users) as member
     where
       g.arn = $1
-      and member ->> 'UserName' = u.name;
+      and member ->> 'UserName' = u.name
+      and u.account_id = g.account_id;
   EOQ
 }
 

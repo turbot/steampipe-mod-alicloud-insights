@@ -20,6 +20,7 @@ category "ram_group" {
 category "ram_policy" {
   title = "RAM Policy"
   color = local.ram_color
+  href  = "/alicloud_insights.dashboard.ram_policy_detail?input.policy_name={{.properties.'Policy Name' | @uri}}"
   icon  = "rule_folder"
 }
 

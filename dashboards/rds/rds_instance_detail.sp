@@ -91,9 +91,8 @@ dashboard "rds_instance_detail" {
   container {
 
     graph {
-      title     = "Relationships"
-      type      = "graph"
-      direction = "top-down"
+      title = "Relationships"
+      type  = "graph"
 
       node {
         base = node.ecs_autoscaling_group

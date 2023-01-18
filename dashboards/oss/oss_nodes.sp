@@ -8,6 +8,7 @@ node "oss_bucket" {
       jsonb_build_object(
         'Name', name,
         'ARN', arn,
+        'Storage Class', storage_class,
         'Account ID', account_id,
         'Region', region
       ) as properties

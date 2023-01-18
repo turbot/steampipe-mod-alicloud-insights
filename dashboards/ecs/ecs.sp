@@ -45,6 +45,7 @@ category "ecs_launch_template" {
 category "ecs_security_group" {
   title = "ECS Security Group"
   color = local.compute_color
+  href  = "/alicloud_insights.dashboard.ecs_security_group_detail?input.security_group_id={{.properties.'Group ID' | @uri}}"
   icon  = "enhanced_encryption"
 }
 
@@ -69,5 +70,6 @@ category "ecs_network_interface" {
 category "ecs_snapshot" {
   title = "ECS Snapshot"
   color = local.storage_color
+  href  = "/alicloud_insights.dashboard.ecs_snapshot_detail?input.snapshot_arn={{.properties.'ARN' | @uri}}"
   icon  = "add_a_photo"
 }

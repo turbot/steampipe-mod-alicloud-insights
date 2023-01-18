@@ -63,9 +63,8 @@ dashboard "ecs_security_group_detail" {
   container {
 
     graph {
-      title     = "Relationships"
-      type      = "graph"
-      direction = "TD"
+      title = "Relationships"
+      type  = "graph"
 
       node {
         base = node.ecs_instance

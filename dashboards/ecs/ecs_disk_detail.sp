@@ -81,9 +81,8 @@ dashboard "ecs_disk_detail" {
   container {
 
     graph {
-      title     = "Relationships"
-      type      = "graph"
-      direction = "TD"
+      title = "Relationships"
+      type  = "graph"
 
       node {
         base = node.ecs_disk

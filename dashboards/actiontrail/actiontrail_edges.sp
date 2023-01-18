@@ -7,7 +7,9 @@ edge "actiontrail_trail_to_oss_bucket" {
       b.arn as to_id
     from
       alicloud_oss_bucket as b
-      left join alicloud_action_trail t on b.name = t.oss_bucket_name
+      left join alicloud_action_trail t
+        on b.name = t.oss_bucket_name
+        and b.account_id = t.account_id
     where
       t.name = any($1);
   EOQ

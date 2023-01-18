@@ -102,9 +102,8 @@ dashboard "ecs_instance_detail" {
 
     graph {
 
-      title     = "Relationships"
-      type      = "graph"
-      direction = "TD"
+      title = "Relationships"
+      type  = "graph"
 
       node {
         base = node.cms_monitor_host

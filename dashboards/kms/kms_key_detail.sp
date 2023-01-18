@@ -71,9 +71,8 @@ dashboard "kms_key_detail" {
   container {
 
     graph {
-      title     = "Relationships"
-      type      = "graph"
-      direction = "TD"
+      title = "Relationships"
+      type  = "graph"
 
       node {
         base = node.ecs_disk
@@ -212,7 +211,8 @@ query "kms_secrets_for_kms_key" {
       s.arn as secret_arn
     from
       alicloud_kms_secret as s
-      left join alicloud_kms_key k on s.encryption_key_id = k.key_id
+      left join alicloud_kms_key k 
+        on s.encryption_key_id = k.key_id
     where
       k.arn = $1
       and s.arn is not null;
@@ -225,7 +225,8 @@ query "oss_buckets_for_kms_key" {
       b.arn as bucket_arn
     from
       alicloud_oss_bucket as b
-      left join alicloud_kms_key k on b.server_side_encryption ->> 'KMSMasterKeyID' = k.key_id
+      left join alicloud_kms_key k 
+        on b.server_side_encryption ->> 'KMSMasterKeyID' = k.key_id
     where
       k.arn = $1
       and b.arn is not null;
@@ -238,7 +239,8 @@ query "ecs_disks_for_kms_key" {
       d.arn as disk_arn
     from
       alicloud_ecs_disk as d
-      left join alicloud_kms_key k on d.kms_key_id = k.key_id
+      left join alicloud_kms_key k 
+        on d.kms_key_id = k.key_id
     where
       k.arn = $1
       and d.arn is not null;
@@ -251,7 +253,8 @@ query "ecs_snapshots_for_kms_key" {
       s.arn as snapshot_arn
     from
       alicloud_ecs_snapshot as s
-      left join alicloud_kms_key k on s.kms_key_id = k.key_id
+      left join alicloud_kms_key k 
+        on s.kms_key_id = k.key_id
     where
       k.arn = $1
       and s.arn is not null;
@@ -264,7 +267,8 @@ query "kms_key_rds_instances" {
       s.arn as snapshot_arn
     from
       alicloud_ecs_snapshot as s
-      left join alicloud_kms_key k on s.kms_key_id = k.key_id
+      left join alicloud_kms_key k 
+        on s.kms_key_id = k.key_id
     where
       k.arn = $1
       and s.arn is not null;

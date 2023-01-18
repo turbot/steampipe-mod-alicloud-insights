@@ -7,7 +7,8 @@ edge "cms_monitor_host_to_ecs_instance" {
       i.arn as to_id
     from
       alicloud_ecs_instance i
-      join alicloud_cms_monitor_host as cms on cms.instance_id = i.instance_id
+      join alicloud_cms_monitor_host as cms 
+        on cms.instance_id = i.instance_id
     where
       i.arn = any($1)
       and cms.region = i.region
