@@ -47,6 +47,11 @@ dashboard "oss_bucket_detail" {
 
   }
 
+  with "bucket_policy_stds_for_oss_bucket" {
+    query = query.bucket_policy_stds_for_oss_bucket
+    args  = [self.input.bucket_arn.value]
+  }
+
   with "action_trails_for_oss_bucket" {
     query = query.action_trails_for_oss_bucket
     args  = [self.input.bucket_arn.value]
@@ -174,16 +179,6 @@ dashboard "oss_bucket_detail" {
       width = 12
 
       table {
-        title = "Policy"
-        query = query.oss_bucket_policy
-        args  = [self.input.bucket_arn.value]
-      }
-    }
-
-    container {
-      width = 12
-
-      table {
         title = "Lifecycle Rules"
         query = query.oss_bucket_lifecycle_policy
         args  = [self.input.bucket_arn.value]
@@ -197,6 +192,14 @@ dashboard "oss_bucket_detail" {
         title = "Server Side Encryption"
         query = query.oss_bucket_server_side_encryption
         args  = [self.input.bucket_arn.value]
+      }
+    }
+
+    graph {
+      title = "Resource Policy"
+      base  = graph.ram_resource_policy_structure
+      args = {
+        policy_std = with.bucket_policy_stds_for_oss_bucket.rows[0].policy_std
       }
     }
 
@@ -317,7 +320,7 @@ query "kms_keys_for_oss_bucket" {
       k.arn as key_arn
     from
       alicloud_oss_bucket as b
-      left join alicloud_kms_key k 
+      left join alicloud_kms_key k
         on b.server_side_encryption ->> 'KMSMasterKeyID' = k.key_id
     where
       b.arn = $1
@@ -331,7 +334,7 @@ query "action_trails_for_oss_bucket" {
       t.name as trail_name
     from
       alicloud_oss_bucket as b
-      left join alicloud_action_trail t 
+      left join alicloud_action_trail t
         on b.name = t.oss_bucket_name
     where
       b.arn = $1
@@ -349,6 +352,17 @@ query "source_logging_oss_buckets_for_oss_bucket" {
     where
       b.arn = $1
       and lb.logging ->> 'TargetBucket' = b.name;
+  EOQ
+}
+
+query "bucket_policy_stds_for_oss_bucket" {
+  sql = <<-EOQ
+    select
+      policy as policy_std
+    from
+      alicloud_oss_bucket
+    where
+      arn = $1;
   EOQ
 }
 

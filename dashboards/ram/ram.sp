@@ -17,6 +17,12 @@ category "ram_group" {
   icon  = "group"
 }
 
+category "ram_resource_policy" {
+  title = "Resource Policy"
+  color = local.ram_color
+  icon  = "rule_folder"
+}
+
 category "ram_policy" {
   title = "RAM Policy"
   color = local.ram_color
