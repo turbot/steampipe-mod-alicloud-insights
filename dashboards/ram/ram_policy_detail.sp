@@ -1,5 +1,5 @@
 dashboard "ram_policy_detail" {
-  title         = "Alicloud RAM Policy Detail"
+  title         = "AliCloud RAM Policy Detail"
   documentation = file("./dashboards/ram/docs/ram_policy_detail.md")
   tags = merge(local.ram_common_tags, {
     type = "Detail"

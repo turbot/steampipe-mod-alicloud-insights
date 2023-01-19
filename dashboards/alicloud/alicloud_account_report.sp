@@ -21,7 +21,6 @@ dashboard "account_report" {
     column "ARN" {
       display = "none"
     }
-
     query = query.account_table
   }
 

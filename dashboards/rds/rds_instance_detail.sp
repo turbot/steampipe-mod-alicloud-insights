@@ -1,6 +1,6 @@
 dashboard "rds_instance_detail" {
 
-  title         = "Alicloud RDS Instance Detail"
+  title         = "AliCloud RDS Instance Detail"
   documentation = file("./dashboards/rds/docs/rds_instance_detail.md")
 
   tags = merge(local.rds_common_tags, {

@@ -1,6 +1,6 @@
 dashboard "rds_instance_age_report" {
 
-  title         = "Alicloud RDS Instance Age Report"
+  title         = "AliCloud RDS Instance Age Report"
   documentation = file("./dashboards/rds/docs/rds_instance_report_age.md")
 
   tags = merge(local.rds_common_tags, {

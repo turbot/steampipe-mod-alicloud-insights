@@ -1,6 +1,6 @@
 dashboard "rds_instance_public_access_report" {
 
-  title         = "Alicloud RDS Instance Public Access Report"
+  title         = "AliCloud RDS Instance Public Access Report"
   documentation = file("./dashboards/rds/docs/rds_instance_report_public_access.md")
 
   tags = merge(local.rds_common_tags, {

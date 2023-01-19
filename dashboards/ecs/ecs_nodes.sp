@@ -1,29 +1,3 @@
-// node "cs_kubernetes_cluster_node" {
-//   category = category.cs_kubernetes_cluster_node
-
-//   sql = <<-EOQ
-//     select
-//       k.node_name as id,
-//       k.title as title,
-//       jsonb_build_object(
-//         'Name', k.node_name,
-//         'Instance Id', k.instance_id,
-//         'Creation Date', k.creation_time,
-//         'Account ID', k.account_id,
-//         'State', k.state,
-//         'Region', k.region
-//       ) as properties
-//     from
-//       alicloud_cs_kubernetes_cluster_node as k,
-//       alicloud_ecs_instance as i
-//     where
-//       i.arn = any($1)
-//       and k.instance_id = i.instance_id;
-//   EOQ
-
-//   param "ecs_instance_arns" {}
-// }
-
 node "ecs_auto_provisioning_group" {
   category = category.ecs_auto_provisioning_group
 

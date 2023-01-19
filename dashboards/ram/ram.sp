@@ -33,8 +33,7 @@ category "ram_policy" {
 category "ram_policy_action" {
   title = "RAM Policy Action"
   color = local.ram_color
-  // href  = "/alicloud_insights.dashboard.ram_action_glob_report?input.action_glob={{.title | @uri}}"
-  icon = "electric_bolt"
+  icon  = "electric_bolt"
 }
 
 category "ram_policy_condition" {

@@ -340,7 +340,7 @@ query "ecs_snapshot_age" {
   sql = <<-EOQ
       with data as (
       select
-        (EXTRACT(epoch FROM (SELECT (NOW() - creation_time)))/86400)::int as age
+        (extract(epoch from (select (now() - creation_time)))/86400)::int as age
       from
         alicloud_ecs_snapshot
       where
@@ -425,7 +425,7 @@ query "ecs_snapshot_source_disk" {
       d.disk_id as "Disk ID",
       d.name as "Name",
       d.arn as "Disk ARN",
-      s.source_disk_size as "Disk Size",
+      s.source_disk_size as "Disk Size (GiB)",
       s.source_disk_type as "Disk Type",
       d.status as "Disk Status"
     from
@@ -434,7 +434,7 @@ query "ecs_snapshot_source_disk" {
     where
       s.arn = $1
     order by
-      s.source_disk_id;
+      d.disk_id;
   EOQ
 }
 
@@ -458,9 +458,9 @@ query "ecs_snapshot_overview" {
     select
       snapshot_id as "Snapshot ID",
       instant_access as "Instant Access",
-      serial_number as "Serial No",
+      serial_number as "Serial Number",
       type as "Type",
-      last_modified_time as "Last Modified",
+      last_modified_time as "Last Modified Time",
       title as "Title",
       region as "Region",
       account_id as "Account ID",

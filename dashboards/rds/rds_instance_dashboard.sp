@@ -1,6 +1,6 @@
 dashboard "rds_instance_dashboard" {
 
-  title         = "Alicloud RDS Instance Dashboard"
+  title         = "AliCloud RDS Instance Dashboard"
   documentation = file("./dashboards/rds/docs/rds_instance_dashboard.md")
 
   tags = merge(local.rds_common_tags, {
@@ -24,13 +24,13 @@ dashboard "rds_instance_dashboard" {
     card {
       query = query.rds_instance_unencrypted_count
       width = 2
-      
+
     }
 
     card {
-      query = query.rds_instance_ssl_encryption_count
+      query = query.rds_instance_ssl_disabled_count
       width = 2
-      
+
     }
 
   }
@@ -194,7 +194,7 @@ query "rds_instance_unencrypted_count" {
   EOQ
 }
 
-query "rds_instance_ssl_encryption_count" {
+query "rds_instance_ssl_disabled_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -277,7 +277,7 @@ query "rds_instance_ssl_status" {
 query "rds_instance_by_account" {
   sql = <<-EOQ
     select
-      a.title as "account",
+      a.title as "Account",
       count(i.*) as "total"
     from
       alicloud_rds_instance as i,
@@ -294,7 +294,7 @@ query "rds_instance_by_region" {
   sql = <<-EOQ
     select
       region,
-      count(i.*) as total
+      count(i.*) as "total"
     from
       alicloud_rds_instance as i
     group by
