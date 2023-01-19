@@ -1,6 +1,6 @@
-his dashboard answers the following questions for each vswitch:
+his dashboard answers the following questions for each vSwitch:
 
-- How is the vswitch configured?
-- What relationships does the vswitch have with other resources?
+- How is the vSwitch configured?
+- What relationships does the vSwitch have with other resources?
 - What tags are applied?
-- What are the resources launched in the vswitch?
+- What are the resources launched in the vSwitch?

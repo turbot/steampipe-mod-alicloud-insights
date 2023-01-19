@@ -8,7 +8,7 @@ dashboard "vpc_vswitch_detail" {
   })
 
   input "vswitch_id" {
-    title = "Select a vswitch:"
+    title = "Select a vSwitch:"
     query = query.vpc_vswitch_input
     width = 4
   }
@@ -403,7 +403,7 @@ query "vpc_vswitch_status" {
 query "vpc_vswitch_overview" {
   sql = <<-EOQ
     select
-      vswitch_id as "vswitch ID",
+      vswitch_id as "vSwitch ID",
       vpc_id as "VPC ID",
       owner_id as "Owner ID",
       zone_id as "Zone ID",

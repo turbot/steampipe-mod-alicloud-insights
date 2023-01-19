@@ -35,7 +35,7 @@ category "vpc_nat_gateway" {
 }
 
 category "vpc_vswitch" {
-  title = "VPC VSwitch"
+  title = "VPC vSwitch"
   color = local.networking_color
   href  = "/alicloud_insights.dashboard.vpc_vswitch_detail?input.vswitch_id={{.properties.'VSwitch ID' | @uri}}"
   icon  = "lan"
