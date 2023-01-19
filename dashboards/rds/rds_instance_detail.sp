@@ -210,7 +210,6 @@ dashboard "rds_instance_detail" {
 
   container {
 
-
     table {
       title = "Overview"
       type  = "line"
@@ -248,8 +247,6 @@ dashboard "rds_instance_detail" {
       }
     }
   }
-
-
 
   container {
 
