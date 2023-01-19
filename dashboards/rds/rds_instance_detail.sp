@@ -210,51 +210,52 @@ dashboard "rds_instance_detail" {
 
   container {
 
-    container {
+    table {
+      title = "Overview"
+      type  = "line"
+      width = 3
+      query = query.rds_instance_overview
+      args  = [self.input.db_instance_arn.value]
+    }
 
-      width = 6
-
-      table {
-        title = "Overview"
-        type  = "line"
-        width = 6
-        query = query.rds_instance_overview
-        args  = [self.input.db_instance_arn.value]
-      }
-
-      table {
-        title = "Tags"
-        width = 6
-        query = query.rds_instance_tags
-        args  = [self.input.db_instance_arn.value]
-      }
-
+    table {
+      title = "Tags"
+      width = 3
+      query = query.rds_instance_tags
+      args  = [self.input.db_instance_arn.value]
     }
 
     container {
-
       width = 6
 
       table {
-        title = "DB Parameter Groups"
-        query = query.rds_instance_parameter_groups
+        title = "DB Instance Collector Policy"
+        query = query.rds_instance_collector_policy
         args  = [self.input.db_instance_arn.value]
       }
-    }
-
-    container {
-
-      width = 12
 
       table {
         title = "Security IPs"
         query = query.rds_instance_security_ips
         args  = [self.input.db_instance_arn.value]
       }
-    }
 
+      table {
+        title = "DB Instance Configuration"
+        query = query.rds_db_instance_configuration
+        args  = [self.input.db_instance_arn.value]
+      }
+    }
   }
 
+  container {
+
+    table {
+      title = "DB Parameters"
+      query = query.rds_instance_parameter_groups
+      args  = [self.input.db_instance_arn.value]
+    }
+  }
 }
 
 # Input queries
@@ -445,10 +446,23 @@ query "rds_instance_ssl_enabled" {
 
 # Other detail page queries
 
+query "rds_instance_collector_policy" {
+  sql = <<-EOQ
+    select
+      sql_collector_policy ->> 'SQLCollectorStatus' as "SQL Collector Status",
+      sql_collector_policy ->> 'StoragePeriod' as "Storage Period",
+      sql_collector_retention as "SQL Collector Retention"
+    from
+      alicloud_rds_instance
+    where
+      arn = $1;
+  EOQ
+}
+
 query "rds_instance_parameter_groups" {
   sql = <<-EOQ
     select
-      p ->> 'ParameterName' as "DB Parameter Group Name",
+      p ->> 'ParameterName' as "Parameter Name",
       p ->> 'ParameterValue' as "Parameter Value"
     from
       alicloud_rds_instance,
@@ -510,4 +524,22 @@ query "rds_instance_tags" {
     order by
       tag ->> 'Key';
     EOQ
+}
+
+query "rds_db_instance_configuration" {
+  sql = <<-EOQ
+    select
+      db_instance_storage_type as "DB Instance Storage Type",
+      db_instance_storage as "DB Instance Storage (GB)",
+      db_max_quantity as "DB Max Quantity",
+      account_max_quantity as "Account Max Quantity",
+      db_instance_cpu as "DB Instance CPU",
+      db_instance_memory as "DB Instance Memory (MB)",
+      max_connections as "Maximum Concurrent Connections",
+      lock_mode as "Lock Mode"
+    from
+      alicloud_rds_instance
+    where
+      arn = $1;
+  EOQ
 }
