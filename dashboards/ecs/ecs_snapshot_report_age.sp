@@ -1,4 +1,4 @@
-dashboard "alicloud_ecs_snapshot_age_report" {
+dashboard "ecs_snapshot_age_report" {
 
   title         = "AliCloud ECS Snapshot Age Report"
   documentation = file("./dashboards/ecs/docs/ecs_snapshot_report_age.md")
@@ -11,38 +11,38 @@ dashboard "alicloud_ecs_snapshot_age_report" {
   container {
 
     card {
-      query = query.alicloud_ecs_snapshot_count
+      query = query.ecs_snapshot_count
       width = 2
     }
 
     card {
       type  = "info"
       width = 2
-      query = query.alicloud_ecs_snapshot_24_hours_count
+      query = query.ecs_snapshot_24_hours_count
     }
 
     card {
       type  = "info"
       width = 2
-      query = query.alicloud_ecs_snapshot_30_days_count
+      query = query.ecs_snapshot_30_days_count
     }
 
     card {
       type  = "info"
       width = 2
-      query = query.alicloud_ecs_snapshot_30_90_days_count
+      query = query.ecs_snapshot_30_90_days_count
     }
 
     card {
       width = 2
       type  = "info"
-      query = query.alicloud_ecs_snapshot_90_365_days_count
+      query = query.ecs_snapshot_90_365_days_count
     }
 
     card {
       width = 2
       type  = "info"
-      query = query.alicloud_ecs_snapshot_1_year_count
+      query = query.ecs_snapshot_1_year_count
     }
 
   }
@@ -56,12 +56,12 @@ dashboard "alicloud_ecs_snapshot_age_report" {
       display = "none"
     }
 
-    query = query.alicloud_ecs_snapshot_age_table
+    query = query.ecs_snapshot_age_table
   }
 
 }
 
-query "alicloud_ecs_snapshot_24_hours_count" {
+query "ecs_snapshot_24_hours_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -73,7 +73,7 @@ query "alicloud_ecs_snapshot_24_hours_count" {
   EOQ
 }
 
-query "alicloud_ecs_snapshot_30_days_count" {
+query "ecs_snapshot_30_days_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -85,7 +85,7 @@ query "alicloud_ecs_snapshot_30_days_count" {
   EOQ
 }
 
-query "alicloud_ecs_snapshot_30_90_days_count" {
+query "ecs_snapshot_30_90_days_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -97,7 +97,7 @@ query "alicloud_ecs_snapshot_30_90_days_count" {
   EOQ
 }
 
-query "alicloud_ecs_snapshot_90_365_days_count" {
+query "ecs_snapshot_90_365_days_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -109,7 +109,7 @@ query "alicloud_ecs_snapshot_90_365_days_count" {
   EOQ
 }
 
-query "alicloud_ecs_snapshot_1_year_count" {
+query "ecs_snapshot_1_year_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -121,7 +121,7 @@ query "alicloud_ecs_snapshot_1_year_count" {
   EOQ
 }
 
-query "alicloud_ecs_snapshot_age_table" {
+query "ecs_snapshot_age_table" {
   sql = <<-EOQ
     select
       s.snapshot_id as "Snapshot ID",

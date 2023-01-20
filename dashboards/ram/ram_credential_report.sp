@@ -1,4 +1,4 @@
-dashboard "alicloud_ram_credential_report" {
+dashboard "ram_credential_report" {
 
   title         = "AliCloud RAM Credential Report"
   documentation = file("./dashboards/ram/docs/ram_credential_report.md")
@@ -36,17 +36,17 @@ dashboard "alicloud_ram_credential_report" {
     }
 
     column "User Name" {
-      href = "${dashboard.alicloud_ram_user_detail.url_path}?input.user_arn={{.'User ARN' | @uri}}"
+      href = "${dashboard.ram_user_detail.url_path}?input.user_arn={{.'User ARN' | @uri}}"
     }
 
-    query = query.alicloud_ram_credential_entities_root_access_keys_table
+    query = query.ram_credential_entities_root_access_keys_table
   }
 
 }
 
 # Card Queries
 
-query "alicloud_ram_credential_entities_count" {
+query "ram_credential_entities_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -56,7 +56,7 @@ query "alicloud_ram_credential_entities_count" {
   EOQ
 }
 
-query "alicloud_ram_credential_entities_console_access_with_no_mfa_count" {
+query "ram_credential_entities_console_access_with_no_mfa_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -70,7 +70,7 @@ query "alicloud_ram_credential_entities_console_access_with_no_mfa_count" {
   EOQ
 }
 
-query "alicloud_ram_credential_entities_root_access_keys_table" {
+query "ram_credential_entities_root_access_keys_table" {
   sql = <<-EOQ
     select
       user_name as "User Name",

@@ -1,4 +1,4 @@
-dashboard "alicloud_ram_group_dashboard" {
+dashboard "ram_group_dashboard" {
 
   title         = "AliCloud RAM Group Dashboard"
   documentation = file("./dashboards/ram/docs/ram_group_dashboard.md")
@@ -12,19 +12,19 @@ dashboard "alicloud_ram_group_dashboard" {
 
     # Analysis
     card {
-      query = query.alicloud_ram_group_count
+      query = query.ram_group_count
       width = 2
     }
 
     # Assessments
 
     card {
-      query = query.alicloud_ram_groups_without_users_count
+      query = query.ram_groups_without_users_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ram_groups_with_no_attached_policy_count
+      query = query.ram_groups_with_no_attached_policy_count
       width = 2
     }
 
@@ -36,7 +36,7 @@ dashboard "alicloud_ram_group_dashboard" {
 
     chart {
       title = "Groups Without Users"
-      query = query.alicloud_ram_groups_without_users
+      query = query.ram_groups_without_users
       type  = "donut"
       width = 3
 
@@ -52,7 +52,7 @@ dashboard "alicloud_ram_group_dashboard" {
 
     chart {
       title = "Groups Without Policies"
-      query = query.alicloud_ram_groups_without_policies
+      query = query.ram_groups_without_policies
       type  = "donut"
       width = 3
 
@@ -74,14 +74,14 @@ dashboard "alicloud_ram_group_dashboard" {
 
     chart {
       title = "Groups by Account"
-      query = query.alicloud_ram_groups_by_account
+      query = query.ram_groups_by_account
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Groups by Age"
-      query = query.alicloud_ram_groups_by_creation_month
+      query = query.ram_groups_by_creation_month
       type  = "column"
       width = 4
     }
@@ -92,13 +92,13 @@ dashboard "alicloud_ram_group_dashboard" {
 
 # Card Queries
 
-query "alicloud_ram_group_count" {
+query "ram_group_count" {
   sql = <<-EOQ
     select count(*) as "Groups" from alicloud_ram_group;
   EOQ
 }
 
-query "alicloud_ram_groups_without_users_count" {
+query "ram_groups_without_users_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -111,7 +111,7 @@ query "alicloud_ram_groups_without_users_count" {
   EOQ
 }
 
-query "alicloud_ram_groups_with_no_attached_policy_count" {
+query "ram_groups_with_no_attached_policy_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -125,7 +125,7 @@ query "alicloud_ram_groups_with_no_attached_policy_count" {
 
 # Assessment Queries
 
-query "alicloud_ram_groups_without_users" {
+query "ram_groups_without_users" {
   sql = <<-EOQ
     with groups_without_users as (
       select
@@ -147,7 +147,7 @@ query "alicloud_ram_groups_without_users" {
   EOQ
 }
 
-query "alicloud_ram_groups_without_policies" {
+query "ram_groups_without_policies" {
   sql = <<-EOQ
     with groups_without_policies as (
       select
@@ -174,7 +174,7 @@ query "alicloud_ram_groups_without_policies" {
 
 # Analysis Queries
 
-query "alicloud_ram_groups_by_account" {
+query "ram_groups_by_account" {
   sql = <<-EOQ
     select
       a.title as "account",
@@ -190,7 +190,7 @@ query "alicloud_ram_groups_by_account" {
   EOQ
 }
 
-query "alicloud_ram_groups_by_creation_month" {
+query "ram_groups_by_creation_month" {
   sql = <<-EOQ
     with groups as (
       select

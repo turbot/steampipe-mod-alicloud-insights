@@ -3,3 +3,9 @@ locals {
     service = "AliCloud"
   }
 }
+
+category "availability_zone" {
+  title = "Availability Zone"
+  color = local.networking_color
+  icon  = "apartment"
+}

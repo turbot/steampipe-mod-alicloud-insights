@@ -1,4 +1,4 @@
-dashboard "alicloud_kms_key_lifecycle_report" {
+dashboard "kms_key_lifecycle_report" {
 
   title         = "AliCloud KMS CMK Lifecycle Report"
   documentation = file("./dashboards/kms/docs/kms_key_report_lifecycle.md")
@@ -11,12 +11,12 @@ dashboard "alicloud_kms_key_lifecycle_report" {
   container {
 
     card {
-      query = query.alicloud_kms_key_rotation_disabled_count
+      query = query.kms_key_rotation_disabled_count
       width = 2
     }
 
     card {
-      query = query.alicloud_kms_cmk_pending_deletion_count
+      query = query.kms_cmk_pending_deletion_count
       width = 2
     }
 
@@ -32,15 +32,15 @@ dashboard "alicloud_kms_key_lifecycle_report" {
     }
 
     column "Key ID" {
-      href = "${dashboard.alicloud_kms_key_detail.url_path}?input.key_arn={{.ARN | @uri}}"
+      href = "${dashboard.kms_key_detail.url_path}?input.key_arn={{.ARN | @uri}}"
     }
 
-    query = query.alicloud_kms_cmk_lifecycle_table
+    query = query.kms_cmk_lifecycle_table
   }
 
 }
 
-query "alicloud_kms_key_rotation_disabled_count" {
+query "kms_key_rotation_disabled_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -53,7 +53,7 @@ query "alicloud_kms_key_rotation_disabled_count" {
   EOQ
 }
 
-query "alicloud_kms_cmk_pending_deletion_count" {
+query "kms_cmk_pending_deletion_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -66,7 +66,7 @@ query "alicloud_kms_cmk_pending_deletion_count" {
   EOQ
 }
 
-query "alicloud_kms_cmk_lifecycle_table" {
+query "kms_cmk_lifecycle_table" {
   sql = <<-EOQ
     select
       k.key_id as "Key ID",

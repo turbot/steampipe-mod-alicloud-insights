@@ -1,4 +1,4 @@
-dashboard "alicloud_ecs_disk_dashboard" {
+dashboard "ecs_disk_dashboard" {
 
   title         = "AliCloud ECS Disk Dashboard"
   documentation = file("./dashboards/ecs/docs/ecs_disk_dashboard.md")
@@ -10,29 +10,29 @@ dashboard "alicloud_ecs_disk_dashboard" {
   container {
     # Analysis
     card {
-      query = query.alicloud_ecs_disk_count
+      query = query.ecs_disk_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ecs_disk_storage_total
+      query = query.ecs_disk_storage_total
       width = 2
     }
 
     # Assessments
     card {
-      query = query.alicloud_ecs_disk_unattached_count
+      query = query.ecs_disk_unattached_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ecs_disk_unencrypted_count
+      query = query.ecs_disk_unencrypted_count
       width = 2
-      href  = dashboard.alicloud_ecs_disk_encryption_report.url_path
+      href  = dashboard.ecs_disk_encryption_report.url_path
     }
 
     card {
-      query = query.alicloud_ecs_disk_delete_auto_snapshot_count
+      query = query.ecs_disk_delete_auto_snapshot_count
       width = 2
     }
   }
@@ -43,7 +43,7 @@ dashboard "alicloud_ecs_disk_dashboard" {
 
     chart {
       title = "Disk Status"
-      query = query.alicloud_ecs_disk_by_status
+      query = query.ecs_disk_by_status
       type  = "donut"
       width = 4
 
@@ -59,7 +59,7 @@ dashboard "alicloud_ecs_disk_dashboard" {
 
     chart {
       title = "Encryption Status"
-      query = query.alicloud_ecs_disk_by_encryption_status
+      query = query.ecs_disk_by_encryption_status
       type  = "donut"
       width = 4
 
@@ -75,7 +75,7 @@ dashboard "alicloud_ecs_disk_dashboard" {
 
     chart {
       title = "Automatic Snapshot Deletion"
-      query = query.alicloud_ecs_disk_auto_snapshot_deletion
+      query = query.ecs_disk_auto_snapshot_deletion
       type  = "donut"
       width = 4
 
@@ -96,28 +96,28 @@ dashboard "alicloud_ecs_disk_dashboard" {
 
     chart {
       title = "Disks by Account"
-      query = query.alicloud_ecs_disk_by_account
+      query = query.ecs_disk_by_account
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Disks by Region"
-      query = query.alicloud_ecs_disk_by_region
+      query = query.ecs_disk_by_region
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Disks by Category"
-      query = query.alicloud_ecs_disk_by_category
+      query = query.ecs_disk_by_category
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Disks by Age"
-      query = query.alicloud_ecs_disk_by_creation_month
+      query = query.ecs_disk_by_creation_month
       type  = "column"
       width = 3
     }
@@ -128,7 +128,7 @@ dashboard "alicloud_ecs_disk_dashboard" {
 
     chart {
       title = "Storage by Account (GB)"
-      query = query.alicloud_ecs_disk_storage_by_account
+      query = query.ecs_disk_storage_by_account
       type  = "column"
       width = 3
 
@@ -139,7 +139,7 @@ dashboard "alicloud_ecs_disk_dashboard" {
 
     chart {
       title = "Storage by Region (GB)"
-      query = query.alicloud_ecs_disk_storage_by_region
+      query = query.ecs_disk_storage_by_region
       type  = "column"
       width = 3
 
@@ -150,7 +150,7 @@ dashboard "alicloud_ecs_disk_dashboard" {
 
     chart {
       title = "Storage by Category (GB)"
-      query = query.alicloud_ecs_disk_storage_by_category
+      query = query.ecs_disk_storage_by_category
       type  = "column"
       width = 3
 
@@ -161,7 +161,7 @@ dashboard "alicloud_ecs_disk_dashboard" {
 
     chart {
       title = "Storage by Age (GB)"
-      query = query.alicloud_ecs_disk_storage_by_creation_month
+      query = query.ecs_disk_storage_by_creation_month
       type  = "column"
       width = 3
 
@@ -180,14 +180,14 @@ dashboard "alicloud_ecs_disk_dashboard" {
       title = "Top 10 Average Read IOPS - Last 7 days"
       type  = "line"
       width = 6
-      query = query.alicloud_ecs_disk_top_10_read_ops_avg
+      query = query.ecs_disk_top_10_read_ops_avg
     }
 
     chart {
       title = "Top 10 Average Write IOPS - Last 7 days"
       type  = "line"
       width = 6
-      query = query.alicloud_ecs_disk_top_10_write_ops_avg
+      query = query.ecs_disk_top_10_write_ops_avg
     }
 
   }
@@ -196,13 +196,13 @@ dashboard "alicloud_ecs_disk_dashboard" {
 
 # Card Queries
 
-query "alicloud_ecs_disk_count" {
+query "ecs_disk_count" {
   sql = <<-EOQ
     select count(*) as "Disks" from alicloud_ecs_disk
   EOQ
 }
 
-query "alicloud_ecs_disk_storage_total" {
+query "ecs_disk_storage_total" {
   sql = <<-EOQ
     select
       sum(size) as "Total Storage (GB)"
@@ -211,7 +211,7 @@ query "alicloud_ecs_disk_storage_total" {
   EOQ
 }
 
-query "alicloud_ecs_disk_unattached_count" {
+query "ecs_disk_unattached_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -224,7 +224,7 @@ query "alicloud_ecs_disk_unattached_count" {
   EOQ
 }
 
-query "alicloud_ecs_disk_unencrypted_count" {
+query "ecs_disk_unencrypted_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -237,7 +237,7 @@ query "alicloud_ecs_disk_unencrypted_count" {
   EOQ
 }
 
-query "alicloud_ecs_disk_delete_auto_snapshot_count" {
+query "ecs_disk_delete_auto_snapshot_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -253,7 +253,7 @@ query "alicloud_ecs_disk_delete_auto_snapshot_count" {
 
 # Assessments Queries
 
-query "alicloud_ecs_disk_by_status" {
+query "ecs_disk_by_status" {
   sql = <<-EOQ
     select
         usage_status,
@@ -274,7 +274,7 @@ query "alicloud_ecs_disk_by_status" {
   EOQ
 }
 
-query "alicloud_ecs_disk_by_encryption_status" {
+query "ecs_disk_by_encryption_status" {
   sql = <<-EOQ
     select
         encryption_status,
@@ -295,7 +295,7 @@ query "alicloud_ecs_disk_by_encryption_status" {
   EOQ
 }
 
-query "alicloud_ecs_disk_auto_snapshot_deletion" {
+query "ecs_disk_auto_snapshot_deletion" {
   sql = <<-EOQ
     select
         delete_auto_snapshot_enabled,
@@ -321,7 +321,7 @@ query "alicloud_ecs_disk_auto_snapshot_deletion" {
 
 # Analysis Queries
 
-query "alicloud_ecs_disk_by_account" {
+query "ecs_disk_by_account" {
   sql = <<-EOQ
     select
       a.title as "account",
@@ -338,7 +338,7 @@ query "alicloud_ecs_disk_by_account" {
   EOQ
 }
 
-query "alicloud_ecs_disk_by_region" {
+query "ecs_disk_by_region" {
   sql = <<-EOQ
     select
       region as "Region",
@@ -352,7 +352,7 @@ query "alicloud_ecs_disk_by_region" {
   EOQ
 }
 
-query "alicloud_ecs_disk_by_category" {
+query "ecs_disk_by_category" {
   sql = <<-EOQ
     select
       category as "Category",
@@ -366,7 +366,7 @@ query "alicloud_ecs_disk_by_category" {
   EOQ
 }
 
-query "alicloud_ecs_disk_by_creation_month" {
+query "ecs_disk_by_creation_month" {
   sql = <<-EOQ
     with disks as (
       select
@@ -411,7 +411,7 @@ query "alicloud_ecs_disk_by_creation_month" {
   EOQ
 }
 
-query "alicloud_ecs_disk_storage_by_account" {
+query "ecs_disk_storage_by_account" {
   sql = <<-EOQ
     select
       a.title as "account",
@@ -428,7 +428,7 @@ query "alicloud_ecs_disk_storage_by_account" {
   EOQ
 }
 
-query "alicloud_ecs_disk_storage_by_region" {
+query "ecs_disk_storage_by_region" {
   sql = <<-EOQ
     select
       region as "Region",
@@ -442,7 +442,7 @@ query "alicloud_ecs_disk_storage_by_region" {
   EOQ
 }
 
-query "alicloud_ecs_disk_storage_by_category" {
+query "ecs_disk_storage_by_category" {
   sql = <<-EOQ
     select
       category,
@@ -456,7 +456,7 @@ query "alicloud_ecs_disk_storage_by_category" {
   EOQ
 }
 
-query "alicloud_ecs_disk_storage_by_creation_month" {
+query "ecs_disk_storage_by_creation_month" {
   sql = <<-EOQ
     with disks as (
       select
@@ -504,7 +504,7 @@ query "alicloud_ecs_disk_storage_by_creation_month" {
 
 # Performance Queries
 
-query "alicloud_ecs_disk_top_10_read_ops_avg" {
+query "ecs_disk_top_10_read_ops_avg" {
   sql = <<-EOQ
     with top_n as (
       select
@@ -532,7 +532,7 @@ query "alicloud_ecs_disk_top_10_read_ops_avg" {
   EOQ
 }
 
-query "alicloud_ecs_disk_top_10_write_ops_avg" {
+query "ecs_disk_top_10_write_ops_avg" {
   sql = <<-EOQ
     with top_n as (
       select
