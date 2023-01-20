@@ -16,7 +16,7 @@ mod "alicloud_insights" {
   require {
     steampipe = "0.18.1"
     plugin "alicloud" {
-      version = "v0.12.0"
+      version = "0.12.0"
     }
   }
 }
