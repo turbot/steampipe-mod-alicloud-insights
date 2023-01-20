@@ -7,7 +7,7 @@ _Dependencies_
 
 _What's new?_
 
-- Added resource relationship graphs across all the detail dashboards to highlight the relationship the resource shares with other resources. ([#65](https://github.com/turbot/steampipe-mod-alicloud-insights/pull/66))
+- Added resource relationship graphs across all the detail dashboards to highlight the relationship the resource shares with other resources. ([#65](https://github.com/turbot/steampipe-mod-alicloud-insights/pull/65))
 - New dashboards added: ([#65](https://github.com/turbot/steampipe-mod-alicloud-insights/pull/65))
   - [AliCloud RDS Instance Dashboard](https://hub.steampipe.io/mods/turbot/alicloud_insights/dashboards/dashboard.rds_instance_dashboard)
   - [AliCloud RDS Instance Detail](https://hub.steampipe.io/mods/turbot/alicloud_insights/dashboards/dashboard.rds_instance_detail)
