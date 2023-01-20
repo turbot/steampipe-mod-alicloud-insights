@@ -307,9 +307,25 @@ dashboard "ecs_instance_detail" {
       width = 6
 
       table {
-        title = " CPU cores"
+        title = " CPU Cores"
         query = query.ecs_instance_cpu_cores
         args  = [self.input.instance_arn.value]
+      }
+
+      table {
+        title = "Dedicated Host"
+        query = query.ecs_instance_dedicated_host
+        args  = [self.input.instance_arn.value]
+      }
+
+      table {
+        title = "Security Groups"
+        query = query.ecs_instance_security_groups
+        args  = [self.input.instance_arn.value]
+
+        column "Group ID" {
+          href = "/alicloud_insights.dashboard.ecs_security_group_detail?input.security_group_id={{.'Group ID' | @uri}}"
+        }
       }
     }
 
@@ -322,43 +338,13 @@ dashboard "ecs_instance_detail" {
       title = "Network Interfaces"
       query = query.ecs_instance_network_interfaces
       args  = [self.input.instance_arn.value]
+
+      column "VPC ID" {
+        href = "/alicloud_insights.dashboard.vpc_detail?input.vpc_id={{.'VPC ID' | @uri}}"
+      }
     }
 
   }
-
-  container {
-    width = 6
-
-    table {
-      title = "Dedicated Host"
-      query = query.ecs_instance_dedicated_host
-      args  = [self.input.instance_arn.value]
-    }
-
-  }
-
-  container {
-    width = 6
-
-    table {
-      title = "Security Groups"
-      query = query.ecs_instance_security_groups
-      args  = [self.input.instance_arn.value]
-    }
-
-  }
-
-  container {
-    width = 6
-
-    table {
-      title = "VPC Details"
-      query = query.ecs_instance_vpc
-      args  = [self.input.instance_arn.value]
-    }
-
-  }
-
 }
 
 # Inpur queries
@@ -398,11 +384,11 @@ query "ecs_images_for_ecs_instance" {
   sql = <<-EOQ
     with instances as (
       select
-        region, 
+        region,
         account_id
-      from 
-        alicloud_ecs_instance 
-      where 
+      from
+        alicloud_ecs_instance
+      where
         arn = $1
     )select
       im.arn as image_arn
@@ -638,7 +624,6 @@ query "ecs_instance_network_interfaces" {
       p ->> 'PrimaryIpAddress' as "Primary Ip Address",
       private_ip_address as "Private IP Address",
       public_ip_address as "Public IP Address",
-      public_ip_address as "Public IP Address",
       vpc_id as "VPC ID"
     from
       alicloud_ecs_instance,
@@ -677,16 +662,3 @@ query "ecs_instance_security_groups" {
   EOQ
 }
 
-query "ecs_instance_vpc" {
-  sql = <<-EOQ
-    select
-      vpc_attributes ->> 'VpcId' as "ID",
-      vpc_attributes ->> 'NatIpAddress'  as "Nat IP Address",
-      vpc_attributes -> 'PrivateIpAddress' -> 'IpAddress'  as "Private IP Address",
-      vpc_attributes ->> 'VSwitchId' as "Switch ID"
-    from
-      alicloud_ecs_instance
-    where
-      arn = $1;
-  EOQ
-}

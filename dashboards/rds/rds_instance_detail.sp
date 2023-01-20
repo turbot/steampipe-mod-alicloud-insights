@@ -241,19 +241,16 @@ dashboard "rds_instance_detail" {
       }
 
       table {
-        title = "DB Instance Configuration"
+        title = "DB Instance Configurations"
         query = query.rds_db_instance_configuration
         args  = [self.input.db_instance_arn.value]
       }
-    }
-  }
 
-  container {
-
-    table {
-      title = "DB Parameters"
-      query = query.rds_instance_parameter_groups
-      args  = [self.input.db_instance_arn.value]
+      table {
+        title = "DB Parameters"
+        query = query.rds_instance_parameter_groups
+        args  = [self.input.db_instance_arn.value]
+      }
     }
   }
 }

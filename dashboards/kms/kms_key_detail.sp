@@ -189,17 +189,28 @@ dashboard "kms_key_detail" {
 
 query "kms_key_input" {
   sql = <<-EOQ
+    with key_alias as (
     select
-      title as label,
+      p ->> 'AliasName' as title,
+      p ->> 'KeyId' as key_id
+    from
+      alicloud_kms_key,
+      jsonb_array_elements(key_aliases) as p
+    )
+    select
+      coalesce(a.title, k.title) as label,
       arn as value,
       json_build_object(
+        'key_id', a.key_id,
         'account_id', account_id,
         'region', region
       ) as tags
     from
-      alicloud_kms_key
+      alicloud_kms_key as k
+      left join key_alias as a
+      on a.key_id = k.key_id
     order by
-      title;
+      a.title;
   EOQ
 }
 
@@ -211,7 +222,7 @@ query "kms_secrets_for_kms_key" {
       s.arn as secret_arn
     from
       alicloud_kms_secret as s
-      left join alicloud_kms_key k 
+      left join alicloud_kms_key k
         on s.encryption_key_id = k.key_id
     where
       k.arn = $1
@@ -225,7 +236,7 @@ query "oss_buckets_for_kms_key" {
       b.arn as bucket_arn
     from
       alicloud_oss_bucket as b
-      left join alicloud_kms_key k 
+      left join alicloud_kms_key k
         on b.server_side_encryption ->> 'KMSMasterKeyID' = k.key_id
     where
       k.arn = $1
@@ -239,7 +250,7 @@ query "ecs_disks_for_kms_key" {
       d.arn as disk_arn
     from
       alicloud_ecs_disk as d
-      left join alicloud_kms_key k 
+      left join alicloud_kms_key k
         on d.kms_key_id = k.key_id
     where
       k.arn = $1
@@ -253,7 +264,7 @@ query "ecs_snapshots_for_kms_key" {
       s.arn as snapshot_arn
     from
       alicloud_ecs_snapshot as s
-      left join alicloud_kms_key k 
+      left join alicloud_kms_key k
         on s.kms_key_id = k.key_id
     where
       k.arn = $1
@@ -267,7 +278,7 @@ query "kms_key_rds_instances" {
       s.arn as snapshot_arn
     from
       alicloud_ecs_snapshot as s
-      left join alicloud_kms_key k 
+      left join alicloud_kms_key k
         on s.kms_key_id = k.key_id
     where
       k.arn = $1
