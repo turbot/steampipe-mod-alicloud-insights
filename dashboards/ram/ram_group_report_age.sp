@@ -1,4 +1,4 @@
-dashboard "alicloud_ram_group_age_report" {
+dashboard "ram_group_age_report" {
 
   title         = "AliCloud RAM Group Age Report"
   documentation = file("./dashboards/ram/docs/ram_group_report_age.md")
@@ -11,36 +11,36 @@ dashboard "alicloud_ram_group_age_report" {
   container {
 
     card {
-      query = query.alicloud_ram_group_count
+      query = query.ram_group_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ram_group_24_hours_count
-      width = 2
-      type  = "info"
-    }
-
-    card {
-      query = query.alicloud_ram_group_30_days_count
+      query = query.ram_group_24_hours_count
       width = 2
       type  = "info"
     }
 
     card {
-      query = query.alicloud_ram_group_30_90_days_count
+      query = query.ram_group_30_days_count
       width = 2
       type  = "info"
     }
 
     card {
-      query = query.alicloud_ram_group_90_365_days_count
+      query = query.ram_group_30_90_days_count
       width = 2
       type  = "info"
     }
 
     card {
-      query = query.alicloud_ram_group_1_year_count
+      query = query.ram_group_90_365_days_count
+      width = 2
+      type  = "info"
+    }
+
+    card {
+      query = query.ram_group_1_year_count
       width = 2
       type  = "info"
     }
@@ -57,15 +57,15 @@ dashboard "alicloud_ram_group_age_report" {
     }
 
     column "Name" {
-      href = "${dashboard.alicloud_ram_group_detail.url_path}?input.group_arn={{.ARN | @uri}}"
+      href = "${dashboard.ram_group_detail.url_path}?input.group_arn={{.ARN | @uri}}"
     }
 
-    query = query.alicloud_ram_group_age_table
+    query = query.ram_group_age_table
   }
 
 }
 
-query "alicloud_ram_group_24_hours_count" {
+query "ram_group_24_hours_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -77,7 +77,7 @@ query "alicloud_ram_group_24_hours_count" {
   EOQ
 }
 
-query "alicloud_ram_group_30_days_count" {
+query "ram_group_30_days_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -90,7 +90,7 @@ query "alicloud_ram_group_30_days_count" {
   EOQ
 }
 
-query "alicloud_ram_group_30_90_days_count" {
+query "ram_group_30_90_days_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -103,7 +103,7 @@ query "alicloud_ram_group_30_90_days_count" {
   EOQ
 }
 
-query "alicloud_ram_group_90_365_days_count" {
+query "ram_group_90_365_days_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -116,7 +116,7 @@ query "alicloud_ram_group_90_365_days_count" {
   EOQ
 }
 
-query "alicloud_ram_group_1_year_count" {
+query "ram_group_1_year_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -128,7 +128,7 @@ query "alicloud_ram_group_1_year_count" {
   EOQ
 }
 
-query "alicloud_ram_group_age_table" {
+query "ram_group_age_table" {
   sql = <<-EOQ
     select
       b.name as "Name",

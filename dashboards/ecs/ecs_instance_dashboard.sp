@@ -1,4 +1,4 @@
-dashboard "alicloud_ecs_instance_dashboard" {
+dashboard "ecs_instance_dashboard" {
 
   title         = "AliCloud ECS Instance Dashboard"
   documentation = file("./dashboards/ecs/docs/ecs_instance_dashboard.md")
@@ -11,29 +11,29 @@ dashboard "alicloud_ecs_instance_dashboard" {
 
     # Analysis
     card {
-      query = query.alicloud_ecs_instance_count
+      query = query.ecs_instance_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ecs_instance_total_cores_count
+      query = query.ecs_instance_total_cores_count
       width = 2
     }
 
     # Assessments
     card {
-      query = query.alicloud_ecs_instance_public_instance_count
+      query = query.ecs_instance_public_instance_count
       width = 2
-      href  = dashboard.alicloud_ecs_instance_public_access_report.url_path
+      href  = dashboard.ecs_instance_public_access_report.url_path
     }
 
     card {
-      query = query.alicloud_ecs_instance_io_optimized_count
+      query = query.ecs_instance_io_optimized_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ecs_instance_deletion_protection_disabled_count
+      query = query.ecs_instance_deletion_protection_disabled_count
       width = 2
     }
 
@@ -45,7 +45,7 @@ dashboard "alicloud_ecs_instance_dashboard" {
 
     chart {
       title = "Public/Private"
-      query = query.alicloud_ecs_instance_by_public_ip
+      query = query.ecs_instance_by_public_ip
       type  = "donut"
       width = 3
 
@@ -61,7 +61,7 @@ dashboard "alicloud_ecs_instance_dashboard" {
 
     chart {
       title = "I/O Optimized Status"
-      query = query.alicloud_ecs_instance_by_io_optimized
+      query = query.ecs_instance_by_io_optimized
       type  = "donut"
       width = 3
 
@@ -77,7 +77,7 @@ dashboard "alicloud_ecs_instance_dashboard" {
 
     chart {
       title = "Deletion Protection Status"
-      query = query.alicloud_ecs_instance_by_deletion_protection
+      query = query.ecs_instance_by_deletion_protection
       type  = "donut"
       width = 3
 
@@ -99,49 +99,49 @@ dashboard "alicloud_ecs_instance_dashboard" {
 
     chart {
       title = "Instances by Account"
-      query = query.alicloud_ecs_instance_by_account
+      query = query.ecs_instance_by_account
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Instances by Region"
-      query = query.alicloud_ecs_instance_by_region
+      query = query.ecs_instance_by_region
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Instances by State"
-      query = query.alicloud_ecs_instance_by_state
+      query = query.ecs_instance_by_state
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Instances by Age"
-      query = query.alicloud_ecs_instance_by_creation_month
+      query = query.ecs_instance_by_creation_month
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Instances by Type"
-      query = query.alicloud_ecs_instance_by_type
+      query = query.ecs_instance_by_type
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Instances by OS Type"
-      query = query.alicloud_ecs_instance_by_os_type
+      query = query.ecs_instance_by_os_type
       type  = "column"
       width = 3
     }
 
     chart {
       title = "Instances by Network Type"
-      query = query.alicloud_ecs_instance_by_network_type
+      query = query.ecs_instance_by_network_type
       type  = "column"
       width = 3
     }
@@ -154,14 +154,14 @@ dashboard "alicloud_ecs_instance_dashboard" {
 
     chart {
       title = "Top 10 CPU - Last 7 days"
-      query = query.alicloud_ecs_instance_top10_cpu_past_week
+      query = query.ecs_instance_top10_cpu_past_week
       type  = "line"
       width = 6
     }
 
     chart {
       title = "Average Max Daily CPU - Last 30 days"
-      query = query.alicloud_ecs_instance_by_cpu_utilization_category
+      query = query.ecs_instance_by_cpu_utilization_category
       type  = "column"
       width = 6
     }
@@ -172,13 +172,13 @@ dashboard "alicloud_ecs_instance_dashboard" {
 
 # Card Queries
 
-query "alicloud_ecs_instance_count" {
+query "ecs_instance_count" {
   sql = <<-EOQ
     select count(*) as "Instances" from alicloud_ecs_instance;
   EOQ
 }
 
-query "alicloud_ecs_instance_total_cores_count" {
+query "ecs_instance_total_cores_count" {
   sql = <<-EOQ
     select
       cpu_options_core_count as "Total Cores"
@@ -187,7 +187,7 @@ query "alicloud_ecs_instance_total_cores_count" {
   EOQ
 }
 
-query "alicloud_ecs_instance_public_instance_count" {
+query "ecs_instance_public_instance_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -200,7 +200,7 @@ query "alicloud_ecs_instance_public_instance_count" {
   EOQ
 }
 
-query "alicloud_ecs_instance_io_optimized_count" {
+query "ecs_instance_io_optimized_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -213,7 +213,7 @@ query "alicloud_ecs_instance_io_optimized_count" {
   EOQ
 }
 
-query "alicloud_ecs_instance_deletion_protection_disabled_count" {
+query "ecs_instance_deletion_protection_disabled_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -228,7 +228,7 @@ query "alicloud_ecs_instance_deletion_protection_disabled_count" {
 
 # Assessment Queries
 
-query "alicloud_ecs_instance_by_public_ip" {
+query "ecs_instance_by_public_ip" {
   sql = <<-EOQ
     with instances as (
       select
@@ -249,7 +249,7 @@ query "alicloud_ecs_instance_by_public_ip" {
   EOQ
 }
 
-query "alicloud_ecs_instance_by_io_optimized" {
+query "ecs_instance_by_io_optimized" {
   sql = <<-EOQ
     with instances as (
       select
@@ -270,7 +270,7 @@ query "alicloud_ecs_instance_by_io_optimized" {
   EOQ
 }
 
-query "alicloud_ecs_instance_by_deletion_protection" {
+query "ecs_instance_by_deletion_protection" {
   sql = <<-EOQ
     with instances as (
       select
@@ -293,7 +293,7 @@ query "alicloud_ecs_instance_by_deletion_protection" {
 
 # Analysis Queries
 
-query "alicloud_ecs_instance_by_account" {
+query "ecs_instance_by_account" {
   sql = <<-EOQ
     select
       a.title as "account",
@@ -309,7 +309,7 @@ query "alicloud_ecs_instance_by_account" {
   EOQ
 }
 
-query "alicloud_ecs_instance_by_region" {
+query "ecs_instance_by_region" {
   sql = <<-EOQ
     select
       region,
@@ -321,7 +321,7 @@ query "alicloud_ecs_instance_by_region" {
   EOQ
 }
 
-query "alicloud_ecs_instance_by_state" {
+query "ecs_instance_by_state" {
   sql = <<-EOQ
     select
       status,
@@ -333,7 +333,7 @@ query "alicloud_ecs_instance_by_state" {
   EOQ
 }
 
-query "alicloud_ecs_instance_by_creation_month" {
+query "ecs_instance_by_creation_month" {
   sql = <<-EOQ
     with instances as (
       select
@@ -378,7 +378,7 @@ query "alicloud_ecs_instance_by_creation_month" {
   EOQ
 }
 
-query "alicloud_ecs_instance_by_type" {
+query "ecs_instance_by_type" {
   sql = <<-EOQ
     select
       instance_type as "Type",
@@ -392,7 +392,7 @@ query "alicloud_ecs_instance_by_type" {
   EOQ
 }
 
-query "alicloud_ecs_instance_by_os_type" {
+query "ecs_instance_by_os_type" {
   sql = <<-EOQ
     select
       os_type as "Type",
@@ -406,7 +406,7 @@ query "alicloud_ecs_instance_by_os_type" {
   EOQ
 }
 
-query "alicloud_ecs_instance_by_network_type" {
+query "ecs_instance_by_network_type" {
   sql = <<-EOQ
     select
       instance_network_type as "Type",
@@ -422,7 +422,7 @@ query "alicloud_ecs_instance_by_network_type" {
 
 # Performance Queries
 
-query "alicloud_ecs_instance_top10_cpu_past_week" {
+query "ecs_instance_top10_cpu_past_week" {
   sql = <<-EOQ
     with top_n as (
       select
@@ -453,7 +453,7 @@ query "alicloud_ecs_instance_top10_cpu_past_week" {
 }
 
 # underused if avg CPU < 10% every day for last month
-query "alicloud_ecs_instance_by_cpu_utilization_category" {
+query "ecs_instance_by_cpu_utilization_category" {
   sql = <<-EOQ
     with cpu_buckets as (
       select

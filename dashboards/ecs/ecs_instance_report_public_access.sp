@@ -1,4 +1,4 @@
-dashboard "alicloud_ecs_instance_public_access_report" {
+dashboard "ecs_instance_public_access_report" {
 
   title         = "AliCloud ECS Instance Public Access Report"
   documentation = file("./dashboards/ecs/docs/ecs_instance_report_public_access.md")
@@ -11,12 +11,12 @@ dashboard "alicloud_ecs_instance_public_access_report" {
   container {
 
     card {
-      query = query.alicloud_ecs_instance_count
+      query = query.ecs_instance_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ecs_instance_public_access_count
+      query = query.ecs_instance_public_access_count
       width = 2
     }
 
@@ -32,15 +32,15 @@ dashboard "alicloud_ecs_instance_public_access_report" {
     }
 
     column "Instance ID" {
-      href = "${dashboard.alicloud_ecs_instance_detail.url_path}?input.instance_arn={{.ARN | @uri}}"
+      href = "${dashboard.ecs_instance_detail.url_path}?input.instance_arn={{.ARN | @uri}}"
     }
 
-    query = query.alicloud_ecs_instance_public_access_table
+    query = query.ecs_instance_public_access_table
   }
 
 }
 
-query "alicloud_ecs_instance_public_access_count" {
+query "ecs_instance_public_access_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -53,7 +53,7 @@ query "alicloud_ecs_instance_public_access_count" {
   EOQ
 }
 
-query "alicloud_ecs_instance_public_access_table" {
+query "ecs_instance_public_access_table" {
   sql = <<-EOQ
     select
       i.instance_id as "Instance ID",

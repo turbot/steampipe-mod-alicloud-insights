@@ -1,4 +1,4 @@
-dashboard "alicloud_ram_role_dashboard" {
+dashboard "ram_role_dashboard" {
 
   title         = "AliCloud RAM Role Dashboard"
   documentation = file("./dashboards/ram/docs/ram_role_dashboard.md")
@@ -12,22 +12,22 @@ dashboard "alicloud_ram_role_dashboard" {
     # Analysis
 
     card {
-      query = query.alicloud_ram_role_count
+      query = query.ram_role_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ram_roles_without_policy_count
+      query = query.ram_roles_without_policy_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ram_role_with_admin_access_count
+      query = query.ram_role_with_admin_access_count
       width = 2
     }
 
     card {
-      query = query.alicloud_ram_role_allows_cross_account_access_count
+      query = query.ram_role_allows_cross_account_access_count
       width = 2
     }
 
@@ -38,7 +38,7 @@ dashboard "alicloud_ram_role_dashboard" {
 
     chart {
       title = "Allows Administrator Actions"
-      query = query.alicloud_ram_roles_allow_admin_action
+      query = query.ram_roles_allow_admin_action
       type  = "donut"
       width = 3
 
@@ -54,7 +54,7 @@ dashboard "alicloud_ram_role_dashboard" {
 
     chart {
       title = "Allows Cross-Account Access"
-      query = query.alicloud_ram_roles_allow_cross_account_access
+      query = query.ram_roles_allow_cross_account_access
       type  = "donut"
       width = 3
 
@@ -76,14 +76,14 @@ dashboard "alicloud_ram_role_dashboard" {
 
     chart {
       title = "Roles by Account"
-      query = query.alicloud_ram_roles_by_account
+      query = query.ram_roles_by_account
       type  = "column"
       width = 4
     }
 
     chart {
       title = "Roles by Age"
-      query = query.alicloud_ram_roles_by_creation_month
+      query = query.ram_roles_by_creation_month
       type  = "column"
       width = 4
     }
@@ -94,13 +94,13 @@ dashboard "alicloud_ram_role_dashboard" {
 
 # Card Queries
 
-query "alicloud_ram_role_count" {
+query "ram_role_count" {
   sql = <<-EOQ
     select count(*) as "Roles" from alicloud_ram_role;
   EOQ
 }
 
-query "alicloud_ram_roles_without_policy_count" {
+query "ram_roles_without_policy_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -113,7 +113,7 @@ query "alicloud_ram_roles_without_policy_count" {
   EOQ
 }
 
-query "alicloud_ram_role_with_admin_access_count" {
+query "ram_role_with_admin_access_count" {
   sql = <<-EOQ
     select
       count(distinct name) as value,
@@ -127,7 +127,7 @@ query "alicloud_ram_role_with_admin_access_count" {
   EOQ
 }
 
-query "alicloud_ram_role_allows_cross_account_access_count" {
+query "ram_role_allows_cross_account_access_count" {
   sql = <<-EOQ
     with roles_with_cross_account_access as (
       select
@@ -150,7 +150,7 @@ query "alicloud_ram_role_allows_cross_account_access_count" {
 
 # Assessment Queries
 
-query "alicloud_ram_roles_allow_admin_action" {
+query "ram_roles_allow_admin_action" {
   sql = <<-EOQ
     with admin_role_access as (
       select
@@ -173,7 +173,7 @@ query "alicloud_ram_roles_allow_admin_action" {
   EOQ
 }
 
-query "alicloud_ram_roles_allow_cross_account_access" {
+query "ram_roles_allow_cross_account_access" {
   sql = <<-EOQ
     with roles_with_cross_account_access as (
       select
@@ -199,7 +199,7 @@ query "alicloud_ram_roles_allow_cross_account_access" {
 
 # Analysis Queries
 
-query "alicloud_ram_roles_by_account" {
+query "ram_roles_by_account" {
   sql = <<-EOQ
     select
       a.title as "account",
@@ -215,7 +215,7 @@ query "alicloud_ram_roles_by_account" {
   EOQ
 }
 
-query "alicloud_ram_roles_by_creation_month" {
+query "ram_roles_by_creation_month" {
   sql = <<-EOQ
     with roles as (
       select

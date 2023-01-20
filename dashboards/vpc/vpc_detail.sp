@@ -1,4 +1,4 @@
-dashboard "alicloud_vpc_detail" {
+dashboard "vpc_detail" {
 
   title         = "AliCloud VPC Detail"
   documentation = file("./dashboards/vpc/docs/vpc_detail.md")
@@ -9,7 +9,7 @@ dashboard "alicloud_vpc_detail" {
 
   input "vpc_id" {
     title = "Select a VPC:"
-    query = query.alicloud_vpc_input
+    query = query.vpc_input
     width = 4
   }
 
@@ -17,36 +17,230 @@ dashboard "alicloud_vpc_detail" {
 
     card {
       width = 2
-      query = query.alicloud_vpc_ipv4_count
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      query = query.vpc_ipv4_count
+      args  = [self.input.vpc_id.value]
     }
 
     card {
       width = 2
-      query = query.alicloud_vpc_ipv6_count
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      query = query.vpc_ipv6_count
+      args  = [self.input.vpc_id.value]
     }
 
     card {
       width = 2
-      query = query.alicloud_vpc_vswitch_count
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      query = query.vpc_vswitch_count
+      args  = [self.input.vpc_id.value]
     }
 
     card {
       width = 2
-      query = query.alicloud_vpc_is_default
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      query = query.vpc_is_default
+      args  = [self.input.vpc_id.value]
     }
 
+  }
+
+  with "ecs_instances_for_vpc" {
+    query = query.ecs_instances_for_vpc
+    args  = [self.input.vpc_id.value]
+  }
+
+  with "ecs_network_interfaces_for_vpc" {
+    query = query.ecs_network_interfaces_for_vpc
+    args  = [self.input.vpc_id.value]
+  }
+
+  with "ecs_security_groups_for_vpc" {
+    query = query.ecs_security_groups_for_vpc
+    args  = [self.input.vpc_id.value]
+  }
+
+  with "rds_instances_for_vpc" {
+    query = query.rds_instances_for_vpc
+    args  = [self.input.vpc_id.value]
+  }
+
+  with "vpc_dhcp_options_sets_for_vpc" {
+    query = query.vpc_dhcp_options_sets_for_vpc
+    args  = [self.input.vpc_id.value]
+  }
+
+  with "vpc_nat_gateways_for_vpc" {
+    query = query.vpc_nat_gateways_for_vpc
+    args  = [self.input.vpc_id.value]
+  }
+
+  with "vpc_route_tables_for_vpc" {
+    query = query.vpc_route_tables_for_vpc
+    args  = [self.input.vpc_id.value]
+  }
+
+  with "vpc_vswitches_for_vpc" {
+    query = query.vpc_vswitches_for_vpc
+    args  = [self.input.vpc_id.value]
+  }
+
+  container {
+    graph {
+      title = "Relationships"
+      type  = "graph"
+
+      node {
+        base = node.ecs_instance
+        args = {
+          ecs_instance_arns = with.ecs_instances_for_vpc.rows[*].instance_arn
+        }
+      }
+
+      node {
+        base = node.ecs_network_interface
+        args = {
+          ecs_network_interface_ids = with.ecs_network_interfaces_for_vpc.rows[*].eni_id
+        }
+      }
+
+      node {
+        base = node.ecs_security_group
+        args = {
+          ecs_security_group_ids = with.ecs_security_groups_for_vpc.rows[*].security_group_id
+        }
+      }
+
+
+      node {
+        base = node.rds_instance
+        args = {
+          rds_instance_arns = with.rds_instances_for_vpc.rows[*].rds_instance_arn
+        }
+      }
+
+      node {
+        base = node.vpc_availability_zone
+        args = {
+          vpc_vpc_ids = [self.input.vpc_id.value]
+        }
+      }
+
+      node {
+        base = node.vpc_dhcp_option_set
+        args = {
+          vpc_dhcp_option_set_ids = with.vpc_dhcp_options_sets_for_vpc.rows[*].dhcp_options_set_id
+        }
+      }
+
+      node {
+        base = node.vpc_nat_gateway
+        args = {
+          vpc_nat_gateway_ids = with.vpc_nat_gateways_for_vpc.rows[*].gateway_id
+        }
+      }
+
+      node {
+        base = node.vpc_route_table
+        args = {
+          vpc_route_table_ids = with.vpc_route_tables_for_vpc.rows[*].route_table_id
+        }
+      }
+
+      node {
+        base = node.vpc_vpc
+        args = {
+          vpc_vpc_ids = [self.input.vpc_id.value]
+        }
+      }
+
+      node {
+        base = node.vpc_vpn_gateway
+        args = {
+          vpc_vpc_ids = [self.input.vpc_id.value]
+        }
+      }
+
+      node {
+        base = node.vpc_vswitch
+        args = {
+          vpc_vswitch_ids = with.vpc_vswitches_for_vpc.rows[*].vswitch_id
+        }
+      }
+
+      edge {
+        base = edge.vpc_availability_zone_to_vpc_vswitch
+        args = {
+          vpc_vpc_ids = [self.input.vpc_id.value]
+        }
+      }
+
+      edge {
+        base = edge.vpc_vpc_to_vpc_availability_zone
+        args = {
+          vpc_vpc_ids = [self.input.vpc_id.value]
+        }
+      }
+
+      edge {
+        base = edge.vpc_vpc_to_vpc_route_table
+        args = {
+          vpc_vpc_ids = [self.input.vpc_id.value]
+        }
+      }
+
+      edge {
+        base = edge.vpc_vpc_to_ecs_security_group
+        args = {
+          vpc_vpc_ids = [self.input.vpc_id.value]
+        }
+      }
+
+      edge {
+        base = edge.vpc_vpc_to_vpc_dhcp_option_set
+        args = {
+          vpc_dhcp_option_set_ids = with.vpc_dhcp_options_sets_for_vpc.rows[*].dhcp_options_set_id
+        }
+      }
+
+      edge {
+        base = edge.vpc_vpc_to_vpc_vpn_gateway
+        args = {
+          vpc_vpc_ids = [self.input.vpc_id.value]
+        }
+      }
+
+      edge {
+        base = edge.vpc_vswitch_to_ecs_instance
+        args = {
+          vpc_vswitch_ids = with.vpc_vswitches_for_vpc.rows[*].vswitch_id
+        }
+      }
+
+      edge {
+        base = edge.vpc_vswitch_to_ecs_network_interface
+        args = {
+          vpc_vswitch_ids = with.vpc_vswitches_for_vpc.rows[*].vswitch_id
+        }
+      }
+
+      edge {
+        base = edge.vpc_vswitch_to_nat_gateway
+        args = {
+          vpc_nat_gateway_ids = with.vpc_nat_gateways_for_vpc.rows[*].gateway_id
+        }
+      }
+
+      edge {
+        base = edge.vpc_vswitch_to_rds_instance
+        args = {
+          vpc_vswitch_ids = with.vpc_vswitches_for_vpc.rows[*].vswitch_id
+        }
+      }
+
+      edge {
+        base = edge.vpc_vswitch_to_vpc_route_table
+        args = {
+          vpc_vswitch_ids = with.vpc_vswitches_for_vpc.rows[*].vswitch_id
+        }
+      }
+    }
   }
 
   container {
@@ -59,19 +253,15 @@ dashboard "alicloud_vpc_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.alicloud_vpc_overview
-        args = {
-          vpc_id = self.input.vpc_id.value
-        }
+        query = query.vpc_overview
+        args  = [self.input.vpc_id.value]
       }
 
       table {
         title = "Tags"
         width = 6
-        query = query.alicloud_vpc_tags
-        args = {
-          vpc_id = self.input.vpc_id.value
-        }
+        query = query.vpc_tags
+        args  = [self.input.vpc_id.value]
       }
 
     }
@@ -82,18 +272,14 @@ dashboard "alicloud_vpc_detail" {
 
       table {
         title = "CIDR Blocks"
-        query = query.alicloud_vpc_cidr_blocks
-        args = {
-          vpc_id = self.input.vpc_id.value
-        }
+        query = query.vpc_cidr_blocks
+        args  = [self.input.vpc_id.value]
       }
 
       table {
         title = "DHCP Options"
-        query = query.alicloud_vpc_dhcp_options
-        args = {
-          vpc_id = self.input.vpc_id.value
-        }
+        query = query.vpc_dhcp_options
+        args  = [self.input.vpc_id.value]
       }
 
     }
@@ -108,19 +294,17 @@ dashboard "alicloud_vpc_detail" {
       title = "vSwitches by Zone"
       type  = "column"
       width = 4
-      query = query.alicloud_vpc_vswitch_by_az
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
-
+      query = query.vpc_vswitch_by_az
+      args  = [self.input.vpc_id.value]
     }
 
     table {
-      query = query.alicloud_vpc_vswitches_detail
+      query = query.vpc_vswitches_detail
       width = 8
-      args = {
-        vpc_id = self.input.vpc_id.value
+      column "vSwitch ID" {
+        href = "${dashboard.vpc_vswitch_detail.url_path}?input.vswitch_id={{.properties.'vSwitch ID' | @uri}}"
       }
+      args = [self.input.vpc_id.value]
     }
 
   }
@@ -129,20 +313,16 @@ dashboard "alicloud_vpc_detail" {
 
     table {
       title = "Route Tables"
-      query = query.alicloud_vpc_route_tables_detail
+      query = query.vpc_route_tables_detail
       width = 6
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      args  = [self.input.vpc_id.value]
     }
 
     table {
       title = "Routes"
-      query = query.alicloud_vpc_routes_detail
+      query = query.vpc_routes_detail
       width = 6
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      args  = [self.input.vpc_id.value]
     }
 
   }
@@ -151,15 +331,12 @@ dashboard "alicloud_vpc_detail" {
 
     title = "NACLs"
 
-
     flow {
       base  = flow.nacl_flow
       title = "Ingress NACLs"
       width = 6
-      query = query.alicloud_vpc_ingress_nacl_sankey
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      query = query.vpc_ingress_nacl_sankey
+      args  = [self.input.vpc_id.value]
     }
 
 
@@ -167,10 +344,8 @@ dashboard "alicloud_vpc_detail" {
       base  = flow.nacl_flow
       title = "Egress NACLs"
       width = 6
-      query = query.alicloud_vpc_egress_nacl_sankey
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      query = query.vpc_egress_nacl_sankey
+      args  = [self.input.vpc_id.value]
     }
 
 
@@ -181,20 +356,16 @@ dashboard "alicloud_vpc_detail" {
     table {
       title = "Security Groups"
 
-      query = query.alicloud_vpc_security_groups_detail
+      query = query.vpc_security_groups_detail
       width = 6
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      args  = [self.input.vpc_id.value]
     }
 
     table {
       title = "Gateways"
-      query = query.alicloud_vpc_gateways_detail
+      query = query.vpc_gateways_detail
       width = 6
-      args = {
-        vpc_id = self.input.vpc_id.value
-      }
+      args  = [self.input.vpc_id.value]
     }
 
   }
@@ -219,7 +390,7 @@ flow "nacl_flow" {
 
 }
 
-query "alicloud_vpc_input" {
+query "vpc_input" {
   sql = <<-EOQ
     select
       title as label,
@@ -236,7 +407,7 @@ query "alicloud_vpc_input" {
   EOQ
 }
 
-query "alicloud_vpc_ipv4_count" {
+query "vpc_ipv4_count" {
   sql = <<-EOQ
     with cidrs as (
       select
@@ -260,10 +431,9 @@ query "alicloud_vpc_ipv4_count" {
       cidrs;
   EOQ
 
-  param "vpc_id" {}
 }
 
-query "alicloud_vpc_ipv6_count" {
+query "vpc_ipv6_count" {
   sql = <<-EOQ
     with cidrs as (
       select
@@ -280,10 +450,9 @@ query "alicloud_vpc_ipv6_count" {
       cidrs;
   EOQ
 
-  param "vpc_id" {}
 }
 
-query "alicloud_vpc_vswitch_count" {
+query "vpc_vswitch_count" {
   sql = <<-EOQ
     select
       'vSwitches' as label,
@@ -295,10 +464,9 @@ query "alicloud_vpc_vswitch_count" {
       vpc_id = $1;
   EOQ
 
-  param "vpc_id" {}
 }
 
-query "alicloud_vpc_is_default" {
+query "vpc_is_default" {
   sql = <<-EOQ
     select
       'Default VPC' as label,
@@ -310,10 +478,106 @@ query "alicloud_vpc_is_default" {
       vpc_id = $1;
   EOQ
 
-  param "vpc_id" {}
 }
 
-query "alicloud_vpc_overview" {
+# with queries
+
+query "ecs_instances_for_vpc" {
+  sql = <<-EOQ
+    select
+      arn as instance_arn
+    from
+      alicloud_ecs_instance as i
+    where
+      vpc_id = $1;
+  EOQ
+}
+
+query "ecs_network_interfaces_for_vpc" {
+  sql = <<-EOQ
+    select
+      network_interface_id as eni_id
+    from
+      alicloud_ecs_network_interface
+    where
+      vpc_id = $1;
+  EOQ
+}
+
+query "rds_instances_for_vpc" {
+  sql = <<-EOQ
+    select
+      arn as rds_instance_arn
+    from
+      alicloud_rds_instance
+    where
+      vpc_id = $1;
+  EOQ
+}
+
+query "vpc_dhcp_options_sets_for_vpc" {
+  sql = <<-EOQ
+    with vpcs as (
+      select
+        jsonb_array_elements(associate_vpcs)->> 'VpcId' as vpc_id
+      from
+        alicloud_vpc_dhcp_options_set
+    )
+    select
+      d.dhcp_options_set_id
+    from
+      alicloud_vpc_dhcp_options_set as d,
+      vpcs as v
+    where
+      v.vpc_id = $1;
+  EOQ
+}
+
+query "vpc_nat_gateways_for_vpc" {
+  sql = <<-EOQ
+    select
+      nat_gateway_id as gateway_id
+    from
+      alicloud_vpc_nat_gateway
+    where
+      vpc_id = $1;
+  EOQ
+}
+
+query "ecs_security_groups_for_vpc" {
+  sql = <<-EOQ
+    select
+      security_group_id as security_group_id
+    from
+      alicloud_ecs_security_group
+    where
+      vpc_id = $1;
+  EOQ
+}
+
+query "vpc_vswitches_for_vpc" {
+  sql = <<-EOQ
+    select
+      vswitch_id as vswitch_id
+    from
+      alicloud_vpc_vswitch
+    where
+      vpc_id = $1;
+  EOQ
+}
+
+query "vpc_route_tables_for_vpc" {
+  sql = <<-EOQ
+    select
+      route_table_id as route_table_id
+    from
+      alicloud_vpc_route_table
+    where
+      vpc_id = $1;
+  EOQ
+}
+
+query "vpc_overview" {
   sql = <<-EOQ
     select
       vpc_id as "VPC ID",
@@ -326,10 +590,9 @@ query "alicloud_vpc_overview" {
       vpc_id = $1
   EOQ
 
-  param "vpc_id" {}
 }
 
-query "alicloud_vpc_tags" {
+query "vpc_tags" {
   sql = <<-EOQ
     select
       tag ->> 'Key' as "Key",
@@ -343,10 +606,9 @@ query "alicloud_vpc_tags" {
       tag ->> 'Key';
   EOQ
 
-  param "vpc_id" {}
 }
 
-query "alicloud_vpc_cidr_blocks" {
+query "vpc_cidr_blocks" {
   sql = <<-EOQ
     select
       cidr_block as "CIDR Block",
@@ -375,10 +637,9 @@ query "alicloud_vpc_cidr_blocks" {
       vpc_id = $1;
   EOQ
 
-  param "vpc_id" {}
 }
 
-query "alicloud_vpc_dhcp_options" {
+query "vpc_dhcp_options" {
   sql = <<-EOQ
     select
       distinct dhcp_options_set_id as "DHCP Options Set ID",
@@ -397,10 +658,9 @@ query "alicloud_vpc_dhcp_options" {
       dhcp_options_set_id;
   EOQ
 
-  param "vpc_id" {}
 }
 
-query "alicloud_vpc_vswitch_by_az" {
+query "vpc_vswitch_by_az" {
   sql = <<-EOQ
     select
       zone_id,
@@ -415,10 +675,9 @@ query "alicloud_vpc_vswitch_by_az" {
       zone_id;
   EOQ
 
-  param "vpc_id" {}
 }
 
-query "alicloud_vpc_vswitches_detail" {
+query "vpc_vswitches_detail" {
   sql = <<-EOQ
     with vSwitches as (
       select
@@ -447,10 +706,9 @@ query "alicloud_vpc_vswitches_detail" {
       vswitch_id;
   EOQ
 
-  param "vpc_id" {}
 }
 
-query "alicloud_vpc_route_tables_detail" {
+query "vpc_route_tables_detail" {
   sql = <<-EOQ
     select
       route_table_id as "Route Table ID",
@@ -463,10 +721,9 @@ query "alicloud_vpc_route_tables_detail" {
       route_table_id;
   EOQ
 
-  param "vpc_id" {}
 }
 
-query "alicloud_vpc_routes_detail" {
+query "vpc_routes_detail" {
   sql = <<-EOQ
     select
       route_table_id as "Route Table ID",
@@ -489,10 +746,9 @@ query "alicloud_vpc_routes_detail" {
       "Associated To";
   EOQ
 
-  param "vpc_id" {}
 }
 
-query "alicloud_vpc_security_groups_detail" {
+query "vpc_security_groups_detail" {
   sql = <<-EOQ
     select
       name as "Group Name",
@@ -505,10 +761,9 @@ query "alicloud_vpc_security_groups_detail" {
       vpc_id = $1;
   EOQ
 
-  param "vpc_id" {}
 }
 
-query "alicloud_vpc_gateways_detail" {
+query "vpc_gateways_detail" {
   sql = <<-EOQ
     select
       vpn_gateway_id as "ID",
@@ -531,10 +786,9 @@ query "alicloud_vpc_gateways_detail" {
        vpc_id = $1;
   EOQ
 
-  param "vpc_id" {}
 }
 
-query "alicloud_vpc_ingress_nacl_sankey" {
+query "vpc_ingress_nacl_sankey" {
   sql = <<-EOQ
     with aces as (
       select
@@ -636,10 +890,9 @@ query "alicloud_vpc_ingress_nacl_sankey" {
     from aces
   EOQ
 
-  param "vpc_id" {}
 }
 
-query "alicloud_vpc_egress_nacl_sankey" {
+query "vpc_egress_nacl_sankey" {
   sql = <<-EOQ
     with aces as (
       select
@@ -748,7 +1001,6 @@ query "alicloud_vpc_egress_nacl_sankey" {
     from aces
   EOQ
 
-  param "vpc_id" {}
 }
 
 

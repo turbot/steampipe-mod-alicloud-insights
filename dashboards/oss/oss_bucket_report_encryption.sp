@@ -1,4 +1,4 @@
-dashboard "alicloud_oss_bucket_encryption_report" {
+dashboard "oss_bucket_encryption_report" {
 
   title         = "AliCloud OSS Bucket Encryption Report"
   documentation = file("./dashboards/oss/docs/oss_bucket_report_encryption.md")
@@ -11,27 +11,27 @@ dashboard "alicloud_oss_bucket_encryption_report" {
   container {
 
     card {
-      query = query.alicloud_oss_bucket_count
+      query = query.oss_bucket_count
       width = 2
     }
 
     card {
-      query = query.alicloud_oss_bucket_encrypted_with_byok_count
+      query = query.oss_bucket_encrypted_with_byok_count
       width = 2
     }
 
     card {
-      query = query.alicloud_oss_bucket_encrypted_with_servcie_key_count
+      query = query.oss_bucket_encrypted_with_servcie_key_count
       width = 2
     }
 
     card {
-      query = query.alicloud_oss_bucket_unencrypted_count
+      query = query.oss_bucket_unencrypted_count
       width = 2
     }
 
     card {
-      query = query.alicloud_oss_bucket_ssl_not_enforced_count
+      query = query.oss_bucket_ssl_not_enforced_count
       width = 2
     }
 
@@ -47,15 +47,15 @@ dashboard "alicloud_oss_bucket_encryption_report" {
     }
 
     column "Name" {
-      href = "${dashboard.alicloud_oss_bucket_detail.url_path}?input.bucket_arn={{.ARN | @uri}}"
+      href = "${dashboard.oss_bucket_detail.url_path}?input.bucket_arn={{.ARN | @uri}}"
     }
 
-    query = query.alicloud_oss_bucket_encryption_table
+    query = query.oss_bucket_encryption_table
   }
 
 }
 
-query "alicloud_oss_bucket_encrypted_with_byok_count" {
+query "oss_bucket_encrypted_with_byok_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -68,7 +68,7 @@ query "alicloud_oss_bucket_encrypted_with_byok_count" {
   EOQ
 }
 
-query "alicloud_oss_bucket_encrypted_with_servcie_key_count" {
+query "oss_bucket_encrypted_with_servcie_key_count" {
   sql = <<-EOQ
     select
       count(*) as value,
@@ -81,7 +81,7 @@ query "alicloud_oss_bucket_encrypted_with_servcie_key_count" {
   EOQ
 }
 
-query "alicloud_oss_bucket_encryption_table" {
+query "oss_bucket_encryption_table" {
   sql = <<-EOQ
     with ssl_ok as (
       select

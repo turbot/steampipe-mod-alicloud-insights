@@ -1,4 +1,4 @@
-dashboard "alicloud_ram_role_detail" {
+dashboard "ram_role_detail" {
 
   title         = "AliCloud RAM Role Detail"
   documentation = file("./dashboards/ram/docs/ram_role_detail.md")
@@ -9,38 +9,84 @@ dashboard "alicloud_ram_role_detail" {
 
   input "role_arn" {
     title = "Select a role:"
-    query = query.alicloud_ram_role_input
-    width = 2
+    query = query.ram_role_input
+    width = 4
   }
 
   container {
 
     card {
       width = 2
-      query = query.alicloud_ram_role_policy_count_for_role
-      args = {
-        arn = self.input.role_arn.value
-      }
+      query = query.ram_role_policy_count_for_role
+      args  = [self.input.role_arn.value]
     }
 
     card {
       width = 2
-      query = query.alicloud_ram_role_with_admin_access
-      args = {
-        arn = self.input.role_arn.value
-      }
+      query = query.ram_role_with_admin_access
+      args  = [self.input.role_arn.value]
     }
 
     card {
       width = 2
-      query = query.alicloud_ram_role_with_cross_account_access
-      args = {
-        arn = self.input.role_arn.value
-      }
+      query = query.ram_role_with_cross_account_access
+      args  = [self.input.role_arn.value]
     }
 
   }
 
+  with "action_trails_for_ram_role" {
+    query = query.action_trails_for_ram_role
+    args  = [self.input.role_arn.value]
+  }
+
+  with "ram_policies_for_ram_role" {
+    query = query.ram_policies_for_ram_role
+    args  = [self.input.role_arn.value]
+  }
+
+  container {
+
+    graph {
+      title = "Relationships"
+      type  = "graph"
+
+      node {
+        base = node.actiontrail_trail
+        args = {
+          action_trail_names = with.action_trails_for_ram_role.rows[*].trail_name
+        }
+      }
+
+      node {
+        base = node.ram_policy
+        args = {
+          ram_policy_names = with.ram_policies_for_ram_role.rows[*].policy_name
+        }
+      }
+
+      node {
+        base = node.ram_role
+        args = {
+          ram_role_arns = [self.input.role_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.actiontrail_trail_to_ram_role
+        args = {
+          action_trail_names = with.action_trails_for_ram_role.rows[*].trail_name
+        }
+      }
+
+      edge {
+        base = edge.ram_role_to_ram_policy
+        args = {
+          ram_role_arns = [self.input.role_arn.value]
+        }
+      }
+    }
+  }
   container {
 
     container {
@@ -51,10 +97,8 @@ dashboard "alicloud_ram_role_detail" {
         title = "Overview"
         type  = "line"
         width = 6
-        query = query.alicloud_ram_role_overview
-        args = {
-          arn = self.input.role_arn.value
-        }
+        query = query.ram_role_overview
+        args  = [self.input.role_arn.value]
       }
 
     }
@@ -67,10 +111,8 @@ dashboard "alicloud_ram_role_detail" {
         type  = "tree"
         width = 6
         title = "Attached Policies"
-        query = query.alicloud_ram_user_manage_policies_hierarchy
-        args = {
-          arn = self.input.role_arn.value
-        }
+        query = query.ram_user_manage_policies_hierarchy
+        args  = [self.input.role_arn.value]
 
         category "managed_policy" {
           color = "ok"
@@ -82,10 +124,8 @@ dashboard "alicloud_ram_role_detail" {
       table {
         title = "Policies"
         width = 6
-        query = query.alicloud_ram_policies_for_role
-        args = {
-          arn = self.input.role_arn.value
-        }
+        query = query.ram_policies_for_role
+        args  = [self.input.role_arn.value]
       }
 
     }
@@ -93,7 +133,9 @@ dashboard "alicloud_ram_role_detail" {
 
 }
 
-query "alicloud_ram_role_input" {
+# Input queries
+
+query "ram_role_input" {
   sql = <<-EOQ
     select
       title as label,
@@ -108,7 +150,40 @@ query "alicloud_ram_role_input" {
   EOQ
 }
 
-query "alicloud_ram_role_policy_count_for_role" {
+# With queries
+
+query "ram_policies_for_ram_role" {
+  sql = <<-EOQ
+    select
+      p.akas::text as policy_akas
+    from
+      alicloud_ram_role as r,
+      alicloud_ram_policy as p,
+      jsonb_array_elements(r.attached_policy) as policy
+    where
+      r.arn = $1
+      and r.account_id = p.account_id
+      and policy ->> 'PolicyName' = p.policy_name;
+  EOQ
+}
+
+query "action_trails_for_ram_role" {
+  sql = <<-EOQ
+    select
+      t.name as trail_name
+    from
+      alicloud_action_trail as t,
+      alicloud_ram_role as r
+    where
+      r.arn = $1
+      and t.account_id = r.account_id
+      and t.sls_write_role_arn = r.arn;
+  EOQ
+}
+
+# Card queries
+
+query "ram_role_policy_count_for_role" {
   sql = <<-EOQ
     select
       case when attached_policy = '[]' then 0 else jsonb_array_length(attached_policy) end as value,
@@ -118,11 +193,9 @@ query "alicloud_ram_role_policy_count_for_role" {
     where
       arn = $1;
   EOQ
-
-  param "arn" {}
 }
 
-query "alicloud_ram_role_with_admin_access" {
+query "ram_role_with_admin_access" {
   sql = <<-EOQ
     with admin_roles as (
       select
@@ -143,11 +216,9 @@ query "alicloud_ram_role_with_admin_access" {
     where
       r.arn = $1;
   EOQ
-
-  param "arn" {}
 }
 
-query "alicloud_ram_role_with_cross_account_access" {
+query "ram_role_with_cross_account_access" {
   sql = <<-EOQ
     with roles_with_cross_account_access as (
       select
@@ -169,11 +240,11 @@ query "alicloud_ram_role_with_cross_account_access" {
     where
       r.arn = $1;
   EOQ
-
-  param "arn" {}
 }
 
-query "alicloud_ram_role_overview" {
+# Other detail page queries
+
+query "ram_role_overview" {
   sql = <<-EOQ
     select
       name as "Name",
@@ -189,11 +260,9 @@ query "alicloud_ram_role_overview" {
     where
       arn = $1;
   EOQ
-
-  param "arn" {}
 }
 
-query "alicloud_ram_policies_for_role" {
+query "ram_policies_for_role" {
   sql = <<-EOQ
     select
       policies ->> 'PolicyName' as "Name",
@@ -206,11 +275,9 @@ query "alicloud_ram_policies_for_role" {
     where
       arn = $1;
   EOQ
-
-  param "arn" {}
 }
 
-query "alicloud_ram_user_manage_policies_hierarchy" {
+query "ram_user_manage_policies_hierarchy" {
   sql = <<-EOQ
     select
       r.name as id,
@@ -234,6 +301,4 @@ query "alicloud_ram_user_manage_policies_hierarchy" {
     where
       r.arn = $1;
   EOQ
-
-  param "arn" {}
 }

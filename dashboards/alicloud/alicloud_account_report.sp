@@ -1,4 +1,4 @@
-dashboard "alicloud_account_report" {
+dashboard "account_report" {
 
   title         = "AliCloud Account Report"
   documentation = file("./dashboards/alicloud/docs/alicloud_account_report.md")
@@ -11,7 +11,7 @@ dashboard "alicloud_account_report" {
   container {
 
     card {
-      query   = query.alicloud_account_count
+      query = query.account_count
       width = 2
     }
 
@@ -21,13 +21,12 @@ dashboard "alicloud_account_report" {
     column "ARN" {
       display = "none"
     }
-    
-    query = query.alicloud_account_table
+    query = query.account_table
   }
 
 }
 
-query "alicloud_account_count" {
+query "account_count" {
   sql = <<-EOQ
     select
       count(*) as "Accounts"
@@ -36,7 +35,7 @@ query "alicloud_account_count" {
   EOQ
 }
 
-query "alicloud_account_table" {
+query "account_table" {
   sql = <<-EOQ
     select
       account_id as "Account ID",
