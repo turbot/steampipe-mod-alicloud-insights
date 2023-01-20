@@ -1,3 +1,22 @@
+## v0.4 [2023-01-20]
+
+_Dependencies_
+
+- Steampipe `v0.18.0` or higher is now required. ([#66](https://github.com/turbot/steampipe-mod-alicloud-insights/pull/66))
+- Alibaba Cloud plugin `v0.13.0` or higher is now required. ([#66](https://github.com/turbot/steampipe-mod-alicloud-insights/pull/66))
+
+_What's new?_
+
+- Added resource relationship graphs across all the detail dashboards to highlight the relationship the resource shares with other resources. ([#65](https://github.com/turbot/steampipe-mod-alicloud-insights/pull/66))
+- New dashboards added: ([#65](https://github.com/turbot/steampipe-mod-alicloud-insights/pull/65))
+  - [AliCloud RDS Instance Dashboard](https://hub.steampipe.io/mods/turbot/alicloud_insights/dashboards/dashboard.rds_instance_dashboard)
+  - [AliCloud RDS Instance Detail](https://hub.steampipe.io/mods/turbot/alicloud_insights/dashboards/dashboard.rds_instance_detail)
+  - [AliCloud RDS Instance Age Report](https://hub.steampipe.io/mods/turbot/alicloud_insights/dashboards/dashboard.rds_instance_age_report)
+  - [AliCloud RDS Instance Public Access Report](https://hub.steampipe.io/mods/turbot/alicloud_insights/dashboards/dashboard.rds_instance_public_access_report)
+  - [AliCloud VPC VSwitch Detail](https://hub.steampipe.io/mods/turbot/alicloud_insights/dashboards/dashboard.vpc_vswitch_detail)
+  - [AliCloud RAM Policy Detail](https://hub.steampipe.io/mods/turbot/alicloud_insights/dashboards/dashboard.ram_policy_detail)
+  - [AliCloud ECS Snapshot Detail](https://hub.steampipe.io/mods/turbot/alicloud_insights/dashboards/dashboard.ecs_snapshot_detail)
+
 ## v0.3 [2023-01-12]
 
 _Bug fixes_
