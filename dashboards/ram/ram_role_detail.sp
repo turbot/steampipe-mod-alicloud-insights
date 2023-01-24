@@ -40,6 +40,11 @@ dashboard "ram_role_detail" {
     args  = [self.input.role_arn.value]
   }
 
+  with "ecs_instances_for_ram_role" {
+    query = query.ecs_instances_for_ram_role
+    args  = [self.input.role_arn.value]
+  }
+
   with "ram_policies_for_ram_role" {
     query = query.ram_policies_for_ram_role
     args  = [self.input.role_arn.value]
@@ -55,6 +60,13 @@ dashboard "ram_role_detail" {
         base = node.actiontrail_trail
         args = {
           action_trail_names = with.action_trails_for_ram_role.rows[*].trail_name
+        }
+      }
+
+      node {
+        base = node.ecs_instance
+        args = {
+          ecs_instance_arns = with.ecs_instances_for_ram_role.rows[*].instance_arn
         }
       }
 
@@ -76,6 +88,13 @@ dashboard "ram_role_detail" {
         base = edge.actiontrail_trail_to_ram_role
         args = {
           action_trail_names = with.action_trails_for_ram_role.rows[*].trail_name
+        }
+      }
+
+      edge {
+        base = edge.ecs_instance_to_ram_role
+        args = {
+          ecs_instance_arns = with.ecs_instances_for_ram_role.rows[*].instance_arn
         }
       }
 
@@ -164,6 +183,21 @@ query "ram_policies_for_ram_role" {
       r.arn = $1
       and r.account_id = p.account_id
       and policy ->> 'PolicyName' = p.policy_name;
+  EOQ
+}
+
+query "ecs_instances_for_ram_role" {
+  sql = <<-EOQ
+    select
+      i.arn as instance_arn
+    from
+      alicloud_ecs_instance as i,
+      alicloud_ram_role as r,
+      jsonb_array_elements(i.ram_role) as role
+    where
+      r.arn = $1
+      and  r.name = role ->> 'RamRoleName'
+      and role ->> 'RamRoleName' is not null;
   EOQ
 }
 
