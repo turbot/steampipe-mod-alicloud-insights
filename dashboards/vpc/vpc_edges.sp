@@ -66,6 +66,22 @@ edge "vpc_vpc_to_vpc_dhcp_option_set" {
   param "vpc_dhcp_option_set_ids" {}
 }
 
+edge "vpc_vpc_to_vpc_flow_log" {
+  title = "flow log"
+
+  sql = <<-EOQ
+    select
+      resource_id as from_id,
+      flow_log_id as to_id
+    from
+      alicloud_vpc_flow_log
+    where
+      resource_id = any($1);
+  EOQ
+
+  param "vpc_vpc_ids" {}
+}
+
 edge "vpc_vpc_to_vpc_route_table" {
   title = "route to"
   sql   = <<-EOQ
@@ -155,6 +171,22 @@ edge "vpc_vswitch_to_ecs_network_interface" {
       alicloud_ecs_network_interface
     where
       vswitch_id = any($1);
+  EOQ
+
+  param "vpc_vswitch_ids" {}
+}
+
+edge "vpc_vswitch_to_vpc_flow_log" {
+  title = "flow log"
+
+  sql = <<-EOQ
+    select
+      resource_id as from_id,
+      flow_log_id as to_id
+    from
+      alicloud_vpc_flow_log
+    where
+      resource_id = any($1);
   EOQ
 
   param "vpc_vswitch_ids" {}
