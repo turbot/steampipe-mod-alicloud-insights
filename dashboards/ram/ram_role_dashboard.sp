@@ -13,22 +13,22 @@ dashboard "ram_role_dashboard" {
 
     card {
       query = query.ram_role_count
-      width = 2
+      width = 3
     }
 
     card {
       query = query.ram_roles_without_policy_count
-      width = 2
+      width = 3
     }
 
     card {
       query = query.ram_role_with_admin_access_count
-      width = 2
+      width = 3
     }
 
     card {
       query = query.ram_role_allows_cross_account_access_count
-      width = 2
+      width = 3
     }
 
   }

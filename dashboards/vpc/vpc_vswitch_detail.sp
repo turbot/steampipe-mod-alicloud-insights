@@ -16,19 +16,19 @@ dashboard "vpc_vswitch_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
       query = query.vpc_vswitch_available_ip_address_count
       args  = [self.input.vswitch_id.value]
     }
 
     card {
-      width = 2
+      width = 3
       query = query.vpc_vswitch_cidr_block
       args  = [self.input.vswitch_id.value]
     }
 
     card {
-      width = 2
+      width = 3
       query = query.vpc_vswitch_status
       args  = [self.input.vswitch_id.value]
     }

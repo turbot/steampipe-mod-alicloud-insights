@@ -12,12 +12,12 @@ dashboard "ecs_disk_encryption_report" {
 
     card {
       query = query.ecs_disk_count
-      width = 2
+      width = 3
     }
 
     card {
       query = query.ecs_disk_unencrypted_count
-      width = 2
+      width = 3
     }
 
   }

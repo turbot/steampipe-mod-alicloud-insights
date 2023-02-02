@@ -16,19 +16,19 @@ dashboard "ram_role_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
       query = query.ram_role_policy_count_for_role
       args  = [self.input.role_arn.value]
     }
 
     card {
-      width = 2
+      width = 3
       query = query.ram_role_with_admin_access
       args  = [self.input.role_arn.value]
     }
 
     card {
-      width = 2
+      width = 3
       query = query.ram_role_with_cross_account_access
       args  = [self.input.role_arn.value]
     }

@@ -12,24 +12,24 @@ dashboard "rds_instance_dashboard" {
     # Analysis
     card {
       query = query.rds_instance_count
-      width = 2
+      width = 3
     }
 
     # Assessments
     card {
       query = query.rds_instance_public_count
-      width = 2
+      width = 3
     }
 
     card {
       query = query.rds_instance_unencrypted_count
-      width = 2
+      width = 3
 
     }
 
     card {
       query = query.rds_instance_ssl_disabled_count
-      width = 2
+      width = 3
 
     }
 

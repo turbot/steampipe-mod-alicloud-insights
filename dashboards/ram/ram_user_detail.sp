@@ -16,13 +16,13 @@ dashboard "ram_user_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
       query = query.ram_user_mfa_for_user
       args  = [self.input.user_arn.value]
     }
 
     card {
-      width = 2
+      width = 3
       query = query.ram_user_direct_attached_policy_count_for_user
       args  = [self.input.user_arn.value]
     }

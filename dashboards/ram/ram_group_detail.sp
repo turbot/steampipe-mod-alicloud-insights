@@ -17,13 +17,13 @@ dashboard "ram_group_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
       query = query.ram_groups_users_count
       args  = [self.input.group_arn.value]
     }
 
     card {
-      width = 2
+      width = 3
       query = query.ram_groups_policies_count
       args  = [self.input.group_arn.value]
     }

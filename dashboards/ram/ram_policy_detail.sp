@@ -14,13 +14,13 @@ dashboard "ram_policy_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
       query = query.ram_policy_alicloud_managed
       args  = [self.input.policy_name.value]
     }
 
     card {
-      width = 2
+      width = 3
       query = query.ram_policy_attached
       args  = [self.input.policy_name.value]
     }
