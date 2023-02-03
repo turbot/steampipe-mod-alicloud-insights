@@ -12,12 +12,12 @@ dashboard "oss_bucket_logging_report" {
 
     card {
       query = query.oss_bucket_count
-      width = 2
+      width = 3
     }
 
     card {
       query = query.oss_bucket_logging_disabled_count
-      width = 2
+      width = 3
     }
 
   }

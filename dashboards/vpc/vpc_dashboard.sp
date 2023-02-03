@@ -11,17 +11,17 @@ dashboard "vpc_dashboard" {
 
     card {
       query = query.vpc_count
-      width = 2
+      width = 3
     }
 
     card {
       query = query.vpc_default_count
-      width = 2
+      width = 3
     }
 
     card {
       query = query.vpc_no_vswitch_count
-      width = 2
+      width = 3
     }
 
   }

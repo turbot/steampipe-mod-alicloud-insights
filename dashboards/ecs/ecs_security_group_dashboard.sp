@@ -11,22 +11,22 @@ dashboard "ecs_security_group_dashboard" {
 
     card {
       query = query.ecs_security_group_count
-      width = 2
+      width = 3
     }
 
     card {
       query = query.ecs_security_group_unassociated_count
-      width = 2
+      width = 3
     }
 
     card {
       query = query.ecs_security_unrestricted_ingress_count
-      width = 2
+      width = 3
     }
 
     card {
       query = query.ecs_security_unrestricted_egress_count
-      width = 2
+      width = 3
     }
 
 

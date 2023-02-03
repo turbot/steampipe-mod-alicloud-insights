@@ -12,7 +12,7 @@ dashboard "account_report" {
 
     card {
       query = query.account_count
-      width = 2
+      width = 3
     }
 
   }

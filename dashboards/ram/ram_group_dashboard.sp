@@ -13,19 +13,19 @@ dashboard "ram_group_dashboard" {
     # Analysis
     card {
       query = query.ram_group_count
-      width = 2
+      width = 3
     }
 
     # Assessments
 
     card {
       query = query.ram_groups_without_users_count
-      width = 2
+      width = 3
     }
 
     card {
       query = query.ram_groups_with_no_attached_policy_count
-      width = 2
+      width = 3
     }
 
   }

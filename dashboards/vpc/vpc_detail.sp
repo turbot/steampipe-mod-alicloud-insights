@@ -16,25 +16,25 @@ dashboard "vpc_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
       query = query.vpc_ipv4_count
       args  = [self.input.vpc_id.value]
     }
 
     card {
-      width = 2
+      width = 3
       query = query.vpc_ipv6_count
       args  = [self.input.vpc_id.value]
     }
 
     card {
-      width = 2
+      width = 3
       query = query.vpc_vswitch_count
       args  = [self.input.vpc_id.value]
     }
 
     card {
-      width = 2
+      width = 3
       query = query.vpc_is_default
       args  = [self.input.vpc_id.value]
     }

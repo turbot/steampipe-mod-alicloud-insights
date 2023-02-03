@@ -11,22 +11,22 @@ dashboard "ecs_snapshot_dashboard" {
 
     card {
       query = query.ecs_snapshot_count
-      width = 2
+      width = 3
     }
 
     card {
       query = query.ecs_snapshot_storage_total
-      width = 2
+      width = 3
     }
 
     card {
       query = query.ecs_unused_snapshot_count
-      width = 2
+      width = 3
     }
 
     card {
       query = query.ecs_unencrypted_snapshot_count
-      width = 2
+      width = 3
     }
 
   }
