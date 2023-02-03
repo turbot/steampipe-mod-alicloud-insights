@@ -1,3 +1,11 @@
+## v0.5 [2023-02-03]
+
+_Enhancements_
+
+- Updated the `card` width across all the dashboards to enhance readability. ([#79](https://github.com/turbot/steampipe-mod-alicloud-insights/pull/79))
+- Updated `AliCloud VPC Detail` and `AliCloud VPC vSwitch Detail` dashboards to include the relationships the resources share with VPC flow logs. ([#75](https://github.com/turbot/steampipe-mod-alicloud-insights/pull/75))
+- Updated `AliCloud RAM Role Detail` and `AliCloud ECS Instance Detail` dashboards to include the relationships the resources share with ECS instances and RAM roles respectively. ([#77](https://github.com/turbot/steampipe-mod-alicloud-insights/pull/77))
+
 ## v0.4 [2023-01-20]
 
 _Dependencies_
