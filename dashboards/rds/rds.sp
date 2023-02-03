@@ -1,6 +1,6 @@
 locals {
   rds_common_tags = {
-    service = "Alicloud/RDS"
+    service = "AliCloud/RDS"
   }
 }
 
