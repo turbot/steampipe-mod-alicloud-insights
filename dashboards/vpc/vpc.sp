@@ -10,6 +10,12 @@ category "vpc_dhcp_option_set" {
   icon  = "text:DHCP"
 }
 
+category "vpc_flow_log" {
+  title = "VPC Flow Log"
+  color = local.networking_color
+  icon  = "export_notes"
+}
+
 category "vpc_eip" {
   title = "VPC EIP"
   color = local.networking_color

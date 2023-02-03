@@ -12,12 +12,12 @@ dashboard "ram_user_mfa_report" {
 
     card {
       query = query.ram_user_count
-      width = 2
+      width = 3
     }
 
     card {
       query = query.ram_user_no_mfa_count
-      width = 2
+      width = 3
     }
   }
 

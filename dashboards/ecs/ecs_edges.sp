@@ -203,6 +203,26 @@ edge "ecs_instance_to_ecs_security_group" {
   param "ecs_instance_arns" {}
 }
 
+edge "ecs_instance_to_ram_role" {
+  title = "runs as"
+
+  sql = <<-EOQ
+    select
+      i.arn as from_id,
+      r.arn as to_id
+    from
+      alicloud_ecs_instance as i,
+      alicloud_ram_role as r,
+      jsonb_array_elements(i.ram_role) as role
+    where
+      role ->> 'RamRoleName' is not null
+      and r.name = role ->> 'RamRoleName'
+      and i.arn = any($1);
+  EOQ
+
+  param "ecs_instance_arns" {}
+}
+
 edge "ecs_instance_to_vpc_vswitch" {
   title = "vswitch"
 

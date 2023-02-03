@@ -63,6 +63,29 @@ node "vpc_eip" {
   param "vpc_eip_arns" {}
 }
 
+node "vpc_flow_log" {
+  category = category.vpc_flow_log
+
+  sql = <<-EOQ
+    select
+      flow_log_id as id,
+      title as title,
+      jsonb_build_object(
+        'Flow Log ID', flow_log_id,
+        'Status', status,
+        'Creation Time', creation_time,
+        'Account ID', account_id,
+        'Region', region
+      ) as properties
+    from
+      alicloud_vpc_flow_log
+    where
+      flow_log_id = any($1);
+  EOQ
+
+  param "vpc_flow_log_ids" {}
+}
+
 node "vpc_nat_gateway" {
   category = category.vpc_nat_gateway
 

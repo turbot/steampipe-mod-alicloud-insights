@@ -16,19 +16,19 @@ dashboard "vpc_vswitch_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
       query = query.vpc_vswitch_available_ip_address_count
       args  = [self.input.vswitch_id.value]
     }
 
     card {
-      width = 2
+      width = 3
       query = query.vpc_vswitch_cidr_block
       args  = [self.input.vswitch_id.value]
     }
 
     card {
-      width = 2
+      width = 3
       query = query.vpc_vswitch_status
       args  = [self.input.vswitch_id.value]
     }
@@ -52,6 +52,11 @@ dashboard "vpc_vswitch_detail" {
 
   with "rds_instances_for_vpc_vswitch" {
     query = query.rds_instances_for_vpc_vswitch
+    args  = [self.input.vswitch_id.value]
+  }
+
+  with "vpc_flow_logs_for_vpc_vswitch" {
+    query = query.vpc_flow_logs_for_vpc_vswitch
     args  = [self.input.vswitch_id.value]
   }
 
@@ -106,6 +111,13 @@ dashboard "vpc_vswitch_detail" {
         base = node.rds_instance
         args = {
           rds_instance_arns = with.rds_instances_for_vpc_vswitch.rows[*].rds_instance_arn
+        }
+      }
+
+      node {
+        base = node.vpc_flow_log
+        args = {
+          vpc_flow_log_ids = with.vpc_flow_logs_for_vpc_vswitch.rows[*].flow_log_id
         }
       }
 
@@ -167,6 +179,13 @@ dashboard "vpc_vswitch_detail" {
 
       edge {
         base = edge.vpc_vswitch_to_ecs_network_interface
+        args = {
+          vpc_vswitch_ids = [self.input.vswitch_id.value]
+        }
+      }
+
+      edge {
+        base = edge.vpc_vswitch_to_vpc_flow_log
         args = {
           vpc_vswitch_ids = [self.input.vswitch_id.value]
         }
@@ -268,6 +287,17 @@ query "vpc_vswitch_input" {
 }
 
 # with queries
+
+query "vpc_flow_logs_for_vpc_vswitch" {
+  sql = <<-EOQ
+    select
+      flow_log_id as flow_log_id
+    from
+      alicloud_vpc_flow_log
+    where
+      resource_id = $1;
+  EOQ
+}
 
 query "vpc_network_acls_for_vpc_vswitch" {
   sql = <<-EOQ

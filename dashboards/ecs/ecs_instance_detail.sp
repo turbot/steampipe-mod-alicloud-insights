@@ -83,6 +83,11 @@ dashboard "ecs_instance_detail" {
     args  = [self.input.instance_arn.value]
   }
 
+  with "ram_roles_for_ecs_instance" {
+    query = query.ram_roles_for_ecs_instance
+    args  = [self.input.instance_arn.value]
+  }
+
   with "vpc_eips_for_ecs_instance" {
     query = query.vpc_eips_for_ecs_instance
     args  = [self.input.instance_arn.value]
@@ -176,6 +181,13 @@ dashboard "ecs_instance_detail" {
       }
 
       node {
+        base = node.ram_role
+        args = {
+          ram_role_arns = with.ram_roles_for_ecs_instance.rows[*].role_arn
+        }
+      }
+
+      node {
         base = node.vpc_eip
         args = {
           vpc_eip_arns = with.vpc_eips_for_ecs_instance.rows[*].eip_arn
@@ -254,6 +266,13 @@ dashboard "ecs_instance_detail" {
 
       edge {
         base = edge.ecs_instance_to_ecs_security_group
+        args = {
+          ecs_instance_arns = [self.input.instance_arn.value]
+        }
+      }
+
+      edge {
+        base = edge.ecs_instance_to_ram_role
         args = {
           ecs_instance_arns = [self.input.instance_arn.value]
         }
@@ -440,6 +459,21 @@ query "ecs_snapshots_for_ecs_instance" {
       join alicloud_ecs_instance as i on i.instance_id = d.instance_id
     where
       i.arn = $1;
+  EOQ
+}
+
+query "ram_roles_for_ecs_instance" {
+  sql = <<-EOQ
+    select
+      distinct r.arn as role_arn
+    from
+      alicloud_ecs_instance as i,
+      alicloud_ram_role as r,
+      jsonb_array_elements(i.ram_role) as role
+    where
+      role ->> 'RamRoleName' is not null
+      and r.name = role ->> 'RamRoleName'
+      and i.arn = $1;
   EOQ
 }
 

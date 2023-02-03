@@ -12,12 +12,12 @@ dashboard "ecs_instance_public_access_report" {
 
     card {
       query = query.ecs_instance_count
-      width = 2
+      width = 3
     }
 
     card {
       query = query.ecs_instance_public_access_count
-      width = 2
+      width = 3
     }
 
   }

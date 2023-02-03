@@ -12,20 +12,20 @@ dashboard "ram_user_dashboard" {
     # Analysis
     card {
       query = query.ram_user_count
-      width = 2
+      width = 3
     }
 
     # Assessments
 
     card {
       query = query.ram_user_no_mfa_count
-      width = 2
+      width = 3
       href  = dashboard.ram_user_mfa_report.url_path
     }
 
     card {
       query = query.ram_users_with_direct_policy_count
-      width = 2
+      width = 3
     }
 
   }

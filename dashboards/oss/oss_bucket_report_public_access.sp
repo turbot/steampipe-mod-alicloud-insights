@@ -12,12 +12,12 @@ dashboard "oss_bucket_public_access_report" {
 
     card {
       query = query.oss_bucket_count
-      width = 2
+      width = 3
     }
 
     card {
       query = query.oss_bucket_public_access_not_blocked_count
-      width = 2
+      width = 3
     }
 
   }

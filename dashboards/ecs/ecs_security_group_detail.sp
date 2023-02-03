@@ -16,19 +16,19 @@ dashboard "ecs_security_group_detail" {
   container {
 
     card {
-      width = 2
+      width = 3
       query = query.ecs_security_group_unassociated
       args  = [self.input.security_group_id.value]
     }
 
     card {
-      width = 2
+      width = 3
       query = query.ecs_security_unrestricted_ingress
       args  = [self.input.security_group_id.value]
     }
 
     card {
-      width = 2
+      width = 3
       query = query.ecs_security_unrestricted_egress
       args  = [self.input.security_group_id.value]
     }
