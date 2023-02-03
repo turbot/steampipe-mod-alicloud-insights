@@ -66,6 +66,11 @@ dashboard "vpc_detail" {
     args  = [self.input.vpc_id.value]
   }
 
+  with "vpc_flow_logs_for_vpc" {
+    query = query.vpc_flow_logs_for_vpc
+    args  = [self.input.vpc_id.value]
+  }
+
   with "vpc_nat_gateways_for_vpc" {
     query = query.vpc_nat_gateways_for_vpc
     args  = [self.input.vpc_id.value]
@@ -126,6 +131,13 @@ dashboard "vpc_detail" {
         base = node.vpc_dhcp_option_set
         args = {
           vpc_dhcp_option_set_ids = with.vpc_dhcp_options_sets_for_vpc.rows[*].dhcp_options_set_id
+        }
+      }
+
+      node {
+        base = node.vpc_flow_log
+        args = {
+          vpc_flow_log_ids = with.vpc_flow_logs_for_vpc.rows[*].flow_log_id
         }
       }
 
@@ -196,6 +208,13 @@ dashboard "vpc_detail" {
         base = edge.vpc_vpc_to_vpc_dhcp_option_set
         args = {
           vpc_dhcp_option_set_ids = with.vpc_dhcp_options_sets_for_vpc.rows[*].dhcp_options_set_id
+        }
+      }
+
+      edge {
+        base = edge.vpc_vpc_to_vpc_flow_log
+        args = {
+          vpc_vpc_ids = [self.input.vpc_id.value]
         }
       }
 
@@ -530,6 +549,17 @@ query "vpc_dhcp_options_sets_for_vpc" {
       vpcs as v
     where
       v.vpc_id = $1;
+  EOQ
+}
+
+query "vpc_flow_logs_for_vpc" {
+  sql = <<-EOQ
+    select
+      flow_log_id as flow_log_id
+    from
+      alicloud_vpc_flow_log
+    where
+      resource_id = $1;
   EOQ
 }
 
