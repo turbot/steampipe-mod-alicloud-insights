@@ -139,11 +139,11 @@ query "ram_access_key_age_table" {
   sql = <<-EOQ
     select
       k.user_name as "User Name",
-      'acs:ram::' || k.account_id || ':user/' || k.user_name as "User ARN",
       k.access_key_id as "Access Key ID",
-      k.status as "Status",
       now()::date - k.create_date::date as "Age in Days",
       k.create_date as "Create Date",
+      'acs:ram::' || k.account_id || ':user/' || k.user_name as "User ARN",
+      k.status as "Status",
       a.title as "Account",
       k.account_id as "Account ID"
     from
@@ -152,6 +152,7 @@ query "ram_access_key_age_table" {
     where
       a.account_id = k.account_id
     order by
+      k.create_date,
       k.user_name;
   EOQ
 }

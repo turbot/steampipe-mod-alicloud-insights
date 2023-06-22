@@ -128,8 +128,8 @@ query "ecs_instance_1_year_count" {
 query "ecs_instance_age_table" {
   sql = <<-EOQ
     select
-      i.instance_id as "Instance ID",
       i.tags ->> 'Name' as "Name",
+      i.instance_id as "Instance ID",
       now()::date - i.start_time::date as "Age in Days",
       i.start_time as "Start Time",
       i.status as "State",
@@ -143,6 +143,7 @@ query "ecs_instance_age_table" {
     where
       i.account_id = a.account_id
     order by
-      i.instance_id;
+      i.start_time,
+      i.tags ->> 'Name';
   EOQ
 }
