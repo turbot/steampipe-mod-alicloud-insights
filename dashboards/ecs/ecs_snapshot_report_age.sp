@@ -124,8 +124,8 @@ query "ecs_snapshot_1_year_count" {
 query "ecs_snapshot_age_table" {
   sql = <<-EOQ
     select
-      s.snapshot_id as "Snapshot ID",
       s.name as "Name",
+      s.snapshot_id as "Snapshot ID",
       now()::date - s.creation_time::date as "Age in Days",
       s.creation_time as "Create Time",
       s.status as "State",
@@ -139,7 +139,8 @@ query "ecs_snapshot_age_table" {
     where
       s.account_id = a.account_id
     order by
-      s.snapshot_id;
+      s.creation_time,
+      s.name;
   EOQ
 }
 
