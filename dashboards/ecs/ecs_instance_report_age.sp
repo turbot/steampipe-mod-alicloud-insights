@@ -73,7 +73,7 @@ query "ecs_instance_24_hours_count" {
     from
       alicloud_ecs_instance
     where
-      start_time > now() - '1 days' :: interval;
+      creation_time > now() - '1 days' :: interval;
   EOQ
 }
 
@@ -85,7 +85,7 @@ query "ecs_instance_30_days_count" {
     from
       alicloud_ecs_instance
     where
-      start_time between symmetric now() - '1 days' :: interval and now() - '30 days' :: interval;
+      creation_time between symmetric now() - '1 days' :: interval and now() - '30 days' :: interval;
   EOQ
 }
 
@@ -97,7 +97,7 @@ query "ecs_instance_30_90_days_count" {
     from
       alicloud_ecs_instance
     where
-      start_time between symmetric now() - '30 days' :: interval and now() - '90 days' :: interval;
+      creation_time between symmetric now() - '30 days' :: interval and now() - '90 days' :: interval;
   EOQ
 }
 
@@ -109,7 +109,7 @@ query "ecs_instance_90_365_days_count" {
     from
       alicloud_ecs_instance
     where
-      start_time between symmetric (now() - '90 days'::interval) and (now() - '365 days'::interval);
+      creation_time between symmetric (now() - '90 days'::interval) and (now() - '365 days'::interval);
   EOQ
 }
 
@@ -121,7 +121,7 @@ query "ecs_instance_1_year_count" {
     from
       alicloud_ecs_instance
     where
-      start_time <= now() - '1 year' :: interval;
+      creation_time <= now() - '1 year' :: interval;
   EOQ
 }
 
@@ -130,8 +130,8 @@ query "ecs_instance_age_table" {
     select
       i.tags ->> 'Name' as "Name",
       i.instance_id as "Instance ID",
-      now()::date - i.start_time::date as "Age in Days",
-      i.start_time as "Start Time",
+      now()::date - i.creation_time::date as "Age in Days",
+      i.creation_time as "Start Time",
       i.status as "State",
       a.title as "Account",
       i.account_id as "Account ID",
@@ -143,7 +143,7 @@ query "ecs_instance_age_table" {
     where
       i.account_id = a.account_id
     order by
-      i.start_time,
+      i.creation_time,
       i.tags ->> 'Name';
   EOQ
 }
