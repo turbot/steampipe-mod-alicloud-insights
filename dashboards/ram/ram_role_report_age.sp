@@ -132,9 +132,9 @@ query "ram_role_age_table" {
   sql = <<-EOQ
     select
       b.name as "Name",
-      b.arn as "ARN",
       now()::date - b.create_date::date as "Age in Days",
       b.create_date as "Create Time",
+      b.arn as "ARN",
       a.title as "Account",
       b.account_id as "Account ID"
     from
@@ -143,6 +143,7 @@ query "ram_role_age_table" {
     where
       b.account_id = a.account_id
     order by
+      b.create_date,
       b.name;
   EOQ
 }

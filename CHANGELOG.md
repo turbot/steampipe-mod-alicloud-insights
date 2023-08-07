@@ -1,3 +1,10 @@
+## v0.6 [2023-08-07]
+
+_Bug fixes_
+
+- Updated the Age Report dashboards to order by the creation time of the resource. ([#83](https://github.com/turbot/steampipe-mod-alicloud-insights/pull/83))
+- Fixed dashboard localhost URLs in README and index doc. ([#82](https://github.com/turbot/steampipe-mod-alicloud-insights/pull/82))
+
 ## v0.5 [2023-02-03]
 
 _Enhancements_

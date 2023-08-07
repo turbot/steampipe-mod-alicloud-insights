@@ -131,8 +131,8 @@ query "ecs_disk_1_year_count" {
 query "ecs_disk_age_table" {
   sql = <<-EOQ
     select
-      d.disk_id as "Disk ID",
       d.name as "Name",
+      d.disk_id as "Disk ID",
       now()::date - d.creation_time::date as "Age in Days",
       d.creation_time as "Create Time",
       d.status as "State",
@@ -146,6 +146,7 @@ query "ecs_disk_age_table" {
     where
       d.account_id = a.account_id
     order by
-      d.disk_id;
+      d.creation_time,
+      d.name;
   EOQ
 }
