@@ -14,9 +14,8 @@ mod "alicloud_insights" {
   }
 
   require {
-    steampipe = "0.18.0"
     plugin "alicloud" {
-      version = "0.13.0"
+      min_version = "0.13.0"
     }
   }
 }
