@@ -1,3 +1,9 @@
+## v0.7 [2023-11-08]
+
+_Breaking changes_
+
+- Updated the plugin dependency section of the mod to use `min_version` instead of `version`. ([#89](https://github.com/turbot/steampipe-mod-alicloud-insights/pull/89))
+
 ## v0.6 [2023-08-07]
 
 _Bug fixes_
