@@ -45,7 +45,7 @@ Finally, install the mod:
 mkdir dashboards
 cd dashboards
 powerpipe mod init
-powerpipe mod install github.com/turbot/powerpipe-mod-alicloud-compliance
+powerpipe mod install github.com/turbot/powerpipe-mod-alicloud-insights
 ```
 
 ### Browsing Dashboards
