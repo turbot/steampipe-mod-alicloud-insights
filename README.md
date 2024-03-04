@@ -5,7 +5,7 @@
 
 An Alibaba Cloud dashboarding tool that can be used to view dashboards and reports across all of your Alibaba Cloud accounts.
 
-![image](https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/main/docs/images/alicloud_ecs_instance_dashboard.png)
+![image](https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/add-new-checks/docs/images/alicloud_ecs_instance_dashboard.png)
 
 ## Overview
 

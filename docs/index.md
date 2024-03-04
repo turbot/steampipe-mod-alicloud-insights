@@ -6,11 +6,11 @@ repository: "https://github.com/turbot/steampipe-mod-alicloud-insights"
 
 Create dashboards and reports for your Alibaba Cloud resources using Steampipe.
 
-<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/main/docs/images/alicloud_ecs_instance_dashboard.png" width="50%" type="thumbnail"/>
-<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/main/docs/images/alicloud_ecs_instance_detail.png" width="50%" type="thumbnail"/>
-<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/main/docs/images/alicloud_kms_key_age_report.png" width="50%" type="thumbnail"/>
-<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/main/docs/images/alicloud_ram_user_detail.png" width="50%" type="thumbnail"/>
-<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/main/docs/images/alicloud_vpc_detail.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/add-new-checks/docs/images/alicloud_ecs_instance_dashboard.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/add-new-checks/docs/images/alicloud_ecs_instance_detail.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/add-new-checks/docs/images/alicloud_kms_key_age_report.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/add-new-checks/docs/images/alicloud_ram_user_detail.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-alicloud-insights/add-new-checks/docs/images/alicloud_vpc_detail.png" width="50%" type="thumbnail"/>
 
 ## Overview
 
