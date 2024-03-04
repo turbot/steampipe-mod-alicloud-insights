@@ -30,7 +30,7 @@ Install Powerpipe (https://powerpipe.io/downloads), or use Brew:
 brew install turbot/tap/powerpipe
 ```
 
-This mod also requires [Steampipe](https://steampipe.io) with the [Azure plugin](https://hub.steampipe.io/plugins/turbot/azure) and the [Alicloud plugin](https://hub.steampipe.io/plugins/turbot/azuread) as the data source. Install Steampipe (https://steampipe.io/downloads), or use Brew:
+This mod also requires [Steampipe](https://steampipe.io) with the [Alicloud plugin](https://hub.steampipe.io/plugins/turbot/alicloud) as the data source. Install Steampipe (https://steampipe.io/downloads), or use Brew:
 
 ```sh
 brew install turbot/tap/steampipe
