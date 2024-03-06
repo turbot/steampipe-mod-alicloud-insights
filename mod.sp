@@ -1,5 +1,5 @@
 mod "alicloud_insights" {
-  # hub metadata
+  # Hub metadata
   title         = "Alibaba Cloud Insights"
   description   = "Create dashboards and reports for your Alibaba Cloud resources using Powerpipe and Steampipe."
   color         = "#FF6600"
