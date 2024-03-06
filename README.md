@@ -1,6 +1,6 @@
 # Alibaba Cloud Insights Mod for Powerpipe
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > [Powerpipe](https://powerpipe.io) is now the preferred way to run this mod! [Migrating from Steampipe →](https://powerpipe.io/blog/migrating-from-steampipe)
 >
 > All v0.x versions of this mod will work in both Steampipe and Powerpipe, but v1.0.0 onwards will be in Powerpipe format only.
@@ -22,7 +22,11 @@ Dashboards can help answer questions like:
 
 Dashboards are available for ECS, KMS, RAM, OSS, and VPC services.
 
-## Getting started
+## Documentation
+
+- **[Dashboards →](https://hub.powerpipe.io/mods/turbot/alicloud_insights/dashboards)**
+
+## Getting Started
 
 ### Installation
 
@@ -47,7 +51,7 @@ Finally, install the mod:
 mkdir dashboards
 cd dashboards
 powerpipe mod init
-powerpipe mod install github.com/turbot/powerpipe-mod-alicloud-insights
+powerpipe mod install github.com/turbot/steampipe-mod-alicloud-insights
 ```
 
 ### Browsing Dashboards

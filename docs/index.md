@@ -21,7 +21,11 @@ Dashboards can help answer questions like:
 
 Dashboards are available for ECS, KMS, RAM, OSS, and VPC services.
 
-## Getting started
+## Documentation
+
+- **[Dashboards →](https://hub.powerpipe.io/mods/turbot/alicloud_insights/dashboards)**
+
+## Getting Started
 
 ### Installation
 
@@ -46,7 +50,7 @@ Finally, install the mod:
 mkdir dashboards
 cd dashboards
 powerpipe mod init
-powerpipe mod install github.com/turbot/powerpipe-mod-alicloud-insights
+powerpipe mod install github.com/turbot/steampipe-mod-alicloud-insights
 ```
 
 ### Browsing Dashboards
