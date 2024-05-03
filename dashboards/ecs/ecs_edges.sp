@@ -9,9 +9,9 @@ edge "ecs_auto_provisioning_group_to_ecs_instance" {
       alicloud_ecs_auto_provisioning_group as apg,
       jsonb_array_elements(apg.instances) as group_instance,
       alicloud_ecs_instance as i
+      join unnest($1::text[]) as a on i.arn = a and i.account_id = split_part(a, ':', 5) and i.region = split_part(a, ':', 4)
     where
-      i.arn = any($1)
-      and group_instance ->> 'InstanceId' = i.instance_id;
+      group_instance ->> 'InstanceId' = i.instance_id;
   EOQ
 
   param "ecs_instance_arns" {}
@@ -28,9 +28,9 @@ edge "ecs_autoscaling_group_to_ecs_instance" {
       alicloud_ecs_autoscaling_group as asg,
       jsonb_array_elements(asg.scaling_instances) as group_instance,
       alicloud_ecs_instance as i
+      join unnest($1::text[]) as a on i.arn = a and i.account_id = split_part(a, ':', 5) and i.region = split_part(a, ':', 4)
     where
-      i.arn = any($1)
-      and group_instance ->> 'InstanceId' = i.instance_id;
+      group_instance ->> 'InstanceId' = i.instance_id;
   EOQ
 
   param "ecs_instance_arns" {}
@@ -84,9 +84,8 @@ edge "ecs_disk_to_ecs_snapshot" {
         s.arn as to_id
       from
         alicloud_ecs_snapshot s
-        left join alicloud_ecs_disk as d on s.source_disk_id = d.disk_id
-      where
-        s.arn = any($1);
+        join unnest($1::text[]) as a on s.arn = a and s.account_id = split_part(a, ':', 5) and s.region = split_part(a, ':', 4)
+        left join alicloud_ecs_disk as d on s.source_disk_id = d.disk_id;
   EOQ
 
   param "ecs_snapshot_arns" {}
@@ -101,9 +100,8 @@ edge "ecs_disk_to_kms_key" {
       k.arn as to_id
     from
       alicloud_ecs_disk as d
-      left join alicloud_kms_key k on d.kms_key_id = k.key_id
-    where
-      d.arn = any($1);
+      join unnest($1::text[]) as a on d.arn = a and d.account_id = split_part(a, ':', 5) and d.region = split_part(a, ':', 4)
+      left join alicloud_kms_key k on d.kms_key_id = k.key_id;
   EOQ
 
   param "ecs_disk_arns" {}
@@ -138,9 +136,8 @@ edge "ecs_instance_to_ecs_disk" {
       d.arn as to_id
     from
       alicloud_ecs_instance i
-      left join alicloud_ecs_disk as d on i.instance_id = d.instance_id
-    where
-      i.arn = any($1);
+      join alicloud_ecs_disk as d on i.instance_id = d.instance_id
+      join unnest($1::text[]) as a on i.arn = a and i.account_id = split_part(a, ':', 5) and i.region = split_part(a, ':', 4);
   EOQ
 
   param "ecs_instance_arns" {}
@@ -154,11 +151,11 @@ edge "ecs_instance_to_ecs_key_pair" {
       i.arn as from_id,
       k.akas::text as to_id
     from
-      alicloud_ecs_instance as i,
+      alicloud_ecs_instance as i
+      join unnest($1::text[]) as a on i.arn = a and i.account_id = split_part(a, ':', 5) and i.region = split_part(a, ':', 4),
       alicloud_ecs_key_pair as k
     where
-      i.key_pair_name is not null
-      and i.arn = any($1);
+      i.key_pair_name is not null;
   EOQ
 
   param "ecs_instance_arns" {}
@@ -172,11 +169,11 @@ edge "ecs_instance_to_ecs_network_interface" {
       arn as from_id,
       i ->> 'NetworkInterfaceId' as to_id
     from
-      alicloud_ecs_instance,
+      alicloud_ecs_instance
+      join unnest($1::text[]) as a on arn = a and account_id = split_part(a, ':', 5) and region = split_part(a, ':', 4),
       jsonb_array_elements(network_interfaces) as i
     where
-      arn = any($1)
-      and  i ->> 'NetworkInterfaceId' is not null;
+      i ->> 'NetworkInterfaceId' is not null;
   EOQ
 
   param "ecs_instance_arns" {}
@@ -194,6 +191,7 @@ edge "ecs_instance_to_ecs_security_group" {
       group_id as to_id
     from
       alicloud_ecs_instance as i
+      join unnest($1::text[]) as a on i.arn = a and i.account_id = split_part(a, ':', 5) and i.region = split_part(a, ':', 4)
       join jsonb_array_elements(network_interfaces) as n on true
       join jsonb_array_elements(security_group_ids) as group_id on true
     where
@@ -211,13 +209,13 @@ edge "ecs_instance_to_ram_role" {
       i.arn as from_id,
       r.arn as to_id
     from
-      alicloud_ecs_instance as i,
+      alicloud_ecs_instance as i
+      join unnest($1::text[]) as a on i.arn = a and i.account_id = split_part(a, ':', 5) and i.region = split_part(a, ':', 4),
       alicloud_ram_role as r,
       jsonb_array_elements(i.ram_role) as role
     where
       role ->> 'RamRoleName' is not null
-      and r.name = role ->> 'RamRoleName'
-      and i.arn = any($1);
+      and r.name = role ->> 'RamRoleName';
   EOQ
 
   param "ecs_instance_arns" {}
@@ -232,10 +230,9 @@ edge "ecs_instance_to_vpc_vswitch" {
       s.vswitch_id as to_id
     from
       alicloud_ecs_instance as i
+      join unnest($1::text[]) as a on i.arn = a and i.account_id = split_part(a, ':', 5) and i.region = split_part(a, ':', 4)
       join alicloud_vpc_vswitch as s on s.vpc_id = i.vpc_id
-      join jsonb_array_elements(security_group_ids) as group_id on true
-    where
-      i.arn = any($1);
+      join jsonb_array_elements(security_group_ids) as group_id on true;
   EOQ
 
   param "ecs_instance_arns" {}
@@ -351,9 +348,8 @@ edge "ecs_snapshot_to_ecs_disk" {
         d.arn as to_id
       from
         alicloud_ecs_snapshot s
-        left join alicloud_ecs_disk as d on s.snapshot_id = d.source_snapshot_id
-      where
-        s.arn = any($1);
+        join unnest($1::text[]) as a on s.arn = a and s.account_id = split_part(a, ':', 5) and s.region = split_part(a, ':', 4)
+        join alicloud_ecs_disk as d on s.snapshot_id = d.source_snapshot_id;
   EOQ
 
   param "ecs_snapshot_arns" {}
@@ -370,9 +366,9 @@ edge "ecs_snapshot_to_ecs_image" {
       alicloud_ecs_image as images,
       jsonb_array_elements(images.disk_device_mappings) as ddm,
       alicloud_ecs_snapshot as s
+      join unnest($1::text[]) as a on s.arn = a and s.account_id = split_part(a, ':', 5) and s.region = split_part(a, ':', 4)
     where
-      ddm ->> 'SnapshotId' = s.snapshot_id
-      and s.arn = any($1);
+      ddm ->> 'SnapshotId' = s.snapshot_id;
   EOQ
   param "ecs_snapshot_arns" {}
 }
@@ -386,9 +382,8 @@ edge "ecs_snapshot_to_kms_key" {
       k.arn as to_id
     from
       alicloud_ecs_snapshot as s
-      left join alicloud_kms_key k on s.kms_key_id = k.key_id
-    where
-      s.arn = any($1);
+      join unnest($1::text[]) as a on s.arn = a and s.account_id = split_part(a, ':', 5) and s.region = split_part(a, ':', 4)
+      left join alicloud_kms_key k on s.kms_key_id = k.key_id;
   EOQ
 
   param "ecs_snapshot_arns" {}

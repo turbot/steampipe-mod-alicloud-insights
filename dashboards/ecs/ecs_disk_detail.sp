@@ -247,7 +247,9 @@ query "source_ecs_snapshots_for_ecs_disk" {
       alicloud_ecs_snapshot s
       left join alicloud_ecs_disk as d on s.snapshot_id = d.source_snapshot_id
     where
-      d.arn = $1
+      d.account_id = split_part($1, ':', 5)
+      and d.region = split_part($1, ':', 4)
+      and d.arn = $1
       and s.arn is not null;
   EOQ
 }
@@ -260,7 +262,9 @@ query "target_ecs_snapshots_for_ecs_disk" {
       alicloud_ecs_snapshot s
       left join alicloud_ecs_disk as d on s.source_disk_id = d.disk_id
     where
-      d.arn = $1
+      d.account_id = split_part($1, ':', 5)
+      and d.region = split_part($1, ':', 4)
+      and d.arn = $1
       and s.arn is not null;
   EOQ
 }
@@ -289,6 +293,8 @@ query "ecs_instances_for_ecs_disk" {
       left join alicloud_ecs_disk as d on i.instance_id = d.instance_id
     where
       d.arn = $1
+      and d.account_id = split_part($1, ':', 5)
+      and d.region = split_part($1, ':', 4)
       and i.arn is not null;
   EOQ
 }
@@ -302,6 +308,8 @@ query "kms_keys_for_ecs_disk" {
       left join alicloud_ecs_disk as d on k.key_id = d.kms_key_id
     where
       d.arn = $1
+      and d.account_id = split_part($1, ':', 5)
+      and d.region = split_part($1, ':', 4)
       and k.arn is not null;
   EOQ
 }
@@ -316,7 +324,9 @@ query "ecs_disk_storage" {
     from
       alicloud_ecs_disk
     where
-      arn = $1;
+      account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4)
+      and arn = $1;
   EOQ
 }
 
@@ -328,7 +338,9 @@ query "ecs_disk_iops" {
     from
       alicloud_ecs_disk
     where
-      arn = $1;
+      account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4)
+      and arn = $1;
   EOQ
 }
 
@@ -340,7 +352,9 @@ query "ecs_disk_category" {
     from
       alicloud_ecs_disk
     where
-      arn = $1;
+      account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4)
+      and arn = $1;
   EOQ
 }
 
@@ -359,7 +373,9 @@ query "ecs_disk_attached_instances_count" {
     from
       alicloud_ecs_disk
     where
-      arn = $1;
+      account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4)
+      and arn = $1;
   EOQ
 }
 
@@ -372,7 +388,9 @@ query "ecs_disk_encryption" {
     from
       alicloud_ecs_disk
     where
-      arn = $1;
+      account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4)
+      and arn = $1;
   EOQ
 }
 
@@ -385,7 +403,9 @@ query "ecs_disk_auto_snapshot" {
     from
       alicloud_ecs_disk
     where
-      arn = $1;
+      account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4)
+      and arn = $1;
   EOQ
 }
 
@@ -406,6 +426,8 @@ query "ecs_disk_attached_instances" {
     where
       i.instance_id = attachment ->> 'InstanceId'
       and v.arn = $1
+      and v.account_id = split_part($1, ':', 5)
+      and v.region = split_part($1, ':', 4)
     order by
       i.instance_id;
   EOQ
@@ -419,7 +441,9 @@ query "ecs_disk_encryption_status" {
     from
       alicloud_ecs_disk
     where
-      arn = $1;
+      account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4)
+      and arn = $1;
   EOQ
 }
 
@@ -437,7 +461,9 @@ query "ecs_disk_overview" {
     from
       alicloud_ecs_disk
     where
-      arn = $1
+      account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4)
+      and arn = $1;
   EOQ
 }
 
@@ -450,7 +476,9 @@ query "ecs_disk_tags" {
       alicloud_ecs_disk,
       jsonb_array_elements(tags_src) as tag
     where
-      arn = $1
+      account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4)
+      and arn = $1
     order by
       tag ->> 'Key';
   EOQ

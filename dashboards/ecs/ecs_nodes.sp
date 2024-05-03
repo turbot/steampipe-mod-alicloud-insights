@@ -15,9 +15,9 @@ node "ecs_auto_provisioning_group" {
       alicloud_ecs_auto_provisioning_group as apg,
       jsonb_array_elements(apg.instances) as ins_detail,
       alicloud_ecs_instance as i
+      join unnest($1::text[]) as a on i.arn = a and i.account_id = split_part(a, ':', 5) and i.region = split_part(a, ':', 4)
     where
-      i.arn = any($1)
-      and ins_detail ->> 'InstanceId' = i.instance_id;
+      ins_detail ->> 'InstanceId' = i.instance_id;
   EOQ
 
   param "ecs_instance_arns" {}
@@ -61,8 +61,7 @@ node "ecs_disk" {
       ) as properties
     from
       alicloud_ecs_disk
-    where
-      arn = any($1);
+      join unnest($1::text[]) as a on arn = a and account_id = split_part(a, ':', 5) and region = split_part(a, ':', 4);
   EOQ
 
   param "ecs_disk_arns" {}
@@ -84,8 +83,7 @@ node "ecs_image" {
       ) as properties
     from
       alicloud_ecs_image
-    where
-      arn = any($1);
+      join unnest($1::text[]) as a on arn = a and account_id = split_part(a, ':', 5) and region = split_part(a, ':', 4);
   EOQ
 
   param "ecs_image_arns" {}
@@ -107,8 +105,7 @@ node "ecs_instance" {
       ) as properties
     from
       alicloud_ecs_instance
-    where
-      arn = any($1);
+      join unnest($1::text[]) as a on arn = a and account_id = split_part(a, ':', 5) and region = split_part(a, ':', 4);
   EOQ
 
   param "ecs_instance_arns" {}
@@ -224,8 +221,7 @@ node "ecs_snapshot" {
       ) as properties
     from
       alicloud_ecs_snapshot
-    where
-      arn = any($1);
+      join unnest($1::text[]) as a on arn = a and account_id = split_part(a, ':', 5) and region = split_part(a, ':', 4);
   EOQ
 
   param "ecs_snapshot_arns" {}

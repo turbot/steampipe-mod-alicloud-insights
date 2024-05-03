@@ -15,8 +15,7 @@ node "kms_key" {
       ) as properties
     from
       alicloud_kms_key
-    where
-      arn = any($1);
+      join unnest($1::text[]) as a on arn = a and account_id = split_part(a, ':', 4) and region = split_part(a, ':', 3);
   EOQ
 
   param "kms_key_arns" {}
@@ -39,8 +38,7 @@ node "kms_secret" {
       ) as properties
     from
       alicloud_kms_secret
-    where
-      arn = any($1);
+      join unnest($1::text[]) as a on arn = a and account_id = split_part(a, ':', 4) and region = split_part(a, ':', 3);
   EOQ
 
   param "kms_secret_arns" {}

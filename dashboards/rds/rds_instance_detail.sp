@@ -282,7 +282,9 @@ query "vpc_vswitches_for_rds_instance" {
     from
       alicloud_rds_instance
     where
-      arn = $1;
+      account_id = split_part($1,':',5)
+      and region = split_part($1,':',4)
+      and arn = $1;
   EOQ
 }
 
@@ -296,6 +298,8 @@ query "ecs_autoscaling_groups_for_rds_instance" {
       jsonb_array_elements_text(asg.db_instance_ids) as id
     where
       rdi.arn = $1
+      and rdi.account_id = split_part($1,':',5)
+      and rdi.region = split_part($1,':',4)
       and rdi.db_instance_id = id;
   EOQ
 }
@@ -307,7 +311,9 @@ query "vpc_vpcs_for_rds_instance" {
     from
       alicloud_rds_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',5)
+      and region = split_part($1,':',4);
   EOQ
 }
 
@@ -320,6 +326,8 @@ query "target_ro_rds_db_instances_for_rds_instance" {
       alicloud_rds_instance as related_instances
     where
       self.arn = $1
+      and self.account_id = split_part($1,':',5)
+      and self.region = split_part($1,':',4)
       and (related_instances.master_instance_id = self.db_instance_id or self.master_instance_id = related_instances.db_instance_id)
   EOQ
 }
@@ -333,6 +341,8 @@ query "rds_databases_for_rds_instance" {
       alicloud_rds_database as d
     where
       i.arn = $1
+      and i.account_id = split_part($1,':',5)
+      and i.region = split_part($1,':',4)
       and d.db_instance_id = i.db_instance_id;
   EOQ
 }
@@ -346,6 +356,8 @@ query "rds_backups_for_rds_instance" {
       alicloud_rds_backup as b
     where
       i.arn = $1
+      and i.account_id = split_part($1,':',5)
+      and i.region = split_part($1,':',4)
       and b.db_instance_id = i.db_instance_id;
   EOQ
 }
@@ -360,6 +372,8 @@ query "ecs_security_groups_for_rds_instance" {
       alicloud_ecs_security_group as sg
     where
       i.arn = $1
+      and i.account_id = split_part($1,':',5)
+      and i.region = split_part($1,':',4)
       and isg->>'SecurityGroupId' = sg.security_group_id;
   EOQ
 }
@@ -374,7 +388,9 @@ query "rds_instance_engine_type" {
     from
       alicloud_rds_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',5)
+      and region = split_part($1,':',4);
   EOQ
 }
 
@@ -386,7 +402,9 @@ query "rds_instance_class" {
     from
       alicloud_rds_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',5)
+      and region = split_part($1,':',4);
   EOQ
 }
 
@@ -398,7 +416,9 @@ query "rds_instance_storage" {
     from
       alicloud_rds_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',5)
+      and region = split_part($1,':',4);
   EOQ
 }
 
@@ -411,7 +431,9 @@ query "rds_instance_instance_public_access" {
     from
       alicloud_rds_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',5)
+      and region = split_part($1,':',4);
   EOQ
 }
 
@@ -424,7 +446,9 @@ query "rds_instance_instance_tde_status" {
     from
       alicloud_rds_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',5)
+      and region = split_part($1,':',4);
   EOQ
 }
 
@@ -437,7 +461,9 @@ query "rds_instance_ssl_enabled" {
     from
       alicloud_rds_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',5)
+      and region = split_part($1,':',4);
   EOQ
 }
 
@@ -452,7 +478,9 @@ query "rds_instance_collector_policy" {
     from
       alicloud_rds_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',5)
+      and region = split_part($1,':',4);
   EOQ
 }
 
@@ -465,7 +493,9 @@ query "rds_instance_parameter_groups" {
       alicloud_rds_instance,
       jsonb_array_elements(parameters -> 'RunningParameters' -> 'DBInstanceParameter') as p
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',5)
+      and region = split_part($1,':',4);
   EOQ
 }
 
@@ -480,7 +510,9 @@ query "rds_instance_security_ips" {
       alicloud_rds_instance,
       jsonb_array_elements(security_ips_src) as s
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',5)
+      and region = split_part($1,':',4);
   EOQ
 }
 
@@ -504,7 +536,9 @@ query "rds_instance_overview" {
     from
       alicloud_rds_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',5)
+      and region = split_part($1,':',4);
   EOQ
 }
 
@@ -518,6 +552,8 @@ query "rds_instance_tags" {
       jsonb_array_elements(tags_src) as tag
     where
       arn = $1
+      and account_id = split_part($1,':',5)
+      and region = split_part($1,':',4)
     order by
       tag ->> 'Key';
     EOQ
@@ -537,6 +573,8 @@ query "rds_db_instance_configuration" {
     from
       alicloud_rds_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',5)
+      and region = split_part($1,':',4);
   EOQ
 }
