@@ -194,7 +194,8 @@ query "ram_user_mfa_for_user" {
     from
       alicloud_ram_user
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',4);
   EOQ
 
 }
@@ -208,7 +209,9 @@ query "ram_user_direct_attached_policy_count_for_user" {
     from
       alicloud_ram_user
     where
-     arn = $1 and attached_policy = '[]';
+      arn = $1
+      and attached_policy = '[]'
+      and account_id = split_part($1,':',4);
   EOQ
 
 }
@@ -256,7 +259,8 @@ query "ram_user_overview" {
     from
       alicloud_ram_user
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',4);
   EOQ
 
 }
@@ -270,7 +274,8 @@ query "ram_user_access_keys" {
     from
       alicloud_ram_access_key as a left join alicloud_ram_user as u on u.name = a.user_name
     where
-      u.arn  = $1;
+      u.arn  = $1
+      and u.account_id = split_part($1,':',4);
   EOQ
 
 }
@@ -285,7 +290,8 @@ query "ram_user_mfa_devices" {
       alicloud_ram_user,
       jsonb_array_elements(virtual_mfa_devices) as mfa
     where
-      arn  = $1;
+      arn  = $1
+      and account_id = split_part($1,':',4);
   EOQ
 
 }
@@ -308,7 +314,7 @@ query "ram_user_manage_policies_sankey" {
       alicloud_ram_user
     where
       arn in (select ram_user_arn from args)
-
+      and account_id in (select split_part(ram_user_arn,':',4) from args)
     -- Groups
     union select
       u.name as from_id,
@@ -322,6 +328,7 @@ query "ram_user_manage_policies_sankey" {
       inner join alicloud_ram_group g on g.name = user_groups ->> 'GroupName'
     where
       u.arn in (select ram_user_arn from args)
+      and u.account_id in (select split_part(ram_user_arn,':',4) from args)
 
     -- Policies (attached to groups)
     union select
@@ -337,9 +344,9 @@ query "ram_user_manage_policies_sankey" {
       inner join alicloud_ram_group g on g.name = user_groups ->> 'GroupName',
       jsonb_array_elements(g.attached_policy) as user_policy
     where
-       user_policy ->> 'PolicyName' = p.title
-       and u.arn in (select ram_user_arn from args)
-
+      user_policy ->> 'PolicyName' = p.title
+      and u.arn in (select ram_user_arn from args)
+      and u.account_id in (select split_part(ram_user_arn,':',4) from args)
     -- Policies (attached to user)
     union select
       u.name as from_id,
@@ -353,7 +360,8 @@ query "ram_user_manage_policies_sankey" {
       alicloud_ram_policy as p
     where
       pol_arn ->> 'PolicyName' = p.title
-      and u.arn in (select ram_user_arn from args);
+      and u.arn in (select ram_user_arn from args)
+      and u.account_id in (select split_part(ram_user_arn,':',4) from args);
   EOQ
 
 }
@@ -368,7 +376,8 @@ query "ram_groups_for_user" {
       alicloud_ram_user as u,
       jsonb_array_elements(groups) as g
     where
-      u.arn = $1;
+      u.arn = $1
+      and u.account_id = split_part($1,':',4);
   EOQ
 
 }
@@ -388,7 +397,8 @@ query "ram_all_policies_for_user" {
       jsonb_array_elements(g.attached_policy) as group_policy
     where
       group_policy ->> 'PolicyName' = p.title
-      and u.arn = $1
+      and u.arn = 'acs:ram::5982111499156037:user/raj'
+      and u.account_id = split_part('acs:ram::5982111499156037:user/raj',':',4)
 
     -- Policies (attached to user)
     union select
@@ -400,7 +410,8 @@ query "ram_all_policies_for_user" {
       alicloud_ram_policy as p
     where
       pol_arn ->> 'PolicyName' = p.title
-      and u.arn = $1;
+      and u.arn = 'acs:ram::5982111499156037:user/raj'
+      and u.account_id = split_part('acs:ram::5982111499156037:user/raj',':',4);
   EOQ
 
 }

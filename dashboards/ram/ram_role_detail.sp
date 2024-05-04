@@ -196,7 +196,8 @@ query "ecs_instances_for_ram_role" {
       jsonb_array_elements(i.ram_role) as role
     where
       r.arn = $1
-      and  r.name = role ->> 'RamRoleName'
+      and r.account_id = split_part($1,':',4)
+      and r.name = role ->> 'RamRoleName'
       and role ->> 'RamRoleName' is not null;
   EOQ
 }
@@ -225,7 +226,8 @@ query "ram_role_policy_count_for_role" {
     from
       alicloud_ram_role
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',4);
   EOQ
 }
 
@@ -241,14 +243,15 @@ query "ram_role_with_admin_access" {
       policies ->> 'PolicyName' = 'AdministratorAccess'
     )
     select
-       case when a.name is not null then 'Enabled' else 'Disabled' end as value,
+      case when a.name is not null then 'Enabled' else 'Disabled' end as value,
       'Admin Access' as label,
       case when a.name is not null then 'alert' else 'ok' end as type
     from
       alicloud_ram_role as r
       left join admin_roles as a on r.name = a.name
     where
-      r.arn = $1;
+      r.arn = $1
+      and r.account_id = split_part($1,':',4);
   EOQ
 }
 
@@ -265,14 +268,15 @@ query "ram_role_with_cross_account_access" {
         split_part(principal, ':',4) <> account_id
     )
     select
-       case when a.name is not null then 'Enabled' else 'Disabled' end as value,
+      case when a.name is not null then 'Enabled' else 'Disabled' end as value,
       'Cross-Account Access' as label,
       case when a.name is not null then 'alert' else 'ok' end as type
     from
       alicloud_ram_role as r
       left join roles_with_cross_account_access as a on r.name = a.name
     where
-      r.arn = $1;
+      r.arn = $1
+      and r.account_id = split_part($1,':',4);
   EOQ
 }
 
@@ -292,7 +296,8 @@ query "ram_role_overview" {
     from
       alicloud_ram_role
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',4);
   EOQ
 }
 
@@ -307,7 +312,8 @@ query "ram_policies_for_role" {
       alicloud_ram_role,
       jsonb_array_elements(attached_policy) as policies
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',4);
   EOQ
 }
 
@@ -322,7 +328,7 @@ query "ram_user_manage_policies_hierarchy" {
       alicloud_ram_role as r
     where
       r.arn = $1
-
+      and r.account_id = split_part($1,':',4)
     -- Policies (attached to groups)
     union select
       policy ->> 'PolicyName' as id,
@@ -333,6 +339,7 @@ query "ram_user_manage_policies_hierarchy" {
       alicloud_ram_role as r,
       jsonb_array_elements(r.attached_policy) as policy
     where
-      r.arn = $1;
+      r.arn = $1
+      and r.account_id = split_part($1,':',4);
   EOQ
 }
