@@ -226,6 +226,8 @@ query "kms_secrets_for_kms_key" {
         on s.encryption_key_id = k.key_id
     where
       k.arn = $1
+      and k.account_id = split_part($1,':',4)
+      and k.region = split_part($1,':',3)
       and s.arn is not null;
   EOQ
 }
@@ -240,6 +242,8 @@ query "oss_buckets_for_kms_key" {
         on b.server_side_encryption ->> 'KMSMasterKeyID' = k.key_id
     where
       k.arn = $1
+      and k.account_id = split_part($1,':',4)
+      and k.region = split_part($1,':',3)
       and b.arn is not null;
   EOQ
 }
@@ -254,6 +258,8 @@ query "ecs_disks_for_kms_key" {
         on d.kms_key_id = k.key_id
     where
       k.arn = $1
+      and k.account_id = split_part($1,':',4)
+      and k.region = split_part($1,':',3)
       and d.arn is not null;
   EOQ
 }
@@ -268,6 +274,8 @@ query "ecs_snapshots_for_kms_key" {
         on s.kms_key_id = k.key_id
     where
       k.arn = $1
+      and k.account_id = split_part($1,':',4)
+      and k.region = split_part($1,':',3)
       and s.arn is not null;
   EOQ
 }
@@ -282,6 +290,8 @@ query "kms_key_rds_instances" {
         on s.kms_key_id = k.key_id
     where
       k.arn = $1
+      and k.account_id = split_part($1,':',4)
+      and k.region = split_part($1,':',3)
       and s.arn is not null;
   EOQ
 }
@@ -296,7 +306,9 @@ query "kms_key_origin" {
     from
       alicloud_kms_key
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',4)
+      and region = split_part($1,':',3);
   EOQ
 }
 
@@ -308,7 +320,9 @@ query "kms_key_state" {
     from
       alicloud_kms_key
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',4)
+      and region = split_part($1,':',3);
   EOQ
 }
 
@@ -321,7 +335,9 @@ query "kms_key_rotation_enabled" {
     from
       alicloud_kms_key
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',4)
+      and region = split_part($1,':',3);
   EOQ
 }
 
@@ -334,7 +350,9 @@ query "kms_deletion_protection" {
     from
       alicloud_kms_key
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',4)
+      and region = split_part($1,':',3);
   EOQ
 }
 
@@ -347,7 +365,9 @@ query "kms_protection_level" {
     from
       alicloud_kms_key
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',4)
+      and region = split_part($1,':',3);
   EOQ
 }
 
@@ -366,6 +386,8 @@ query "kms_key_overview" {
       alicloud_kms_key
     where
       arn = $1
+      and account_id = split_part($1,':',4)
+      and region = split_part($1,':',3);
     EOQ
 }
 
@@ -379,6 +401,8 @@ query "kms_key_tags" {
       jsonb_array_elements(tags_src) as tag
     where
       arn = $1
+      and account_id = split_part($1,':',4)
+      and region = split_part($1,':',3)
     order by
       tag ->> 'TagKey';
     EOQ
@@ -393,7 +417,9 @@ query "kms_key_age" {
     from
       alicloud_kms_key
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',4)
+      and region = split_part($1,':',3);
   EOQ
 }
 
@@ -407,6 +433,8 @@ query "kms_key_aliases" {
       alicloud_kms_key,
       jsonb_array_elements(key_aliases) as p
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1,':',4)
+      and region = split_part($1,':',3);
   EOQ
 }

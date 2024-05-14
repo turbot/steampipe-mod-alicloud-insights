@@ -1,3 +1,9 @@
+## v0.9 [2024-05-14]
+
+_Enhancements_
+
+- Optimized queries to leverage the [connection-level qualifiers](https://steampipe.io/blog/connection-level-qualifiers) for faster execution time and lower API load. To benefit from these enhancements, please upgrade to [AliCloud v0.22.0](https://github.com/turbot/steampipe-plugin-alicloud/blob/main/CHANGELOG.md#v0220-2024-05-13) or higher. ([#95](https://github.com/turbot/steampipe-mod-alicloud-insights/pull/95))
+
 ## v0.8 [2024-03-06]
 
 _Powerpipe_

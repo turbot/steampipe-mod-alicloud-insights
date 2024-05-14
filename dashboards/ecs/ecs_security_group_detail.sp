@@ -495,7 +495,7 @@ query "ecs_security_group_egress_rules" {
 
 query "ecs_security_group_ingress_rule_sankey" {
   sql = <<-EOQ
-   with associations as (
+  with associations as (
     select
       title,
       arn,
@@ -507,7 +507,7 @@ query "ecs_security_group_ingress_rule_sankey" {
       sg = $1
     ),
     rules as (
-       select
+      select
           concat(text(p ->> 'SourceCidrIp'), text(p ->> 'Ipv6SourceCidrIp'), text(p ->> 'SourceGroupId'),text(p ->> 'SourcePrefixListId')) as "source",
           case
             when p ->> 'IpProtocol' = 'ALL' then 'All Traffic'
@@ -606,7 +606,7 @@ query "ecs_security_group_ingress_rule_sankey" {
 
 query "ecs_security_group_egress_rule_sankey" {
   sql = <<-EOQ
-   with associations as (
+  with associations as (
     select
       title,
       arn,
@@ -618,7 +618,7 @@ query "ecs_security_group_egress_rule_sankey" {
       sg = $1
     ),
     rules as (
-       select
+      select
           concat(text(p ->> 'DestCidrIp'), text(p ->> 'Ipv6DestCidrIp'), text(p ->> 'DestGroupId'),text(p ->> 'DestPrefixListId')) as "source",
           case
             when p ->> 'IpProtocol' = 'ALL' then 'All Traffic'

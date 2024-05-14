@@ -263,7 +263,9 @@ query "ecs_images_for_ecs_snapshot" {
     where
       ddm ->> 'SnapshotId' is not null
       and ddm ->> 'SnapshotId' = s.snapshot_id
-      and s.arn = $1;
+      and s.arn = $1
+      and s.account_id = split_part($1, ':', 5)
+      and s.region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -276,7 +278,9 @@ query "ecs_instances_for_ecs_snapshot" {
       join alicloud_ecs_disk as d on s.source_disk_id = d.disk_id
       join alicloud_ecs_instance as i on i.instance_id = d.instance_id
     where
-      s.arn = $1;
+      s.arn = $1
+      and s.account_id = split_part($1, ':', 5)
+      and s.region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -290,6 +294,8 @@ query "ecs_launch_templates_for_ecs_snapshot" {
       jsonb_array_elements(latest_version_details -> 'LaunchTemplateData' -> 'DataDisks' -> 'DataDisk') as disk_config
     where
       s.arn = $1
+      and s.account_id = split_part($1, ':', 5)
+      and s.region = split_part($1, ':', 4)
       and disk_config ->> 'SnapshotId' is not null
       and disk_config ->> 'SnapshotId' = s.snapshot_id;
   EOQ
@@ -304,6 +310,8 @@ query "source_ecs_disks_for_ecs_snapshot" {
       left join alicloud_ecs_disk as d on s.source_disk_id = d.disk_id
     where
       s.arn = $1
+      and s.account_id = split_part($1, ':', 5)
+      and s.region = split_part($1, ':', 4)
       and d.arn is not null;
   EOQ
 }
@@ -317,6 +325,8 @@ query "target_ecs_disks_for_ecs_snapshot" {
       left join alicloud_ecs_disk as d on s.snapshot_id = d.source_snapshot_id
     where
       s.arn = $1
+      and s.account_id = split_part($1, ':', 5)
+      and s.region = split_part($1, ':', 4)
       and d.arn is not null;
   EOQ
 }
@@ -330,6 +340,8 @@ query "kms_keys_for_ecs_snapshot" {
       left join alicloud_ecs_snapshot as s on k.key_id = s.kms_key_id
     where
       s.arn = $1
+      and s.account_id = split_part($1, ':', 5)
+      and s.region = split_part($1, ':', 4)
       and k.arn is not null;
   EOQ
 }
@@ -345,6 +357,8 @@ query "ecs_snapshot_age" {
         alicloud_ecs_snapshot
       where
         arn = $1
+        and account_id = split_part($1, ':', 5)
+        and region = split_part($1, ':', 4)
     )
     select
       'Age (in Days)' as label,
@@ -363,7 +377,9 @@ query "ecs_snapshot_usage_source_disk_size" {
     from
       alicloud_ecs_snapshot
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -376,7 +392,9 @@ query "ecs_snapshot_encryption" {
     from
       alicloud_ecs_snapshot
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -388,7 +406,9 @@ query "ecs_snapshot_state" {
     from
       alicloud_ecs_snapshot
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -400,7 +420,9 @@ query "ecs_snapshot_usage" {
     from
       alicloud_ecs_snapshot
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -413,7 +435,9 @@ query "ecs_snapshot_instant_access" {
     from
       alicloud_ecs_snapshot
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -433,6 +457,8 @@ query "ecs_snapshot_source_disk" {
       join alicloud_ecs_disk as d on s.source_disk_id = d.disk_id
     where
       s.arn = $1
+      and s.account_id = split_part($1, ':', 5)
+      and s.region = split_part($1, ':', 4)
     order by
       d.disk_id;
   EOQ
@@ -449,7 +475,9 @@ query "ecs_snapshot_encryption_status" {
       alicloud_kms_key as k
     where
       s.kms_key_id = k.key_id
-      and s.arn = $1;
+      and s.arn = $1
+      and s.account_id = split_part($1, ':', 5)
+      and s.region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -469,6 +497,8 @@ query "ecs_snapshot_overview" {
       alicloud_ecs_snapshot
     where
       arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -482,6 +512,8 @@ query "ecs_snapshot_tags" {
       jsonb_array_elements(tags_src) as tag
     where
       arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4)
     order by
       tag ->> 'Key';
   EOQ
