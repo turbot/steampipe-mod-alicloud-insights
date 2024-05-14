@@ -397,8 +397,8 @@ query "ram_all_policies_for_user" {
       jsonb_array_elements(g.attached_policy) as group_policy
     where
       group_policy ->> 'PolicyName' = p.title
-      and u.arn = 'acs:ram::5982111499156037:user/raj'
-      and u.account_id = split_part('acs:ram::5982111499156037:user/raj',':',4)
+      and u.arn = $1
+      and u.account_id = split_part($1,':',4)
 
     -- Policies (attached to user)
     union select
@@ -410,8 +410,8 @@ query "ram_all_policies_for_user" {
       alicloud_ram_policy as p
     where
       pol_arn ->> 'PolicyName' = p.title
-      and u.arn = 'acs:ram::5982111499156037:user/raj'
-      and u.account_id = split_part('acs:ram::5982111499156037:user/raj',':',4);
+      and u.arn = $1
+      and u.account_id = split_part($1,':',4);
   EOQ
 
 }

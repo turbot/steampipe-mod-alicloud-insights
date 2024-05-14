@@ -174,7 +174,7 @@ query "ram_role_input" {
 query "ram_policies_for_ram_role" {
   sql = <<-EOQ
     select
-      p.akas::text as policy_akas
+      p.policy_name as policy_name
     from
       alicloud_ram_role as r,
       alicloud_ram_policy as p,
