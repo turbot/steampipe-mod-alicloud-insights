@@ -1,3 +1,9 @@
+## v0.9 [2024-05-14]
+
+_Enhancements_
+
+- Queries have been optimized to better work with the connection quals. ([#95](https://github.com/turbot/steampipe-mod-alicloud-insights/pull/95))
+
 ## v0.8 [2024-03-06]
 
 _Powerpipe_
