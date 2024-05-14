@@ -277,7 +277,7 @@ query "rds_instance_ssl_status" {
 query "rds_instance_by_account" {
   sql = <<-EOQ
     select
-      a.title as "Account",
+      a.title as "account",
       count(i.*) as "total"
     from
       alicloud_rds_instance as i,

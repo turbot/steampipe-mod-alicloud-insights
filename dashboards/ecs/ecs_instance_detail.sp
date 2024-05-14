@@ -395,7 +395,9 @@ query "ecs_disks_for_ecs_instance" {
       alicloud_ecs_instance i
       left join alicloud_ecs_disk as d on i.instance_id = d.instance_id
     where
-      i.arn = $1;
+      i.arn = $1
+      and i.account_id = split_part($1, ':', 5)
+      and i.region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -409,6 +411,8 @@ query "ecs_images_for_ecs_instance" {
         alicloud_ecs_instance
       where
         arn = $1
+        and account_id = split_part($1, ':', 5)
+        and region = split_part($1, ':', 4)
     )select
       im.arn as image_arn
     from
@@ -418,7 +422,9 @@ query "ecs_images_for_ecs_instance" {
         and im.region = (select region from instances)
         and im.account_id = (select account_id from instances)
     where
-      ins.arn = $1;
+      ins.arn = $1
+      and ins.account_id = split_part($1, ':', 5)
+      and ins.region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -432,6 +438,8 @@ query "ecs_autoscaling_groups_for_ecs_instance" {
       alicloud_ecs_instance as i
     where
       i.arn = $1
+      and i.account_id = split_part($1, ':', 5)
+      and i.region = split_part($1, ':', 4)
       and group_instance ->> 'InstanceId' = i.instance_id;
   EOQ
 }
@@ -445,6 +453,8 @@ query "ecs_network_interfaces_for_ecs_instance" {
       jsonb_array_elements(network_interfaces) as p
     where
       arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4)
       and  p ->> 'NetworkInterfaceId' is not null;
   EOQ
 }
@@ -458,7 +468,9 @@ query "ecs_snapshots_for_ecs_instance" {
       join alicloud_ecs_disk as d on s.source_disk_id = d.disk_id
       join alicloud_ecs_instance as i on i.instance_id = d.instance_id
     where
-      i.arn = $1;
+      i.account_id = split_part($1, ':', 5)
+      and i.region = split_part($1, ':', 4)
+      and i.arn = $1;
   EOQ
 }
 
@@ -473,7 +485,9 @@ query "ram_roles_for_ecs_instance" {
     where
       role ->> 'RamRoleName' is not null
       and r.name = role ->> 'RamRoleName'
-      and i.arn = $1;
+      and i.arn = $1
+      and i.account_id = split_part($1, ':', 5)
+      and i.region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -484,7 +498,9 @@ query "vpc_vswitches_for_ecs_instance" {
     from
       alicloud_ecs_instance i
     where
-      i.arn = $1;
+      i.arn = $1
+      and i.account_id = split_part($1, ':', 5)
+      and i.region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -496,7 +512,9 @@ query "ecs_security_groups_for_ecs_instance" {
       alicloud_ecs_instance as i,
       jsonb_array_elements_text(security_group_ids) as group_id
     where
-      i.arn = $1;
+      i.account_id = split_part($1, ':', 5)
+      and i.region = split_part($1, ':', 4)
+      and i.arn = $1;
   EOQ
 }
 
@@ -509,6 +527,8 @@ query "vpc_eips_for_ecs_instance" {
       left join alicloud_vpc_eip as e on i.instance_id = e.instance_id
     where
       i.arn = $1
+      and i.account_id = split_part($1, ':', 5)
+      and i.region = split_part($1, ':', 4)
       and e.arn is not null;
   EOQ
 }
@@ -520,7 +540,9 @@ query "vpc_vpcs_for_ecs_instance" {
     from
       alicloud_ecs_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -534,7 +556,9 @@ query "ecs_instance_status" {
     from
       alicloud_ecs_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -546,7 +570,9 @@ query "ecs_instance_os_type" {
     from
       alicloud_ecs_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -558,7 +584,9 @@ query "ecs_instance_type" {
     from
       alicloud_ecs_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -570,7 +598,9 @@ query "ecs_instance_total_cores" {
     from
       alicloud_ecs_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -583,7 +613,9 @@ query "ecs_instance_public_access" {
     from
       alicloud_ecs_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -596,7 +628,9 @@ query "ecs_instance_io_optimized" {
     from
       alicloud_ecs_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -619,7 +653,9 @@ query "ecs_instance_overview" {
     from
       alicloud_ecs_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -633,6 +669,8 @@ query "ecs_instance_tags" {
       jsonb_array_elements(tags_src) as tag
     where
       arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4)
     order by
       tag ->> 'TagKey';
     EOQ
@@ -646,7 +684,9 @@ query "ecs_instance_cpu_cores" {
     from
       alicloud_ecs_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -663,7 +703,9 @@ query "ecs_instance_network_interfaces" {
       alicloud_ecs_instance,
       jsonb_array_elements(network_interfaces) as p
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -678,7 +720,9 @@ query "ecs_instance_dedicated_host" {
     from
       alicloud_ecs_instance
     where
-      arn = $1;
+      arn = $1
+      and account_id = split_part($1, ':', 5)
+      and region = split_part($1, ':', 4);
   EOQ
 }
 
@@ -692,7 +736,9 @@ query "ecs_instance_security_groups" {
       jsonb_array_elements_text(security_group_ids) as group_id
       left join alicloud_ecs_security_group as g on g.security_group_id = group_id
     where
-      i.arn = $1;
+      i.arn = $1
+      and i.account_id = split_part($1, ':', 5)
+      and i.region = split_part($1, ':', 4);
   EOQ
 }
 

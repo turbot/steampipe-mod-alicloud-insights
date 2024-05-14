@@ -193,6 +193,7 @@ query "ram_groups_users_count" {
       alicloud_ram_group
     where
       arn = $1
+      and account_id = split_part($1,':',4);
   EOQ
 }
 
@@ -206,6 +207,7 @@ query "ram_groups_policies_count" {
       alicloud_ram_group
     where
       arn = $1
+      and account_id = split_part($1,':',4);
   EOQ
 }
 
@@ -222,6 +224,7 @@ query "ram_group_overview" {
       alicloud_ram_group
     where
       arn = $1
+      and account_id = split_part($1,':',4);
   EOQ
 }
 
@@ -237,6 +240,7 @@ query "ram_users_for_group" {
       jsonb_array_elements(users) as u
     where
       arn = $1
+      and account_id = split_part($1,':',4);
   EOQ
 }
 
@@ -252,5 +256,6 @@ query "ram_all_policies_for_group" {
       jsonb_array_elements(attached_policy) as policies
     where
       arn = $1
+      and account_id = split_part($1,':',4);
   EOQ
 }

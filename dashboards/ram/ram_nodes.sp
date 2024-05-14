@@ -39,8 +39,7 @@ node "ram_group" {
       ) as properties
     from
       alicloud_ram_group
-    where
-      arn = any($1);
+      join unnest($1::text[]) as a on arn = a and account_id = split_part(a, ':', 4);
   EOQ
 
   param "ram_group_arns" {}
@@ -190,8 +189,7 @@ node "ram_role" {
       ) as properties
     from
       alicloud_ram_role
-    where
-      arn = any($1);
+      join unnest($1::text[]) as a on arn = a and account_id = split_part(a, ':', 4);
   EOQ
 
   param "ram_role_arns" {}
@@ -214,8 +212,7 @@ node "ram_user" {
       ) as properties
     from
       alicloud_ram_user
-    where
-      arn = any($1);
+      join unnest($1::text[]) as a on arn = a and account_id = split_part(a, ':', 4);
   EOQ
 
   param "ram_user_arns" {}
